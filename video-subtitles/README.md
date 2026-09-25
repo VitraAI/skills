@@ -1,23 +1,21 @@
 # video-subtitles
 
-An agent skill that makes, translates and edits subtitles with the Vitra
-Universe API — from a video or an existing subtitle file to reviewed subtitle
-files, or a video with the subtitles burned in, without opening the editor.
+An agent skill that makes subtitles from a video with the Vitra Universe API —
+reviewed subtitle files in every language you need, or the video with the
+subtitles burned in — without opening the editor. To translate a subtitle
+file you already have, use the subtitle-translation skill.
 
 Drop this folder into your agent runtime's skills directory. The agent reads
 `SKILL.md` and drives the scripts on its own.
 
 ## What it does
 
-1. **From a video:** transcribes it into timed subtitles in the spoken
-   language (optionally following a script you already have: SRT, VTT, ASS,
-   SSA or TXT).
-2. **From a subtitle file:** translates it into the languages you choose,
-   keeping every cue's timing.
-3. Lets you review and correct lines by number — text, timing, split, merge,
+1. Transcribes the video into timed subtitles in the spoken language
+   (optionally following a script you already have: SRT, VTT, ASS, SSA or TXT).
+2. Lets you review and correct lines by number — text, timing, split, merge,
    delete.
-4. Adds more translated subtitle languages to the same job.
-5. Downloads any language as SRT, VTT, DFXP, XML, STL, EDL, TXT or JSON, or
+3. Adds translated subtitle languages to the same job.
+4. Downloads any language as SRT, VTT, DFXP, XML, STL, EDL, TXT or JSON, or
    renders the video with one language burned in.
 
 Progress is reported in the same steps the Vitra webapp shows. Anything that

@@ -1,49 +1,26 @@
-#!/usr/bin/env python3
-"""Start subtitles: from a video (transcribe) or from a subtitle file (translate).
+"""Subtitle jobs, the engine under the subtitle skills' entry scripts.
 
 Single source: `sync-lib.sh` copies this file into the subtitle skills. Edit it
 here only, then run the sync.
 
-The mode follows the file, as in the webapp:
-  video (.mp4, .mov, …)           -> subtitle generation (VIDEO_TO_SUBTITLE):
-                                     subtitles in the spoken language. Add
-                                     translated languages afterwards with
-                                     add_subtitle_language.py, once reviewed.
-  subtitle file (.srt .vtt .ass .ssa) -> subtitle translation
-                                     (SUBTITLE_TO_TRANSCRIPT_TRANSLATION) into
-                                     every --target-language.
+Two kinds of job, as in the webapp's upload dialog:
+  VIDEO_TO_SUBTITLE                    Subtitle Generation: a video in,
+                                       timed subtitles in its spoken language
+  SUBTITLE_TO_TRANSCRIPT_TRANSLATION   Subtitle Translation: a subtitle file
+                                       in, translated into the target languages
 
-  --script (video only): a script of what is said (.srt .vtt .ass .ssa .txt);
-  transcription follows it, and a timed script's cues are kept 1:1.
-
-  POST /v1/galaxy/translate-video/upload         (or reuse an identical upload)
-  POST /v1/galaxy/translate-video/process-log/publish   (idempotent)
-  GET  .../process-log/{id}/status               until ready
-
-Prints JSON:
-  { "status": "review_ready" | "failed", "job_id", "mode", "source_language",
-    "target_languages", "progress", "next_action": "inspect_subtitles" }
-
-Re-running it for the same file and languages reconnects to the same job.
-
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Uploads (reusing an identical upload), publishes idempotently, and waits.
 """
 
 from __future__ import annotations
 
 import sys
-
-sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
-
-import argparse
-import json
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-import _common  # noqa: E402
-import _progress  # noqa: E402
-import _tm  # noqa: E402
-import _tv  # noqa: E402
+import _common
+import _progress
+import _tm
+import _tv
 
 # Subtitle file types the API accepts.
 SUBTITLE_EXTENSIONS = {".srt", ".vtt", ".ass", ".ssa"}
@@ -98,43 +75,23 @@ def choose_memory(base: str, headers: dict, args, targets: list[str]) -> tuple[s
     return "", ""  # unreachable
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Start subtitles from a video or a subtitle file.")
-    src = parser.add_mutually_exclusive_group(required=True)
-    src.add_argument("--file", help="A video, or a subtitle file (.srt .vtt .ass .ssa).")
-    src.add_argument("--url", help="Public http(s) URL of the same (downloaded, then uploaded).")
-    parser.add_argument("--source-language", required=True, metavar="KEY",
-                        help="Language spoken in the video / written in the file (list_languages.py).")
-    parser.add_argument("--target-language", action="append", default=[], metavar="KEY",
-                        help="Language to translate a subtitle FILE into (repeatable).")
-    parser.add_argument("--tm-name", help="Translation memory to use, by the name list_tms.py shows.")
-    parser.add_argument("--create-tm", action="store_true",
-                        help="Create a memory for this job (needs --target-language and --tm-context).")
-    parser.add_argument("--tm-context",
-                        help="With --create-tm: one sentence on who the memory is for. Ask the user.")
-    parser.add_argument("--tm-engine", choices=["gemini", "azure"],
-                        help="With --create-tm: gemini (default, follows the style guide) or azure.")
-    parser.add_argument("--script", help="With a video: its script (.srt .vtt .ass .ssa .txt), optional.")
-    parser.add_argument("--name", help="Name shown in Vitra. Defaults to the file name.")
-    parser.add_argument("--max-wait", type=int, default=DEFAULT_MAX_WAIT)
-    return parser
+def run(args, mode: str, source_tag: str) -> tuple[int, dict]:
+    """Start (or reconnect to) a job of `mode` and wait: (exit code, result).
 
-
-def run(args: argparse.Namespace) -> tuple[int, dict]:
-    """Start (or reconnect to) the job and wait for it: (exit code, result)."""
+    The caller has already checked the file is the right kind for the mode.
+    """
     path, is_temp = _tv.resolve_source(args.file, args.url)
-    mode = TRANSLATE if path.suffix.lower() in SUBTITLE_EXTENSIONS else GENERATE
-    targets = sorted(set(args.target_language))
+    targets = sorted(set(getattr(args, "target_language", None) or []))
     if mode == TRANSLATE and not targets:
         die(_common.EXIT_API_ERROR, "a subtitle file needs at least one --target-language.",
             error_code="TARGET_LANGUAGE_NEEDED",
             ask="Which language(s) should these subtitles be translated into?")
-    if mode == GENERATE and targets:
+    if mode == GENERATE and targets and not getattr(args, "create_tm", False):
         # The webapp generates first, then adds languages from the reviewed
         # source; publishing a video with targets is not a subtitle job.
         sys.stderr.write("[subtitles] a video is transcribed first; add "
                          f"{', '.join(targets)} with add_subtitle_language.py after review\n")
-    script = Path(args.script).expanduser() if args.script else None
+    script = Path(args.script).expanduser() if getattr(args, "script", None) else None
     if script and mode == TRANSLATE:
         die(_common.EXIT_API_ERROR, "--script is for a video; a subtitle file is translated as it is.")
     if script and (not script.is_file() or script.suffix.lower() not in SCRIPT_EXTENSIONS):
@@ -166,7 +123,7 @@ def run(args: argparse.Namespace) -> tuple[int, dict]:
         "processName": run_name,
         "uploadIds": [upload_id, *([script_id] if script_id else [])],
         "sourceLanguage": args.source_language,
-        "metadata": {"source": "skill:video-subtitles"},
+        "metadata": {"source": source_tag},
         "inputData": {
             "translationMode": "subtitle-translation" if mode == TRANSLATE else "subtitle-generation",
             "multiSpeaker": True,
@@ -203,13 +160,3 @@ def run(args: argparse.Namespace) -> tuple[int, dict]:
         "progress": progress,
         "next_action": "inspect_subtitles",
     }
-
-
-def main() -> int:
-    code, result = run(build_parser().parse_args())
-    print(json.dumps(result, ensure_ascii=False))
-    return code
-
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -19,7 +19,7 @@ options).
 
 | Script | Options | Returns |
 |---|---|---|
-| `start_subtitles` | `--file` \| `--url`, `--source-language`, `--target-language` (repeatable; subtitle files), `--script` (videos), `--tm-name` \| `--create-tm --tm-context "..." [--tm-engine gemini\|azure]`, `--name` | `review_ready` with `mode` (generate / translate), `memory`, `progress`; or a question: `TM_CHOICE_NEEDED`, `TM_NEEDED`, `TM_CONTEXT_NEEDED`, `TARGET_LANGUAGE_NEEDED` |
+| `start_subtitles` | `--file` \| `--url` (a video), `--source-language`, `--script`, `--tm-name` \| `--create-tm --target-language <key> --tm-context "..." [--tm-engine gemini\|azure]`, `--name` | `review_ready` with `memory`, `progress`; or a question: `TM_CHOICE_NEEDED`, `TM_NEEDED`, `TM_CONTEXT_NEEDED`. A subtitle file is refused (`WRONG_SKILL`): that's subtitle-translation |
 | `add_subtitle_language` | `--job-id`, `--language` (repeatable), `--expected-revision` | `review_ready`, `partial` or `failed`; `added`, `failed` |
 | `retry_subtitles` | `--job-id` | Resumes a failed job at the failed step: `review_ready` or `failed` |
 

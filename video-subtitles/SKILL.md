@@ -15,7 +15,7 @@ compatibility: >-
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.0"
+  version: "1.1"
   display-name: Video Subtitles
   category: Video
   tags: Video, Subtitles, Translation
@@ -26,7 +26,7 @@ metadata:
 
 # Video Subtitles
 
-Subtitles from a video or a subtitle file, through the Vitra API. Every script
+Subtitles from a video, through the Vitra API. Every script
 prints **one line of JSON**; three fields drive the flow:
 
 - `status`: where things stand.
@@ -50,22 +50,25 @@ their Vitra admin can grant them. Key missing (exit 2): relay the setup lines.
 
 | Input | Required | How |
 |---|---|---|
-| A video, or a subtitle file | yes | Local path or public http(s) URL. The file type picks the mode |
-| Spoken / written language | yes | Ask. Key: `python3 scripts/list_languages.py <name>` |
-| Target languages | subtitle file: yes | Ask. A video is subtitled in its own language first; translations are added after review |
-| Script of what is said | no | A video only: `.srt .vtt .ass .ssa .txt`. Transcription follows it; a timed one keeps its cues |
+| The video | yes | Local path or public http(s) URL |
+| Spoken language | yes | Ask. Key: `python3 scripts/list_languages.py <name>` |
+| Script of what is said | no | `.srt .vtt .ass .ssa .txt`. Transcription follows it; a timed one keeps its cues |
+
+The video is subtitled in its own language first; translated languages are
+added after review (step 4). A subtitle file on its own, to translate, is the
+subtitle-translation skill's job.
 
 ## The flow
 
 ```
-- [ ] 1. Translation memory     (⏸ ask if several; video only)
+- [ ] 1. Translation memory     (⏸ ask if several)
 - [ ] 2. Start                  → subtitles ready for review
 - [ ] 3. Review                 (⏸ show the lines; edit what the user asks)
 - [ ] 4. Add languages          (⏸ which ones; spends credits)
 - [ ] 5. Deliver                (⏸ file download, or burned-in video: spends credits)
 ```
 
-### 1. Translation memory ⏸ (video only)
+### 1. Translation memory ⏸
 
 A video's subtitles need a translation memory: it holds the wording every
 later translation reuses. `start_subtitles.py` picks it:
@@ -78,20 +81,16 @@ later translation reuses. `start_subtitles.py` picks it:
   (optionally `--tm-engine gemini|azure`; gemini is the default and follows the
   style guide).
 
-A subtitle file needs no choice: the server finds or creates the memory for
-the language pair, unless the user names one (`--tm-name`).
-
 ### 2. Start
 
 ```bash
 python3 scripts/start_subtitles.py --file talk.mp4 --source-language <src> [--script talk.srt]
-python3 scripts/start_subtitles.py --file talk.srt --source-language <src> --target-language <tgt>
 ```
 
 Uploads (reusing an identical earlier upload), starts the job and waits. Ends
 with `review_ready`. Re-running the same command reconnects to the same job.
-It can stop first to ask: `TARGET_LANGUAGE_NEEDED`, `TM_CHOICE_NEEDED`,
-`TM_NEEDED`: ask `error.ask`, then re-run with the answer.
+It can stop first to ask: `TM_CHOICE_NEEDED` or `TM_NEEDED`: ask
+`error.ask`, then re-run with the answer.
 
 ### 3. Review ⏸
 

@@ -19,15 +19,15 @@ CHECK=0
 # (run manifest) and imports the shared one as _core (see RENAMES).
 BASE="_http.py _common.py _access.py"
 VIDEO="_tm.py _tv.py _jobs.py _progress.py _cards.py _cue.py list_languages.py list_tms.py list_providers.py"
-SUBTITLES="start_subtitles.py inspect_subtitles.py edit_subtitles.py add_subtitle_language.py download_subtitles.py retry_subtitles.py translate_subtitles.py"
+SUBTITLES="_subtitles.py inspect_subtitles.py edit_subtitles.py add_subtitle_language.py download_subtitles.py retry_subtitles.py"
 
 SKILL_FILES=(
   "image-creator|${BASE}"
   "image-resize|${BASE}"
   "image-translation|${BASE} _tm.py list_tms.py list_providers.py"
   "video-dubbing|_http.py _access.py ${VIDEO} download_export.py edit_subtitles.py"
-  "video-subtitles|${BASE} ${VIDEO} ${SUBTITLES} burn_subtitles.py download_export.py"
-  "subtitle-translation|${BASE} ${VIDEO} ${SUBTITLES}"
+  "video-subtitles|${BASE} ${VIDEO} ${SUBTITLES} start_subtitles.py burn_subtitles.py download_export.py"
+  "subtitle-translation|${BASE} ${VIDEO} ${SUBTITLES} translate_subtitles.py"
   "document-translation|${BASE} _tm.py _state.py list_tms.py list_providers.py"
   "text-to-speech|${BASE} _state.py list_voices.py list_languages.py"
   "voice-cloning|${BASE} _state.py list_languages.py"
