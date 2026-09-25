@@ -38,7 +38,7 @@ PL = "translate_video.process_log"
 # Each step of this skill and the permissions its API calls require. Keep in
 # step with the scripts.
 STEPS = [
-    {"step": "Upload the video or subtitle file", "needs": ["translate_video.upload:create"]},
+    {"step": "Upload the video", "needs": ["translate_video.upload:create"]},
     {"step": "Start the subtitles", "needs": [f"{PL}:create"]},
     {"step": "Choose a translation memory", "needs": ["translation_memory:read"]},
     {"step": "Review the subtitles", "needs": [f"{PL}:read"]},

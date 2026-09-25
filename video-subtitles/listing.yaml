@@ -4,20 +4,20 @@
 # that do the same jobs (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Make subtitles from a video, or translate a subtitle file you already have,
-  without opening the editor. Review and correct lines by number, add more
+  Make subtitles from a video without opening the editor, optionally following
+  a script you already have. Review and correct lines by number, add more
   languages to the same job, then download SRT, VTT or other formats — or
   render the video with the subtitles burned in. Progress shows in the same
   steps as the Vitra webapp, and anything that costs credits is confirmed
   first.
 when-to-use: >-
-  Reach for it for captions or subtitles — "subtitle this video", "translate
-  this SRT into Spanish", "add Hindi captions", "burn the subtitles in". Input
-  is a video or a subtitle file (SRT, VTT, ASS, SSA), local or a public URL.
-  For a voice-over in another language, use Video Dubbing.
+  Reach for it for captions on a video — "subtitle this video", "add Hindi
+  captions", "burn the subtitles in". Input is a video, local or a public URL.
+  To translate a subtitle file you already have, use Subtitle Translation; for
+  a voice-over, Video Dubbing.
 features:
-  - title: From a video or a file
-    description: Transcribes a video into timed subtitles, or translates an existing subtitle file.
+  - title: From any video
+    description: Transcribes the speech into timed subtitles in the language spoken.
   - title: Script-guided
     description: Follows a script you already have, keeping a timed script's cues as they are.
   - title: Line-by-line review
@@ -29,8 +29,8 @@ features:
 use-cases:
   - title: Accessible video
     description: Caption product and training videos in their own language.
-  - title: Subtitle localization
-    description: Translate one SRT into every market's language with consistent terminology.
+  - title: Multilingual captions
+    description: Caption a video once, review it, then add every market's language.
   - title: Social clips
     description: Burn subtitles into short videos for sound-off viewing.
 mcp-toolset: subtitles

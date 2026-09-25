@@ -1,4 +1,4 @@
-"""video-subtitles against a small fake Vitra API: what each script sends and
+"""The subtitle skills against a small fake Vitra API: what each script sends and
 what it tells the agent. Run from the repo root:
 
     python3 -m unittest discover -s tests/video-subtitles
@@ -126,10 +126,10 @@ class SubtitlesTest(unittest.TestCase):
         self.video = self.dir / "talk.mp4"
         self.video.write_bytes(b"\x00\x00\x00\x18ftypmp42")
 
-    def run_script(self, name: str, *args: str) -> tuple[int, dict]:
+    def run_script(self, name: str, *args: str, skill: str = "video-subtitles") -> tuple[int, dict]:
         env = {**os.environ, "VITRA_UNIVERSE_API_KEY": "uvk_test", "VITRA_UNIVERSE_BASE_URL": self.fake.base,
                "PYTHONDONTWRITEBYTECODE": "1", "VITRA_DUB_FAST_POLL": "1"}
-        proc = subprocess.run([sys.executable, str(SCRIPTS / f"{name}.py"), *args],
+        proc = subprocess.run([sys.executable, str(SCRIPTS.parents[1] / skill / "scripts" / f"{name}.py"), *args],
                               capture_output=True, text=True, env=env, timeout=60)
         lines = [ln for ln in proc.stdout.splitlines() if ln.strip()]
         self.assertLessEqual(len(lines), 1, proc.stdout)
@@ -142,11 +142,32 @@ class SubtitlesTest(unittest.TestCase):
         self.assertEqual(out["error"]["code"], "TM_CHOICE_NEEDED")
         self.assertEqual(self.fake.uploads, 0)
 
-    def test_a_subtitle_file_needs_its_target_languages(self) -> None:
+    def test_a_subtitle_file_is_not_this_skills_job(self) -> None:
         srt = self.dir / "talk.srt"
         srt.write_text("1\n00:00:00,000 --> 00:00:01,000\nHi\n")
         code, out = self.run_script("start_subtitles", "--file", str(srt), "--source-language", "english")
-        self.assertEqual(out["error"]["code"], "TARGET_LANGUAGE_NEEDED")
+        self.assertEqual(out["error"]["code"], "WRONG_SKILL")
+        self.assertIn("subtitle-translation", out["error"]["message"])
+        self.assertEqual(self.fake.uploads, 0)
+
+    def test_subtitle_translation_is_files_in_files_out(self) -> None:
+        srt = self.dir / "talk.srt"
+        srt.write_text("1\n00:00:00,000 --> 00:00:01,000\nHi\n")
+        code, out = self.run_script("translate_subtitles", "--file", str(srt), "--source-language", "english",
+                                    "--target-language", "hindi_india", "--out-dir", str(self.dir / "out"),
+                                    skill="subtitle-translation")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(out["files"][0]["language"], "hindi_india")
+        self.assertTrue(Path(out["files"][0]["path"]).read_text().startswith("1\n00:00:00,000"))
+        body = self.fake.sent(f"{PL}/publish")[0]
+        self.assertEqual((body["processType"], body["targetLanguages"], "tmId" in body),
+                         ("SUBTITLE_TO_TRANSCRIPT_TRANSLATION", ["hindi_india"], False))
+
+    def test_subtitle_translation_refuses_a_video(self) -> None:
+        code, out = self.run_script("translate_subtitles", "--file", str(self.video), "--source-language",
+                                    "english", "--target-language", "hindi_india", skill="subtitle-translation")
+        self.assertEqual(out["error"]["code"], "WRONG_SKILL")
+        self.assertEqual(self.fake.uploads, 0)
 
     def test_video_with_script_is_published_with_both_uploads(self) -> None:
         script = self.dir / "talk.txt"
@@ -154,7 +175,7 @@ class SubtitlesTest(unittest.TestCase):
         code, out = self.run_script("start_subtitles", "--file", str(self.video), "--source-language", "english",
                                     "--script", str(script))
         self.assertEqual(code, 0, out)
-        self.assertEqual((out["status"], out["mode"], out["memory"]), ("review_ready", "generate", "Acme"))
+        self.assertEqual((out["status"], out["memory"]), ("review_ready", "Acme"))
         body = self.fake.sent(f"{PL}/publish")[0]
         self.assertEqual((body["processType"], body["uploadIds"], body["tmId"]),
                          ("VIDEO_TO_SUBTITLE", ["u1", "u2"], "tm1"))

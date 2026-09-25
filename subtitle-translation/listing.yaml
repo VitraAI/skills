@@ -42,6 +42,6 @@ mcp-tools:
     title: Get subtitles as a file
 related-skills:
   - name: video-subtitles
-    why: Make subtitles from a video, or burn translated ones into it.
+    why: No subtitle file yet? Make subtitles from the video itself.
   - name: document-translation
     why: Translate documents, spreadsheets and text files instead.

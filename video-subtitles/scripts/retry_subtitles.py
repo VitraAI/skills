@@ -51,7 +51,7 @@ def main() -> int:
         die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, "retry this job"))
     if status == 404:
         die(_common.EXIT_API_ERROR, "that job was not found in this organization, or this server "
-            "can't retry jobs yet; start it again with start_subtitles.py.")
+            "can't retry jobs yet; start it again.")
     if status == 409:
         # Not failed, or already running: retrying again won't change that.
         die(_common.EXIT_API_ERROR, f"the job can't be retried right now: {_common.api_message(payload)}")
