@@ -46,6 +46,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import _common  # noqa: E402
 import _http  # noqa: E402
+import _progress  # noqa: E402
 import _voices  # noqa: E402
 
 PL = "/v1/galaxy/translate-video/process-log"
@@ -140,9 +141,10 @@ def poll_status(base: str, headers: dict, job_id: str, interval: int, max_wait: 
     while True:
         p = get_status(base, headers, job_id)
         state = p.get("status")
-        if state != last:
-            sys.stderr.write(f"[poll] job={job_id} status={state}\n")
-            last = state
+        progress_line = _progress.line(_progress.dub_progress(p))
+        if progress_line != last:
+            sys.stderr.write(progress_line + "\n")
+            last = progress_line
         if p.get("isFinished") and str(state).lower() == DONE:
             return
         if str(state).upper() in FAILED_STATUSES:

@@ -8,7 +8,8 @@
   "scripts": {
     "validate": "node scripts/validate.mjs && ./sync-lib.sh --check",
     "build": "node scripts/build.mjs",
-    "check": "npm run validate && npm run build"
+    "check": "npm run validate && npm test && npm run build",
+    "test": "for d in tests/*/; do PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s \"$d\" || exit 1; done"
   },
   "dependencies": {
     "jszip": "^3.10.1",

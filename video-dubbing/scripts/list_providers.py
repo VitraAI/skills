@@ -35,6 +35,10 @@ import _http  # noqa: E402
 
 PROVIDERS_PATH = "/v1/translation-memory/providers"
 
+# The engines a VitraTM memory can translate with (server: TM_ENGINES, default
+# first). `azure` ignores the memory's style guide.
+VITRATM_ENGINES = "gemini (default), azure"
+
 die = _common.die
 
 
@@ -66,9 +70,12 @@ def main() -> int:
     blocked = [p for p in rows if isinstance(p, dict) and not p.get("available")]
 
     for p in available:
-        methods = ", ".join(m.get("id", "") for m in (p.get("methods") or []))
         multi = "any source" if p.get("supportsMultiSource") else "fixed source"
-        print(f"{str(p.get('provider') or '').ljust(10)} {str(p.get('label') or '').ljust(10)} [{multi}] {methods}")
+        # What a person chooses. The provider's `methods` (`llm_translate`, …)
+        # are internal call names, not choices — printing them made agents
+        # offer "translateLLM" as if it were an engine.
+        engines = VITRATM_ENGINES if p.get("provider") == "vitratm" else "its own engines"
+        print(f"{str(p.get('provider') or '').ljust(10)} {str(p.get('label') or '').ljust(10)} [{multi}] engines: {engines}")
 
     for p in blocked:
         sys.stderr.write(

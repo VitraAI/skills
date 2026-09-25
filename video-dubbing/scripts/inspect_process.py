@@ -9,10 +9,17 @@ the server actually holds rather than from what it remembers publishing.
   GET .../process-log/{id}/editor-output -> transcripts, speakers, settings
 
 Prints JSON:
-  { "status": "...", "process_id": "...", "stage": "...",
-    "source_language": "...", "target_languages": [...],
-    "speakers": [...], "cards": {"<lang>": {"total": 12, "with_audio": 11}},
-    "exports": [...], "next_action": "list_issues" }
+  { "status": "ok", "process_id", "revision", "run_status", "stage",
+    "source_language", "target_languages",
+    "cards":  {"<lang>": {"total": 12, "with_audio": 11, "unreviewed": 4}},
+    "issues": {"<lang>": {"errors": 1, "warnings": 2}},
+    "suggestions": [{"do", "why", "run", "spends_credits"}],
+    "next_action": "..." }
+
+`suggestions` are the next steps worth offering, computed from the data above
+(missing or stale audio, blocking issues, unreviewed lines, what is exported):
+relay them to the user in order; never run one that spends credits without a
+yes.
 
 Add `--cards <lang>` to also print every card for one language — id, text,
 speaker, emotion, rate and current audio — which is what `patch_cards` needs
@@ -35,6 +42,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import _common  # noqa: E402
 import _http  # noqa: E402
+import _progress  # noqa: E402
 
 PL = "/v1/galaxy/translate-video/process-log"
 STATUS_PATH = PL + "/{job_id}/status"
@@ -83,18 +91,23 @@ def card_summary(rows: list, lang: str) -> dict:
     `with_audio` is the number that would survive an export today — a card whose
     `a.url` is missing is the "missing audio" case the issue list reports.
     """
-    total = with_audio = 0
+    total = with_audio = unreviewed = 0
     for row in rows:
-        if not isinstance(row, dict):
+        if not isinstance(row, dict) or row.get("isGap"):
             continue
         block = row.get(lang)
         if not isinstance(block, dict):
             continue
         total += 1
         audio = block.get("a")
-        if isinstance(audio, dict) and audio.get("url"):
+        # A Keep Source line plays the original recording on purpose: it has
+        # no dubbed audio and needs none.
+        if block.get("keepSourceAudio") or (isinstance(audio, dict) and audio.get("url")):
             with_audio += 1
-    return {"total": total, "with_audio": with_audio}
+        # `rs`: u unverified (or absent), v verified, a approved.
+        if block.get("rs") not in ("v", "a"):
+            unreviewed += 1
+    return {"total": total, "with_audio": with_audio, "unreviewed": unreviewed}
 
 
 def describe_cards(rows: list, lang: str) -> list:
@@ -130,6 +143,96 @@ def describe_cards(rows: list, lang: str) -> list:
                 },
             }
         )
+    return out
+
+
+def issue_counts(base: str, headers: dict, job_id: str, lang: str) -> dict | None:
+    """Blocking errors and warnings for one language; None if unreadable."""
+    from urllib.parse import urlencode
+
+    try:
+        status, payload = _http.get_json(
+            f"{base}{PL}/transcript/issues?{urlencode({'id': job_id, 'lang': lang})}",
+            headers=headers,
+        )
+    except _http.NetworkError:
+        return None
+    if status != 200 or not isinstance(payload, dict):
+        return None
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    count = lambda k: len(data.get(k)) if isinstance(data.get(k), list) else 0  # noqa: E731
+    return {"errors": count("errors"), "warnings": count("warnings")}
+
+
+def suggest(result: dict, job_id: str) -> list[dict]:
+    """Next steps worth offering, most urgent first, from verified data only."""
+    out: list[dict] = []
+
+    def add(do: str, why: str, run: str, credits: bool) -> None:
+        out.append({"do": do, "why": why, "run": run, "spends_credits": credits})
+
+    run_status = str(result.get("run_status") or "").lower()
+    if run_status == "failed":
+        add("Resume the dub from the step that failed",
+            "the run failed; a retry keeps every finished step",
+            f"retry_dub.py --job-id {job_id}", True)
+        return out
+    if result.get("awaiting_voices"):
+        add("Ask the user about each speaker's voice, then continue",
+            "the dub is waiting for the voice decision",
+            f"resume_dub.py --job-id {job_id} --voice-map '<answers>'", True)
+        return out
+    if run_status not in ("completed", ""):
+        add("Wait, then check again",
+            f"the dub is still {run_status}",
+            f"inspect_process.py --job-id {job_id}", False)
+        return out
+    if result.get("background_jobs"):
+        add("Wait for the running job, then check again",
+            "a job is still changing this dub (" + ", ".join(
+                f"{j.get('operation')} {j.get('language') or ''}".strip()
+                for j in result["background_jobs"]) + ")",
+            f"inspect_process.py --job-id {job_id}", False)
+        return out
+
+    exports = result.get("exports") or {}
+    revision = result.get("revision")
+    stale = result.get("audio_stale") or {}
+    for lang in result.get("target_languages") or []:
+        cards = (result.get("cards") or {}).get(lang) or {}
+        issues = (result.get("issues") or {}).get(lang) or {}
+        missing = max(0, int(cards.get("total") or 0) - int(cards.get("with_audio") or 0))
+        blocked = False
+        if missing:
+            blocked = True
+            add(f"Generate speech for {missing} {lang} line(s) that have none",
+                "lines without audio block the export",
+                f"regenerate_cards.py --job-id {job_id} --language {lang} --missing", True)
+        if stale.get(lang):
+            blocked = True
+            add(f"Re-voice {len(stale[lang])} {lang} line(s) that still speak their old version",
+                "their emotion changed after the audio was made",
+                f"regenerate_cards.py --job-id {job_id} --language {lang} --stale", True)
+        if issues.get("errors") and not missing:
+            blocked = True
+            add(f"Fix {issues['errors']} blocking issue(s) in {lang}",
+                "export is refused while errors remain",
+                f"fix_issues.py --job-id {job_id} --language {lang}", False)
+        if blocked:
+            continue
+        if cards.get("unreviewed"):
+            add(f"Review {cards['unreviewed']} {lang} line(s) nobody has checked yet",
+                "nothing blocks the export, but unchecked lines ship as the machine wrote them",
+                f"inspect_process.py --job-id {job_id} --cards {lang}", False)
+        done = exports.get(lang) or {}
+        if done.get("export_id") and done.get("revision") == revision:
+            add(f"Download the {lang} video",
+                "it is already exported at the current version",
+                f"download_export.py --export-id <{lang} export> --out ./{lang}.mp4 --job-id {job_id}", False)
+        else:
+            add(f"Export the {lang} video",
+                "no blocking issues remain" + (" (the earlier export is out of date)" if done else ""),
+                f"export_dub.py --job-id {job_id} --language {lang} --revision {revision}", True)
     return out
 
 
@@ -204,9 +307,15 @@ def main() -> int:
             "emotion_detection": bool((status_row.get("inputData") or {}).get("emotionDetection")),
             "multi_speaker": bool((status_row.get("inputData") or {}).get("multiSpeaker")),
         },
+        "awaiting_voices": bool(status_row.get("awaitingHumanValidation")),
+        # The webapp's step-by-step view of the run (see _progress.py).
+        "progress": _progress.dub_progress(status_row),
         "background_jobs": running_jobs(base, headers, args.job_id),
         "usage": usage(base, headers),
-        "next_action": "list_issues",
+    }
+    result["issues"] = {
+        lang: counts for lang in targets
+        if (counts := issue_counts(base, headers, args.job_id, lang)) is not None
     }
     saved = _common.load_manifest(args.job_id)
     if saved:
@@ -216,6 +325,10 @@ def main() -> int:
             lang: {k: e.get(k) for k in ("export_id", "revision", "resolution")}
             for lang, e in (saved.get("exports") or {}).items()
         }
+
+    result["suggestions"] = suggest(result, args.job_id)
+    first = result["suggestions"][0]["run"].split(".py")[0] if result["suggestions"] else None
+    result["next_action"] = first or "list_issues"
 
     if args.cards:
         if args.cards not in targets:
