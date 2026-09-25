@@ -1,7 +1,8 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
-# jobs; each `name` must be a tool the Vitra MCP server offers.
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
 about: >-
   Adapt one image to every size you need. This is not a crop or a stretch: the
   model re-composes the artwork for each aspect ratio, so the subject, text and
@@ -28,8 +29,18 @@ use-cases:
     description: Adapt a landscape banner into Story, square and portrait posts.
   - title: Localized campaigns
     description: Resize an image after translating it, reusing the same artwork.
+mcp-toolset: image
 mcp-tools:
   - name: adapt_image_sizes
     title: Adapt an image to other sizes
   - name: get_adapted_sizes
     title: Check adapted sizes
+  - name: find_assets
+    title: Find files in the Drive
+  - name: get_upload_link
+    title: Get a link to upload a file
+related-skills:
+  - name: image-translation
+    why: Translate the image's text first; it can also reshape a translated image by aspect ratio.
+  - name: image-creator
+    why: Generate a new image to resize.

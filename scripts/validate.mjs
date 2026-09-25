@@ -42,6 +42,31 @@ for (const { folder, skill, problems: found } of results) {
   if (/(^|[^./])\.\.\//m.test(body)) report(where, 'SKILL.md reaches outside the skill with ../');
 }
 
+// Listings name real things: MCP tools the server offers (scripts/mcp-tools.json),
+// in the toolset they give, and related skills that exist in this repo.
+const mcp = JSON.parse(readFileSync(join(ROOT, 'scripts/mcp-tools.json'), 'utf8'));
+const toolsetOf = new Map(
+  Object.entries(mcp.toolsets).flatMap(([set, names]) => names.map((n) => [n, set])),
+);
+const skillNames = new Set(results.map((r) => r.folder));
+for (const { folder, skill } of results) {
+  const listing = skill?.listing;
+  if (!listing) continue;
+  const where = `${folder}/listing.yaml`;
+  if (listing.mcpToolset && !(listing.mcpToolset in mcp.toolsets)) {
+    report(where, `mcp-toolset "${listing.mcpToolset}" is not an MCP toolset`);
+  }
+  if (listing.mcpTools.length && !listing.mcpToolset) report(where, 'mcp-tools needs an mcp-toolset');
+  for (const t of listing.mcpTools) {
+    if (!toolsetOf.has(t.name)) report(where, `mcp-tools: the MCP server has no tool "${t.name}"`);
+  }
+  for (const r of listing.relatedSkills) {
+    if (r.name === folder || !skillNames.has(r.name)) {
+      report(where, `related-skills: "${r.name}" is not another skill in this repo`);
+    }
+  }
+}
+
 // A stray secret must never reach a public repo. Check what git would commit
 // (tracked + staged); a local, gitignored .env beside a skill is how the
 // skills are meant to be configured, so its presence on disk is fine.

@@ -118,12 +118,25 @@ function readListing(dir, problems) {
       return [{ name, title }];
     },
   );
+  const relatedSkills = (Array.isArray(doc['related-skills']) ? doc['related-skills'] : []).flatMap(
+    (r, i) => {
+      const name = str(r?.name);
+      const why = str(r?.why);
+      if (!name || !why) {
+        problems.push(`related-skills[${i}] needs a name and a why`);
+        return [];
+      }
+      return [{ name, why }];
+    },
+  );
   return {
     about: str(doc.about),
     whenToUse: str(doc['when-to-use']),
     features: points(doc.features, 'features', problems),
     useCases: points(doc['use-cases'], 'use-cases', problems),
+    mcpToolset: str(doc['mcp-toolset']),
     mcpTools,
+    relatedSkills,
   };
 }
 
@@ -250,7 +263,9 @@ export function toDetail(skill) {
     whenToUse: skill.listing?.whenToUse ?? null,
     features: skill.listing?.features ?? [],
     useCases: skill.listing?.useCases ?? [],
+    mcpToolset: skill.listing?.mcpToolset ?? null,
     mcpTools: skill.listing?.mcpTools ?? [],
+    relatedSkills: skill.listing?.relatedSkills ?? [],
     files: skill.files.map(({ path, size }) => ({ path, size })),
   };
 }

@@ -1,7 +1,8 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
-# jobs; each `name` must be a tool the Vitra MCP server offers.
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
 about: >-
   Generate an image from a plain-language prompt, then keep refining it the same
   way — "make the background darker", "remove the text" — until it's right.
@@ -31,6 +32,7 @@ use-cases:
     description: Produce images in a client's brand colors straight from their domain.
   - title: Iterating with stakeholders
     description: Apply feedback as plain-language edits without starting over.
+mcp-toolset: image
 mcp-tools:
   - name: generate_image
     title: Generate an image
@@ -40,3 +42,8 @@ mcp-tools:
     title: Save a generated image to the Drive
   - name: list_brand_kits
     title: List brand kits
+related-skills:
+  - name: image-resize
+    why: Re-compose the finished image for other sizes and platforms.
+  - name: image-translation
+    why: Localize the text in the finished image for other markets.
