@@ -30,8 +30,8 @@ use-cases:
     description: STL or DFXP files for broadcast workflows.
 mcp-toolset: subtitles
 mcp-tools:
-  - name: start_subtitles
-    title: Make or translate subtitles
+  - name: translate_subtitle_file
+    title: Translate a subtitle file
   - name: get_subtitles
     title: Check or read subtitles
   - name: edit_subtitle_lines
