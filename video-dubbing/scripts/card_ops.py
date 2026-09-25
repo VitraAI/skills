@@ -1,40 +1,40 @@
 #!/usr/bin/env python3
-"""Card operations beyond field edits — everything else the editor does to a
-card. Field edits (text, timing, emotion, rate, Keep Source, lip-sync, review
-status, volume) are patch_cards.py.
+"""Line operations beyond field edits — everything else the editor does to a
+line. Field edits (text, timing, emotion, rate, Keep Source, lip-sync, review
+status, volume) are patch_cards.py; subtitle lines are edit_subtitles.py.
 
-  split          --card-id X --chunks '["first part", "second part"]'   (2-3)
-  merge          --card-ids A,B[,C]         consecutive cards, same speaker
-  delete         --card-id X
-  add            --after X | --before X  --start S --end E  [--text "..."]
-                 [--speaker-id N]           a new line in the gap next to X
-  assign-speaker --card-id X --speaker-id N
-  add-speaker    --card-id X --label "Name" --gender male|female
-  speaker-voice  --speaker-id N --language L --voice-id V --voice-name "..."
+Lines are numbered as inspect_process --cards lists them.
+
+  split          --line N --chunks '["first part", "second part"]'   (2-3)
+  merge          --lines N,M[,K]            consecutive lines, same speaker
+  delete         --line N
+  add            --after N | --before N  --start S --end E  [--text "..."]
+                 [--speaker-id N]           a new line in the silence next to N
+  assign-speaker --line N --speaker-id S
+  add-speaker    --line N --label "Name" --gender male|female
+  speaker-voice  --speaker-id S --language L --voice-id V --voice-name "..."
                  [--voice-type T]           that speaker's voice in one language
-  retranslate    --card-id X --language L   re-translate one line from the source
-  speak          --card-id X --language L  [--voice-id V --voice-name "..."
+  retranslate    --line N --language L      re-translate one line from the source
+  speak          --line N --language L  [--voice-id V --voice-name "..."
                  --voice-type T]            re-voice ONE line now (optionally in
                                             another voice), synchronously
-  sub-update     --card-id X --language L --subtitle-id S [--text] [--start --end]
-  sub-delete     --card-id X --language L --subtitle-id S
-  sub-split      --card-id X --language L --subtitle-id S --at-word N
-  sub-merge      --card-id X --language L --subtitle-ids S1,S2
 
-Structural and subtitle edits carry `expectedRevision` (from --revision or
-read now) and are refused with 409 if the transcript changed meanwhile.
-`retranslate` and `speak` are billed per use and are not revision-guarded (a
-refusal after the work ran would charge for nothing).
+Structural edits carry `expectedRevision` (from --revision or read now) and
+are refused with 409 if the transcript changed meanwhile. `retranslate` and
+`speak` are billed per use and are not revision-guarded (a refusal after the
+work ran would charge for nothing).
 
 What each one leaves to do next is in `next_action` / `follow_up`:
-  split        -> the new cards have no translation or audio: retranslate +
+  split        -> the new lines have no translation or audio: retranslate +
                   speak (or regenerate_cards --missing) per target language
-  merge        -> the merged card has no audio: regenerate_cards --missing
+  merge        -> the merged line has no audio: regenerate_cards --missing
   add          -> empty line: patch_cards text (source), retranslate, speak
-  speaker-voice-> that speaker's cards in L lose their audio: regenerate_cards
+  speaker-voice-> that speaker's lines in L lose their audio: regenerate_cards
                   --missing
-Prints JSON: { "status": "done", "operation", "revision_after", "cards": [...],
-               "follow_up": "...", "next_action": "..." }
+After split, merge, add or delete the lines are renumbered (`renumbered`).
+
+Prints JSON: { "status": "done", "operation", "lines": [N...], "renumbered",
+               "revision_after", "follow_up", "next_action" }
 
 Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
@@ -47,8 +47,6 @@ sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 
 import argparse
 import json
-import secrets
-import string
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -60,7 +58,6 @@ import _voices  # noqa: E402
 PL = "/v1/galaxy/translate-video/process-log"
 STATUS_PATH = PL + "/{job_id}/status"
 TRANSCRIPT_ACTION = PL + "/transcript/action"
-SUBTITLE_ACTION = PL + "/subtitle/action"
 SYNC_ACTION = PL + "/sync-services/action"
 ASSIGN_SPEAKER = PL + "/{job_id}/assign-speaker"
 ADD_SPEAKER = PL + "/{job_id}/speakers"
@@ -105,11 +102,6 @@ def guarded(base: str, headers: dict, job: str, path: str, action: str, data, re
     return payload, (int(header) if header and header.isdigit() else None)
 
 
-def new_card_id() -> str:
-    alphabet = string.ascii_letters + string.digits + "_-"
-    return "".join(secrets.choice(alphabet) for _ in range(5))
-
-
 def status_row(base: str, headers: dict, job: str) -> dict:
     try:
         status, payload = _http.get_json(base + STATUS_PATH.format(job_id=job), headers=headers)
@@ -122,33 +114,26 @@ def status_row(base: str, headers: dict, job: str) -> dict:
 def card_or_die(index: dict, cid: str) -> dict:
     card = index.get(cid)
     if card is None:
-        die(_common.EXIT_API_ERROR, f"card {cid} is not in this dub.")
+        die(_common.EXIT_API_ERROR, "that line is not in this dub.")
     return card
 
 
-def subtitle_or_die(card: dict, lang: str, sid: str) -> tuple[list, int]:
-    subs = _cards.block(card, lang).get("subs")
-    subs = subs if isinstance(subs, list) else []
-    for i, sub in enumerate(subs):
-        if isinstance(sub, dict) and sub.get("id") == sid:
-            return subs, i
-    die(_common.EXIT_API_ERROR, f"subtitle {sid} is not on card {card.get('id')} in {lang}.")
-    return [], -1  # unreachable
-
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Card operations (split, merge, speakers, voices, subtitles, ...).")
+    parser = argparse.ArgumentParser(description="Line operations (split, merge, add, delete, speakers, voices, ...).")
     parser.add_argument("operation", choices=[
         "split", "merge", "delete", "add", "assign-speaker", "add-speaker", "speaker-voice",
-        "retranslate", "speak", "sub-update", "sub-delete", "sub-split", "sub-merge",
+        "retranslate", "speak",
     ])
     parser.add_argument("--job-id", required=True)
-    parser.add_argument("--card-id")
-    parser.add_argument("--card-ids")
+    parser.add_argument("--line", type=int, help="The line's number (inspect_process --cards).")
+    parser.add_argument("--lines", help="Line numbers, e.g. 3,4.")
+    # Older callers named cards by id; people and agents use line numbers.
+    parser.add_argument("--card-id", help=argparse.SUPPRESS)
+    parser.add_argument("--card-ids", help=argparse.SUPPRESS)
     parser.add_argument("--language")
     parser.add_argument("--chunks", help='JSON list of 2-3 source-text pieces, in order.')
-    parser.add_argument("--after")
-    parser.add_argument("--before")
+    parser.add_argument("--after", type=int, metavar="LINE")
+    parser.add_argument("--before", type=int, metavar="LINE")
     parser.add_argument("--start", type=float)
     parser.add_argument("--end", type=float)
     parser.add_argument("--text")
@@ -158,14 +143,13 @@ def main() -> int:
     parser.add_argument("--voice-id")
     parser.add_argument("--voice-name")
     parser.add_argument("--voice-type")
-    parser.add_argument("--subtitle-id")
-    parser.add_argument("--subtitle-ids")
-    parser.add_argument("--at-word", type=int)
     parser.add_argument("--revision", type=int, help="Revision from inspect_process; refuses if it moved.")
     args = parser.parse_args()
 
+    shown_as = {"card-id": "line", "card-ids": "lines"}
+
     def need(*names: str) -> None:
-        missing = [n for n in names if getattr(args, n.replace("-", "_")) in (None, "")]
+        missing = [shown_as.get(n, n) for n in names if getattr(args, n.replace("-", "_")) in (None, "")]
         if missing:
             die(_common.EXIT_API_ERROR, f"{args.operation} needs --" + ", --".join(missing))
 
@@ -181,6 +165,14 @@ def main() -> int:
             error_code="REVISION_CONFLICT", current_revision=current)
     revision = args.revision if args.revision is not None else current
     index = _cards.by_id(cards)
+    numbers = _cards.line_numbers(cards)
+    if args.line is not None:
+        args.card_id = _cards.card_at_line(cards, args.line)
+    if args.lines:
+        try:
+            args.card_ids = ",".join(_cards.card_at_line(cards, int(x)) for x in args.lines.split(",") if x.strip())
+        except ValueError:
+            die(_common.EXIT_API_ERROR, "--lines takes line numbers, e.g. 3,4")
     row = status_row(base, headers, job)
     source = row.get("sourceLanguage") or ""
     targets = row.get("targetLanguages") or []
@@ -230,45 +222,23 @@ def main() -> int:
         card_or_die(index, args.card_id)
         _, revision = guarded(base, headers, job, TRANSCRIPT_ACTION, "delete",
                               {"transcriptId": args.card_id}, revision, "delete")
-        result["cards"] = [args.card_id]
+        result["deleted_line"] = numbers.get(args.card_id)
 
     elif op == "add":
         need("start", "end")
-        anchor_id = args.after or args.before
-        if not anchor_id:
-            die(_common.EXIT_API_ERROR, "add needs --after or --before a card.")
-        anchor = card_or_die(index, anchor_id)
-        st, et = args.start, args.end
-        if st < 0 or st >= et:
-            die(_common.EXIT_API_ERROR, "--start must be before --end.")
-        duration = _cards.video_duration()
-        if duration and et > duration + 1e-6:
-            die(_common.EXIT_API_ERROR, f"--end is past the end of the video ({duration}s).")
-        prev, nxt = _cards.neighbours(cards, anchor_id, source)
-        lo = ((_cards.block(anchor, source).get("v") or {}).get("et") if args.after
-              else ((_cards.block(prev, source).get("v") or {}).get("et") if prev else 0))
-        hi = (((_cards.block(nxt, source).get("v") or {}).get("st") if nxt else duration or None)
-              if args.after else (_cards.block(anchor, source).get("v") or {}).get("st"))
-        if (lo is not None and st < lo - 1e-6) or (hi is not None and et > hi + 1e-6):
-            die(_common.EXIT_API_ERROR, f"the new line must fit in the gap {lo}s – {hi}s without overlapping.")
-        speaker = args.speaker_id or (_cards.block(anchor, source).get("speakerId") or anchor.get("speakerId"))
-        text = (args.text or "").strip()
-        new_card: dict = {"id": new_card_id()}
-        for lang in [k for k in anchor if k not in ("id", "ref", "isGap", "index", "merged")]:
-            if not isinstance(anchor.get(lang), dict):
-                continue
-            new_card[lang] = {
-                "tr": {"text": text if lang == source else "", "cc": len(text) if lang == source else 0,
-                       "wc": len(text.split()) if lang == source else 0, "c": 0},
-                "a": None, "v": {"st": st, "et": et, "r": 1}, "subs": [],
-            }
-        if source in new_card:
-            new_card[source]["speakerId"] = speaker
-            new_card[source]["tr"]["diarization"] = {"start": st, "end": et, "text": text}
-        position = [str(c.get("id")) for c in cards].index(anchor_id) + (1 if args.after else 0)
-        _, revision = guarded(base, headers, job, TRANSCRIPT_ACTION, "add",
-                              {"transcript": new_card, "index": position}, revision, "add")
-        result["cards"] = [new_card["id"]]
+        if (args.after is None) == (args.before is None):
+            die(_common.EXIT_API_ERROR, "add needs --after N or --before N (a line number).")
+        anchor_id = _cards.card_at_line(cards, args.after if args.after is not None else args.before)
+        # The API builds the line and checks it fits in the silence there.
+        data = {"after" if args.after is not None else "before": anchor_id,
+                "start": args.start, "end": args.end}
+        if args.text:
+            data["text"] = args.text.strip()
+        if args.speaker_id:
+            data["speakerId"] = str(args.speaker_id)
+        payload, revision = guarded(base, headers, job, TRANSCRIPT_ACTION, "add", data, revision, "add a line")
+        new_id = ((payload or {}).get("transcript") or {}).get("id")
+        result["cards"] = [new_id] if new_id else []
         follow_up = "Empty in every dubbed language: retranslate then speak it per language."
         next_action = "retranslate"
 
@@ -348,69 +318,18 @@ def main() -> int:
         if op == "retranslate":
             revision = _cards.read_editor(base, headers, job)[1]
 
-    else:  # subtitle lines
-        need("card-id", "language")
-        card = card_or_die(index, args.card_id)
-        path = {"language": args.language, "transcriptId": args.card_id}
-        if op == "sub-update":
-            need("subtitle-id")
-            subs, i = subtitle_or_die(card, args.language, args.subtitle_id)
-            sub = dict(subs[i])
-            if args.text is not None:
-                sub["text"] = args.text.strip()
-            if args.start is not None or args.end is not None:
-                t = dict(sub.get("t") or {})
-                t["st"] = args.start if args.start is not None else t.get("st")
-                t["et"] = args.end if args.end is not None else t.get("et")
-                if t["st"] is None or t["et"] is None or t["st"] >= t["et"]:
-                    die(_common.EXIT_API_ERROR, "subtitle start must be before its end.")
-                sub["t"] = t
-            data = {"path": {**path, "subtitleId": args.subtitle_id}, "subtitle": sub}
-            _, revision = guarded(base, headers, job, SUBTITLE_ACTION, "updateById", data, revision, "update subtitle")
-        elif op == "sub-delete":
-            need("subtitle-id")
-            subtitle_or_die(card, args.language, args.subtitle_id)
-            _, revision = guarded(base, headers, job, SUBTITLE_ACTION, "delete",
-                                  {"path": {**path, "subtitleId": args.subtitle_id}}, revision, "delete subtitle")
-        elif op == "sub-split":
-            need("subtitle-id", "at-word")
-            subs, i = subtitle_or_die(card, args.language, args.subtitle_id)
-            sub = subs[i]
-            words = str(sub.get("text") or "").split()
-            if not 0 < args.at_word < len(words):
-                die(_common.EXIT_API_ERROR, f"--at-word must be between 1 and {len(words) - 1}.")
-            st, et = (sub.get("t") or {}).get("st", 0), (sub.get("t") or {}).get("et", 0)
-            cut = st + (et - st) * args.at_word / len(words)
-            parts = [
-                {"id": sub["id"], "t": {"st": st, "et": cut}, "text": " ".join(words[:args.at_word])},
-                {"id": new_card_id(), "t": {"st": cut, "et": et}, "text": " ".join(words[args.at_word:])},
-            ]
-            _, revision = guarded(base, headers, job, SUBTITLE_ACTION, "split",
-                                  {"path": {**path, "subtitleId": args.subtitle_id}, "subtitles": parts},
-                                  revision, "split subtitle")
-        elif op == "sub-merge":
-            need("subtitle-ids")
-            ids = [x.strip() for x in args.subtitle_ids.split(",") if x.strip()]
-            picked = []
-            for sid in ids:
-                subs, i = subtitle_or_die(card, args.language, sid)
-                picked.append((i, subs[i]))
-            picked.sort()
-            if len(picked) < 2 or any(b[0] != a[0] + 1 for a, b in zip(picked, picked[1:])):
-                die(_common.EXIT_API_ERROR, "sub-merge needs 2+ consecutive subtitle lines.")
-            first, last = picked[0][1], picked[-1][1]
-            merged = {"id": first["id"],
-                      "t": {"st": (first.get("t") or {}).get("st"), "et": (last.get("t") or {}).get("et")},
-                      "text": " ".join(str(s.get("text") or "").strip() for _, s in picked)}
-            _, revision = guarded(base, headers, job, SUBTITLE_ACTION, "merge",
-                                  {"path": path, "subtitleIds": ids, "merged": merged}, revision, "merge subtitles")
-        result["cards"] = [args.card_id]
-
     if revision is None and op not in ("retranslate", "speak"):
         revision = _cards.read_editor(base, headers, job)[1]
     _common.update_manifest(job, revision=revision)
-    result.update({"revision_after": revision, "follow_up": follow_up, "next_action": next_action})
-    print(json.dumps(result))
+    # Report lines by the numbers people see now (a structural edit renumbers).
+    structural = op in ("split", "merge", "add", "delete")
+    ids = result.pop("cards", None)
+    if ids is not None:
+        now = _cards.line_numbers(_cards.read_editor(base, headers, job)[0]) if structural else numbers
+        result["lines"] = sorted(now[c] for c in ids if c in now)
+    result.update({"renumbered": structural, "revision_after": revision,
+                   "follow_up": follow_up, "next_action": next_action})
+    print(json.dumps(result, ensure_ascii=False))
     return _common.EXIT_OK
 
 

@@ -15,16 +15,17 @@ plus the scripts it runs.
 | [`image-resize`](image-resize/) | Re-compose one image for other sizes (Story, LinkedIn, 1080x1920…) |
 | [`image-translation`](image-translation/) | Translate the text baked into an image and keep its layout |
 | [`video-dubbing`](video-dubbing/) | Dub a video into other languages, review it line by line, export it |
+| [`video-subtitles`](video-subtitles/) | Make or translate subtitles, review them line by line, download or burn them in |
 
 ## Status
 
-Version 0.1, ahead of the production release it depends on. Until that release
+Version 0.3, ahead of the production release it depends on. Until that release
 is live on `universe-api.vitra.ai`:
 
 - `image-creator` (generate, edit, save to Drive), `image-resize` and
   `image-translation` work.
-- `image-creator`'s brand-kit scripts, `video-dubbing` and the Vitra MCP
-  server that the Claude Code plugin adds need that release.
+- `image-creator`'s brand-kit scripts, `video-dubbing`, `video-subtitles` and
+  the Vitra MCP server that the Claude Code plugin adds need that release.
 
 ## Install
 

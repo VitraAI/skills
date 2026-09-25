@@ -16,7 +16,7 @@ What exists, stated exactly:
 --download DIR saves the raw clip (and checks it is really audio).
 
 Prints JSON:
-  { "card_id", "language", "revision", "text", "voice", "emotion",
+  { "line", "language", "revision", "text", "voice", "emotion",
     "source": { "video_url", "start", "end", "text" },
     "raw_audio": { "available", "url", "duration_seconds", "sha256", "path"? },
     "playback_audio": { "available": false, "reason", "transforms": {...} } }
@@ -48,7 +48,9 @@ die = _common.die
 def main() -> int:
     parser = argparse.ArgumentParser(description="Source segment and current audio of one card.")
     parser.add_argument("--job-id", required=True)
-    parser.add_argument("--card-id", required=True)
+    which = parser.add_mutually_exclusive_group(required=True)
+    which.add_argument("--line", type=int, help="The line's number (inspect_process --cards).")
+    which.add_argument("--card-id", help=argparse.SUPPRESS)  # older callers
     parser.add_argument("--language", required=True, help="Dubbed language key.")
     parser.add_argument("--download", metavar="DIR", help="Save the raw audio clip here.")
     args = parser.parse_args()
@@ -67,12 +69,15 @@ def main() -> int:
     source_lang = (row or {}).get("sourceLanguage") or ""
 
     cards, revision = _cards.read_editor(base, headers, args.job_id)
+    if args.line is not None:
+        args.card_id = _cards.card_at_line(cards, args.line)
+    line = _cards.line_numbers(cards).get(args.card_id)
     card = _cards.by_id(cards).get(args.card_id)
     if card is None:
-        die(_common.EXIT_API_ERROR, f"card {args.card_id} is not in this dub.")
+        die(_common.EXIT_API_ERROR, "that line is not in this dub.")
     blk = _cards.block(card, args.language)
     if not blk:
-        die(_common.EXIT_API_ERROR, f"card {args.card_id} has no {args.language} line.")
+        die(_common.EXIT_API_ERROR, f"line {line} has no {args.language} version.")
     src = _cards.block(card, source_lang)
     src_v = src.get("v") if isinstance(src.get("v"), dict) else {}
     v = blk.get("v") if isinstance(blk.get("v"), dict) else {}
@@ -91,7 +96,7 @@ def main() -> int:
         if args.download:
             out_dir = Path(args.download).expanduser()
             out_dir.mkdir(parents=True, exist_ok=True)
-            dest = out_dir / f"{args.language}-{args.card_id}.wav"
+            dest = out_dir / f"{args.language}-line{line}.wav"
             try:
                 _http.download_to_file(a["url"], dest)
             except Exception as e:  # noqa: BLE001
@@ -102,7 +107,7 @@ def main() -> int:
             raw["path"] = str(dest)
 
     print(json.dumps({
-        "card_id": args.card_id,
+        "line": line,
         "language": args.language,
         "revision": revision,
         "text": (blk.get("tr") or {}).get("text") if isinstance(blk.get("tr"), dict) else None,

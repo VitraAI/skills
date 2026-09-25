@@ -209,32 +209,6 @@ def put_json(
     return request_json("PUT", url, headers, body=data, content_type="application/json", timeout=timeout)
 
 
-def put_file(
-    url: str,
-    headers: dict[str, str],
-    file_path,
-    timeout: float = 600.0,
-) -> int:
-    """PUT raw file bytes (a presigned S3 upload). Returns the status code.
-
-    The presign bakes the headers into the signature, so send back EXACTLY the
-    headers the server handed over — no auth header, no extras, or S3 rejects
-    the signature.
-    """
-    with open(file_path, "rb") as fh:
-        data = fh.read()
-    req = urllib.request.Request(url, data=data, method="PUT")
-    for key, value in headers.items():
-        req.add_header(key, value)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status
-    except urllib.error.HTTPError as e:
-        return e.code
-    except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise NetworkError(humanize(e)) from e
-
-
 def download_to_file(
     url: str,
     dest: Path,

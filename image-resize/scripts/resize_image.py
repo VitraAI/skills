@@ -11,10 +11,8 @@ The webapp's Adapts flow, with the upload routed through the Vitra API host:
   3. POST .../adapt/{id}/adapt   queue one variant per target size
      poll GET .../adapt/{id}/variants until each variant settles
 
-Why not the webapp's presign + PUT straight to S3: sandboxed agents may only
-reach the API host, and a bucket host is exactly what their network rules
-block. Adopting by key (`sourceKey`) is the route the server offers for images
-the org already owns; it verifies the key is the org's own.
+Everything goes through the Vitra API host: sandboxed agents can often reach
+only that host, so nothing is uploaded straight to storage.
 
 Prints JSON:
   { "status": "completed",

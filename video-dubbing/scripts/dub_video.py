@@ -5,6 +5,7 @@ then poll to the speaker-voice review gate and print the detected speakers.
 Flow:
   1. resolve the source (--file or --url; a URL is downloaded to a temp file)
   2. POST multipart to /v1/galaxy/translate-video/upload            -> uploadId
+     (and the optional --script the same way, sent as a second uploadId)
   3. find or create a translation memory for the run                -> tmId
   4. POST /v1/galaxy/translate-video/process-log/publish            -> jobId
   5. poll /v1/galaxy/translate-video/process-log/{jobId}/status
@@ -48,6 +49,7 @@ import _common  # noqa: E402
 import _http  # noqa: E402
 import _progress  # noqa: E402
 import _tm  # noqa: E402
+import _tv  # noqa: E402
 
 UPLOAD_PATH = "/v1/galaxy/translate-video/upload"
 TM_PATH = "/v1/translation-memory"
@@ -62,6 +64,8 @@ CLONED_VOICES_PATH = "/v1/galaxy/translate-video/voice/cloned"
 # `inputData.voiceMode: "instant_clone"` (the separate *_WITH_INSTANT_VOICE_CLONE
 # type was retired by the MergeDubbingProcessTypes migration).
 PROCESS_TYPE = "VIDEO_TO_SPEECH_TRANSLATION"
+# Scripts the server accepts beside a video: subtitle formats + plain text.
+SCRIPT_EXTENSIONS = {".srt", ".vtt", ".ass", ".ssa", ".txt"}
 VOICE_MODE = "instant_clone"
 DEFAULT_POLL_INTERVAL = 12
 DEFAULT_MAX_WAIT = 1800  # 30 min to reach the gate
@@ -204,11 +208,14 @@ def publish(
     tm_id: str | None,
     idempotency_key: str,
     emotion_detection: bool = True,
+    script_id: str | None = None,
 ) -> str:
     body = {
         "processType": PROCESS_TYPE,
         "processName": run_name,
-        "uploadIds": [upload_id],
+        # A script rides along as a second upload; the server marks it the
+        # transcription reference (assignFileRoles), as the webapp's pairing does.
+        "uploadIds": [upload_id, *([script_id] if script_id else [])],
         "sourceLanguage": source_language,
         "targetLanguages": target_languages,
         "metadata": {"source": "skill:video-dubbing"},
@@ -391,6 +398,11 @@ def main() -> int:
         help="Target language key (repeat for several).",
     )
     parser.add_argument("--name", help="Process display name. Defaults to the file name.")
+    parser.add_argument(
+        "--script",
+        help="Optional script of what is said (.srt .vtt .ass .ssa or .txt): transcription "
+             "follows it instead of guessing. A timed script also fixes the line timings.",
+    )
     parser.add_argument("--poll-interval", type=int, default=DEFAULT_POLL_INTERVAL)
     parser.add_argument(
         "--tm-provider",
@@ -430,6 +442,11 @@ def main() -> int:
         _tm.resolve_by_name(base, headers, args.tm_name) if args.tm_name else None
     )
 
+    script = Path(args.script).expanduser() if args.script else None
+    if script and (not script.is_file() or script.suffix.lower() not in SCRIPT_EXTENSIONS):
+        die(_common.EXIT_API_ERROR,
+            f"--script must be an existing {', '.join(sorted(SCRIPT_EXTENSIONS))} file.")
+
     path, is_temp = resolve_source(args.file, args.url)
     try:
         run_name = args.name or f"dub · {path.stem}"
@@ -452,6 +469,7 @@ def main() -> int:
         else:
             upload_id = upload(base, headers, path)
             sys.stderr.write(f"[upload] uploadId={upload_id}\n")
+        script_id, script_sha = _tv.upload(base, headers, script) if script else (None, None)
 
         # A TM the caller chose always wins (see SKILL.md: list, then ask).
         # Otherwise the server finds-or-creates the one for THIS language pair
@@ -469,7 +487,8 @@ def main() -> int:
         # starting — and paying for — a second one.
         publish_key = _common.idempotency_key(
             "publish", file_sha256, source_language, sorted(targets), tm_id, run_name,
-            emotion_detection, *(["new", time.time()] if args.new_run else []),
+            emotion_detection, *(["script", script_sha] if script_sha else []),
+            *(["new", time.time()] if args.new_run else []),
         )
 
         # Reconcile before creating: this machine's manifest first (covers a
@@ -483,14 +502,16 @@ def main() -> int:
             ):
                 job_id = known["job_id"]
                 sys.stderr.write(f"[reuse] continuing run {job_id} from the manifest\n")
-            if not job_id:
+            # A run found by upload can't tell whether it used this script, so
+            # with a script only the manifest (keyed by it) may reconnect.
+            if not job_id and not script:
                 job_id = find_existing_run(base, headers, upload_id, source_language, targets)
                 if job_id:
                     sys.stderr.write(f"[reuse] found existing run {job_id} for this file\n")
         if not job_id:
             job_id = publish(
                 base, headers, upload_id, run_name, source_language, targets, tm_id,
-                publish_key, emotion_detection,
+                publish_key, emotion_detection, script_id,
             )
             sys.stderr.write(f"[publish] jobId={job_id}\n")
 

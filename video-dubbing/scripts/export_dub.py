@@ -23,9 +23,14 @@ An export already recorded for this language at the same revision and
 settings is returned as-is instead of rendered again. A render the server
 marks FAILED is reported at once, not waited on until the timeout.
 
+--subtitles <language> burns that language's subtitles into the video (the
+webapp's "Embed Subtitles"). A language with no subtitle lines yet is refused
+(reason no_subtitles) unless --generate-subtitles is given, which makes them
+first from the translated lines: that is charged per minute of video.
+
 Prints JSON:
-  { "status": "exported", "language": "...", "export_id": "...",
-    "media_url": "...", "next_action": "download_export" }
+  { "status": "exported", "language": "...", "subtitles": "<lang>"|null,
+    "export_id": "...", "media_url": "...", "next_action": "download_export" }
 
 Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
@@ -46,6 +51,7 @@ from urllib.parse import urlencode
 sys.path.insert(0, str(Path(__file__).parent))
 import _common  # noqa: E402
 import _http  # noqa: E402
+import _tv  # noqa: E402
 
 PL = "/v1/galaxy/translate-video/process-log"
 ISSUES_PATH = PL + "/transcript/issues"
@@ -102,7 +108,8 @@ def transcript_revision(base: str, headers: dict, job_id: str) -> int | None:
 
 
 def start_export(
-    base: str, headers: dict, job_id: str, lang: str, resolution: str, lip_sync: bool
+    base: str, headers: dict, job_id: str, lang: str, resolution: str, lip_sync: bool,
+    subtitles: str | None = None,
 ) -> str:
     body = {
         "processId": job_id,
@@ -115,6 +122,9 @@ def start_export(
     }
     if lip_sync:
         body["lipSync"] = True
+    if subtitles:
+        body["embedSubtitle"] = True
+        body["subtitleLanguage"] = subtitles
 
     # Without a known revision there is no safe key: a key blind to edits
     # would replay a stale render after the transcript changed. Then the export
@@ -123,7 +133,8 @@ def start_export(
     export_headers = dict(headers)
     if revision is not None:
         export_headers["Idempotency-Key"] = _common.idempotency_key(
-            "export", job_id, lang, resolution, lip_sync, revision
+            "export", job_id, lang, resolution, lip_sync, revision,
+            *([subtitles] if subtitles else []),
         )
 
     try:
@@ -212,6 +223,15 @@ def main() -> int:
     )
     parser.add_argument("--lip-sync", action="store_true")
     parser.add_argument(
+        "--subtitles", metavar="LANGUAGE_KEY",
+        help="Burn this language's subtitles into the video (usually the same language).",
+    )
+    parser.add_argument(
+        "--generate-subtitles", action="store_true",
+        help="With --subtitles: make the subtitle lines first if that language has none "
+             "(charged per minute of video).",
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Render even though blocking errors exist. The server still "
@@ -256,12 +276,28 @@ def main() -> int:
                       f"the transcript changed since review (revision {args.revision} -> {revision})",
                       "inspect_process", current_revision=revision)
 
-    settings = {"resolution": args.resolution, "lip_sync": args.lip_sync, "revision": revision}
+    if args.subtitles:
+        count = _tv.subtitle_count(cards, args.subtitles)
+        if not count and not args.generate_subtitles:
+            return refuse("no_subtitles",
+                          f"{args.subtitles} has no subtitle lines yet; making them costs credits "
+                          "(per minute of video)", "export_dub --generate-subtitles",
+                          subtitles=args.subtitles)
+        if not count:
+            sys.stderr.write(f"[export] generating {args.subtitles} subtitles…\n")
+            if not _tv.generate_subtitles(base, headers, args.job_id, args.subtitles):
+                die(_common.EXIT_API_ERROR,
+                    f"no subtitles could be made for {args.subtitles}: it has no translated lines.")
+            revision = transcript_revision(base, headers, args.job_id)
+
+    settings = {"resolution": args.resolution, "lip_sync": args.lip_sync, "revision": revision,
+                "subtitles": args.subtitles}
     prior = ((saved.get("exports") or {}).get(lang)) or {}
     if revision is not None and prior.get("media_url") and all(prior.get(k) == v for k, v in settings.items()):
         sys.stderr.write("[export] this exact version was already rendered; reusing it\n")
         print(json.dumps({"status": "exported", "language": lang, "export_id": prior["export_id"],
                           "media_url": prior["media_url"], "revision": revision, "reused": True,
+                          "subtitles": args.subtitles,
                           "next_action": "download_export"}))
         return _common.EXIT_OK
 
@@ -276,7 +312,7 @@ def main() -> int:
                     "language": args.language,
                     "error_count": len(errors),
                     "first_error": {
-                        "card_id": first.get("transcriptId"),
+                        "line": _cards.line_numbers(cards).get(str(first.get("transcriptId"))),
                         "type": first.get("type"),
                         "message": first.get("msg"),
                     },
@@ -292,7 +328,8 @@ def main() -> int:
 
     sys.stderr.write(f"[export] rendering {args.language}…\n")
     export_id = start_export(
-        base, headers, args.job_id, args.language, args.resolution, args.lip_sync
+        base, headers, args.job_id, args.language, args.resolution, args.lip_sync,
+        args.subtitles,
     )
     _common.update_manifest(args.job_id, exports={lang: {"export_id": export_id, **settings}})
     media_url = poll_media(
@@ -305,6 +342,7 @@ def main() -> int:
             {
                 "status": "exported",
                 "language": args.language,
+                "subtitles": args.subtitles,
                 "export_id": export_id,
                 "media_url": media_url,
                 "revision": revision,

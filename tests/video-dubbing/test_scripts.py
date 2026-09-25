@@ -63,14 +63,14 @@ class SkillTestCase(unittest.TestCase):
 
 class PatchCardsTest(SkillTestCase):
     def test_text_timing_emotion_chain_revisions(self) -> None:
-        edits = [{"card_id": "c1", "text": "नमस्ते दोस्त", "end": 2.5, "emotion": "calm"}]
+        edits = [{"line": 1, "text": "नमस्ते दोस्त", "end": 2.5, "emotion": "calm"}]
         code, out, err = self.run_script("patch_cards", "--job-id", JOB, "--language", "hindi",
                                          "--revision", "3", "--edits", json.dumps(edits))
         self.assertEqual(code, 0, err)
         self.assertEqual(out["status"], "patched")
         self.assertEqual({c["field"] for c in out["changes"]}, {"text", "end", "emotion"})
         # New text: the server removed the audio (not stale — missing).
-        self.assertEqual(out["audio_cleared"], ["c1"])
+        self.assertEqual(out["audio_cleared"], [1])
         self.assertEqual(out["audio_stale"], [])
         self.assertEqual(out["next_action"], "regenerate_cards")
         self.assertEqual(out["revision_after"], 5)  # two guarded writes chained
@@ -85,14 +85,14 @@ class PatchCardsTest(SkillTestCase):
 
     def test_emotion_change_keeps_audio_and_marks_it_stale(self) -> None:
         code, out, _ = self.run_script("patch_cards", "--job-id", JOB, "--language", "hindi",
-                                       "--edits", '[{"card_id": "c1", "emotion": "calm"}]')
-        self.assertEqual((code, out["audio_stale"], out["audio_cleared"]), (0, ["c1"], []))
+                                       "--edits", '[{"line": 1, "emotion": "calm"}]')
+        self.assertEqual((code, out["audio_stale"], out["audio_cleared"]), (0, [1], []))
 
     def test_old_server_keeping_audio_after_text_edit_is_still_caught(self) -> None:
         self.st["clear_audio_on_text"] = False
         code, out, _ = self.run_script("patch_cards", "--job-id", JOB, "--language", "hindi",
-                                       "--edits", '{"c1": "नया"}')
-        self.assertEqual((out["audio_stale"], out["audio_cleared"]), (["c1"], []))
+                                       "--edits", '{"1": "नया"}')
+        self.assertEqual((out["audio_stale"], out["audio_cleared"]), ([1], []))
 
     def test_stale_revision_is_refused_before_sending(self) -> None:
         code, out, _ = self.run_script("patch_cards", "--job-id", JOB, "--language", "hindi",
@@ -139,25 +139,25 @@ class RegenerateTest(SkillTestCase):
         code, out, err = self.run_script("regenerate_cards", "--job-id", JOB, "--language", "hindi", "--missing")
         self.assertEqual(code, 0, err)
         self.assertEqual(out["status"], "regenerated")
-        self.assertEqual([c["card_id"] for c in out["cards"]], ["c3"])
-        self.assertTrue(out["cards"][0]["audio_changed"])
+        self.assertEqual([c["line"] for c in out["lines"]], [3])
+        self.assertTrue(out["lines"][0]["audio_changed"])
         body = self.calls("POST", f"{PL}/{JOB}/generate-all")[0][2]
         self.assertEqual(body["transcriptIds"], ["c3"])
 
     def test_same_url_new_bytes_counts_as_changed(self) -> None:
         code, out, _ = self.run_script("regenerate_cards", "--job-id", JOB, "--language", "hindi",
-                                       "--card-ids", "c1")
+                                       "--lines", "1")
         self.assertEqual(code, 0)
-        self.assertTrue(out["cards"][0]["audio_changed"])
-        self.assertTrue(out["cards"][0]["verified"])
+        self.assertTrue(out["lines"][0]["audio_changed"])
+        self.assertTrue(out["lines"][0]["verified"])
 
     def test_unchanged_audio_is_not_counted_as_fixed(self) -> None:
         self.st["on_child_done"] = lambda state, child: None  # job "succeeds", changes nothing
         code, out, _ = self.run_script("regenerate_cards", "--job-id", JOB, "--language", "hindi",
-                                       "--card-ids", "c1")
+                                       "--lines", "1")
         self.assertNotEqual(code, 0)
         self.assertEqual(out["status"], "partial")
-        self.assertFalse(out["cards"][0]["audio_changed"])
+        self.assertFalse(out["lines"][0]["audio_changed"])
 
 
 class AddLanguageTest(SkillTestCase):
@@ -222,7 +222,7 @@ class FixIssuesTest(SkillTestCase):
         self.assertNotEqual(code, 0)  # a timing error remains: not autofixable
         self.assertEqual(out["status"], "partial")
         self.assertEqual(out["attempts"], 1)  # stopped: nothing left it can fix
-        self.assertEqual(out["approved_text_changed"][0]["card_id"], "c2")
+        self.assertEqual(out["approved_text_changed"][0]["line"], 2)
         self.assertEqual(out["remaining_errors"][0]["type"], "Start Time Error")
         self.assertEqual(out["next_action"], "patch_cards")
 
@@ -242,17 +242,19 @@ class CardOpsTest(SkillTestCase):
         code, out, err = self.run_script("card_ops", "speaker-voice", "--job-id", JOB, "--speaker-id", "1",
                                          "--language", "hindi", "--voice-id", "v2", "--voice-name", "Aria")
         self.assertEqual(code, 0, err)
-        self.assertEqual(sorted(out["cards"]), ["c1", "c2", "c3"])
+        self.assertEqual(out["lines"], [1, 2, 3])
         self.assertEqual(out["next_action"], "regenerate_cards")
         self.assertEqual(self.manifest()["voice_map"]["1"]["hindi"], "v2")
 
     def test_add_must_fit_the_gap(self) -> None:
-        code, _, _ = self.run_script("card_ops", "add", "--job-id", JOB, "--after", "c1",
+        code, _, _ = self.run_script("card_ops", "add", "--job-id", JOB, "--after", "1",
                                      "--start", "1.5", "--end", "2.8")
         self.assertNotEqual(code, 0)
-        code, out, err = self.run_script("card_ops", "add", "--job-id", JOB, "--after", "c1",
+        code, out, err = self.run_script("card_ops", "add", "--job-id", JOB, "--after", "1",
                                          "--start", "2.1", "--end", "2.9", "--text", "Wait")
         self.assertEqual(code, 0, err)
+        self.assertEqual((out["lines"], out["renumbered"]), ([2], True))
+        self.assertEqual(set(self.st["last_action"]["data"]), {"after", "start", "end", "text"})
         added = self.st["cards"][1]
         self.assertEqual(added["english"]["speakerId"], "1")
         self.assertEqual(added["hindi"]["v"], {"st": 2.1, "et": 2.9, "r": 1})
@@ -266,16 +268,19 @@ class CardOpsTest(SkillTestCase):
         self.assertEqual(body["data"]["voice"], {"voiceId": "v7", "voiceName": "Priya"})
 
     def test_subtitle_merge_and_split(self) -> None:
-        code, _, err = self.run_script("card_ops", "sub-merge", "--job-id", JOB, "--card-id", "c1",
-                                       "--language", "hindi", "--subtitle-ids", "c1-s1,c1-s2")
+        # Lines by number; the API builds the merged line and cuts the split.
+        code, out, err = self.run_script("edit_subtitles", "--job-id", JOB, "--language", "hindi",
+                                         "--merge", "1,2")
         self.assertEqual(code, 0, err)
-        merged = self.st["last_subtitle_action"]["data"]["merged"]
-        self.assertEqual((merged["t"], merged["text"]), ({"st": 0.0, "et": 2.0}, "first half second half"))
-        code, _, err = self.run_script("card_ops", "sub-split", "--job-id", JOB, "--card-id", "c1",
-                                       "--language", "hindi", "--subtitle-id", "c1-s1", "--at-word", "1")
+        data = self.st["last_subtitle_action"]["data"]
+        self.assertEqual((data["subtitleIds"], "merged" in data), (["c1-s1", "c1-s2"], False))
+        self.assertEqual(out["changes"][0]["after"], "first half second half")
+        code, out, err = self.run_script("edit_subtitles", "--job-id", JOB, "--language", "hindi",
+                                         "--split", "1", "--at-word", "2")
         self.assertEqual(code, 0, err)
-        parts = self.st["last_subtitle_action"]["data"]["subtitles"]
-        self.assertEqual([p["text"] for p in parts], ["first", "half"])
+        data = self.st["last_subtitle_action"]["data"]
+        self.assertEqual((data["atWord"], "subtitles" in data), (1, False))
+        self.assertEqual(out["changes"][0]["after"], ["first", "half"])
 
 
 class LiveFindingsTest(SkillTestCase):
@@ -334,20 +339,20 @@ class GuidanceTest(SkillTestCase):
             {"taskIdentifier": "AUDIO-EXTRACTOR", "status": "completed", "progress": 100},
             {"taskIdentifier": "TRANSCRIPTION-ENGINE", "status": "running", "progress": 40},
         ]
+        steps = {"percent": 20, "summary": "Step 2 of 6: Transcribing video, 40%",
+                 "steps": [{"title": "Analysing the video", "status": "completed", "percent": 100},
+                           {"title": "Transcribing video", "status": "in-progress", "percent": 40}]}
+        self.st["progress_steps"] = steps
         code, out, _ = self.run_script("inspect_process", "--job-id", JOB)
-        progress = out["progress"]
-        self.assertEqual([s["title"] for s in progress["steps"]][:2],
-                         ["Analysing the video", "Transcribing the video"])
-        self.assertEqual(progress["steps"][1], {"title": "Transcribing the video",
-                                                "status": "in-progress", "percent": 40})
-        self.assertEqual(progress["summary"], "Step 2 of 6: Transcribing the video, 40%")
+        self.assertEqual(out["progress"], steps)  # relayed as the API reports it
         self.assertEqual(out["suggestions"][0]["run"].split(".py")[0], "inspect_process")
 
     def test_progress_marks_the_voice_step_as_waiting(self) -> None:
         self.st["status"], self.st["awaiting"] = "running", True
         self.st["tasks"] = [{"taskIdentifier": "INSTANT-VOICE-CLONING-ENGINE", "status": "running", "progress": 0}]
         _, out, _ = self.run_script("inspect_process", "--job-id", JOB)
-        self.assertIn("waiting for your decision", out["progress"]["summary"])
+        # No progressSteps from this server: the plain fallback still says it.
+        self.assertIn("waiting for your decision", out["progress"]["summary"].lower())
         self.assertEqual(out["suggestions"][0]["run"].split(".py")[0], "resume_dub")
 
     def test_suggestions_put_blocking_work_before_export(self) -> None:
@@ -492,12 +497,12 @@ class RecoveryTest(SkillTestCase):
 
     def test_inspect_reports_settings_usage_and_stale(self) -> None:
         self.run_script("patch_cards", "--job-id", JOB, "--language", "hindi",
-                        "--edits", '[{"card_id": "c1", "emotion": "calm"}]')
+                        "--edits", '[{"line": 1, "emotion": "calm"}]')
         code, out, err = self.run_script("inspect_process", "--job-id", JOB)
         self.assertEqual(code, 0, err)
         self.assertTrue(out["settings"]["emotion_detection"])
         self.assertEqual(out["usage"]["credit_balance"], 120.5)
-        self.assertEqual(out["audio_stale"], {"hindi": ["c1"]})
+        self.assertEqual(out["audio_stale"], {"hindi": [1]})
 
     def test_card_media_separates_raw_from_playback(self) -> None:
         code, out, err = self.run_script("get_card_media", "--job-id", JOB, "--card-id", "c1",

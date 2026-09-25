@@ -168,3 +168,43 @@ def resolve_by_name(base: str, headers: dict, name: str) -> str:
         "Run list_tms.py and use one of those names exactly.",
     )
     return ""  # unreachable: die() exits
+
+
+def create_tm(
+    base: str,
+    headers: dict,
+    name: str,
+    source_language: str,
+    target_languages: list[str],
+    context: str | None,
+    engine: str | None = None,
+    provider: str = "vitratm",
+) -> tuple[str | None, str | None]:
+    """Create a memory the way the webapp does. Returns (id, None) or (None, reason).
+
+    A VitraTM memory needs `context`: one sentence on who it is for (client or
+    product, audience). The server sends it to the model with every translation
+    through the memory, so it comes from the user, never invented. `engine` is
+    `gemini` (default; follows the style guide) or `azure` (ignores it).
+    """
+    body: dict = {
+        "name": name,
+        "sourceLanguage": source_language,
+        "targetLanguages": target_languages,
+        "tmMode": "create",
+        "provider": provider,
+    }
+    if provider == "vitratm":
+        body["context"] = (context or "").strip()
+        if engine:
+            body["engine"] = engine
+    try:
+        status, payload = _http.post_json(base + TM_PATH, headers, body)
+    except _http.NetworkError as e:
+        return None, f"network error: {e}"
+    if status in (401, 403):
+        return None, "this key is not allowed to create translation memories"
+    tm_id = payload.get("id") if isinstance(payload, dict) else None
+    if status not in (200, 201) or not tm_id:
+        return None, f"{status}: {_common.api_message(payload)}"
+    return str(tm_id), None

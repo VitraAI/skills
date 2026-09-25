@@ -20,7 +20,7 @@ A card whose audio did not change is reported, not counted as fixed.
 
 Prints JSON:
   { "status": "regenerated" | "partial" | "failed", "language",
-    "cards": [{ card_id, audio_changed, verified, has_audio, duration_seconds,
+    "lines": [{ line, audio_changed, verified, has_audio, duration_seconds,
                 audio_sha256 }],
     "next_action": "list_issues" }
 
@@ -56,7 +56,8 @@ def main() -> int:
     parser.add_argument("--job-id", required=True)
     parser.add_argument("--language", required=True, help="Target language key.")
     which = parser.add_mutually_exclusive_group(required=True)
-    which.add_argument("--card-ids", help="Comma-separated card ids.")
+    which.add_argument("--lines", help="Line numbers, e.g. 3,7 (inspect_process --cards).")
+    which.add_argument("--card-ids", help=argparse.SUPPRESS)  # older callers
     which.add_argument(
         "--stale", action="store_true",
         help="The cards patch_cards reported as audio_stale (from the run manifest).",
@@ -74,19 +75,25 @@ def main() -> int:
 
     cards, _ = _cards.read_editor(base, headers, args.job_id)
     index = _cards.by_id(cards)
+    numbers = _cards.line_numbers(cards)
 
     if args.missing:
         ids = [cid for cid, c in index.items() if _cards.block(c, lang) and not _cards.audio_of(c, lang)]
     elif args.stale:
         ids = list(((saved.get("audio_stale") or {}).get(lang)) or [])
+    elif args.lines:
+        try:
+            ids = [_cards.card_at_line(cards, int(x)) for x in args.lines.split(",") if x.strip()]
+        except ValueError:
+            die(_common.EXIT_API_ERROR, "--lines takes line numbers, e.g. 3,7")
     else:
         ids = [x.strip() for x in args.card_ids.split(",") if x.strip()]
 
     unknown = [cid for cid in ids if cid not in index or not _cards.block(index[cid], lang)]
     if unknown:
-        die(_common.EXIT_API_ERROR, f"not {lang} cards of this dub: {', '.join(unknown)}")
+        die(_common.EXIT_API_ERROR, f"{len(unknown)} of those lines have no {lang} version in this dub.")
     if not ids:
-        print(json.dumps({"status": "unchanged", "language": lang, "cards": [],
+        print(json.dumps({"status": "unchanged", "language": lang, "lines": [],
                           "next_action": "list_issues"}))
         return _common.EXIT_OK
 
@@ -139,12 +146,11 @@ def main() -> int:
             changed = (audio.get("duration_seconds"), audio.get("rate")) != (
                 prior.get("duration_seconds"), prior.get("rate"))
         report.append({
-            "card_id": cid,
+            "line": numbers.get(cid),
             "has_audio": bool(audio),
             "audio_changed": changed,
             "verified": verified,
             "duration_seconds": audio.get("duration_seconds"),
-            "audio_sha256": audio.get("sha256"),
         })
         if changed:
             fixed.append(cid)
@@ -156,7 +162,7 @@ def main() -> int:
     print(json.dumps({
         "status": "regenerated" if all_ok else "partial",
         "language": lang,
-        "cards": report,
+        "lines": report,
         "next_action": "list_issues",
     }))
     return _common.EXIT_OK if all_ok else _common.EXIT_API_ERROR

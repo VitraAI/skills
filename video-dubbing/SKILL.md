@@ -9,21 +9,22 @@ description: >-
   video into Hindi", "make a Spanish version of this clip", "add a French
   voiceover", "translate this webinar and keep my voice" — and whenever they
   want to fix, re-voice, add a language to, or export a dub they already have,
-  even if they don't say "dub". Not for subtitles only, audio-only files,
-  translating the text inside images, or document translation.
+  even if they don't say "dub"; it can also burn subtitles into the dubbed
+  video. Not for subtitles without a voice-over (video-subtitles), audio-only
+  files, translating the text inside images, or document translation.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization). ffmpeg is
   optional (fuller download checks).
 metadata:
   skill-author: Vitra.ai
-  version: "3.0"
+  version: "3.1"
   display-name: Video Dubbing
   category: Video
   tags: Video, Translation, Popular
   source: vitra
   added: "2026-09-09"
-  updated: "2026-09-25"
+  updated: "2026-09-26"
 ---
 
 # Video Dubbing
@@ -57,7 +58,7 @@ If the key is missing, the script exits 2 with setup instructions: see
 | Input | Required | How |
 |---|---|---|
 | The video | yes | A local file path or a public http(s) URL |
-| Spoken language | yes | Ask; there is no auto-detect. Get the key from `python3 scripts/list_languages.py` |
+| Spoken language | yes | Ask; there is no auto-detect. Get the key: `python3 scripts/list_languages.py <name>` |
 | Target languages | yes | Keys from the same list (e.g. `hindi_india`), never display names |
 | Translation memory | ask only if several fit | See step 1 |
 
@@ -97,7 +98,9 @@ python3 scripts/dub_video.py --file <path> --source-language <src> \
 ```
 
 Uploads (or reuses an identical earlier upload), starts the dub, waits, and
-stops at `"status": "awaiting_voices"` with the speakers. Running it again never
+stops at `"status": "awaiting_voices"` with the speakers. If the user has a
+script of what is said (`.srt .vtt .ass .ssa .txt`), add `--script <file>`:
+transcription follows it. Running it again never
 starts a second dub for the same file and languages; it reconnects.
 
 ### 3. Voices ⏸
@@ -119,12 +122,13 @@ languages. Details: [voices and memories](references/voices-and-memory.md).
 python3 scripts/inspect_process.py --job-id <job> --cards <source-language>
 ```
 
-Show the user the lines (text and timing). Fix only what they ask for, with the
-`revision` you just read:
+Show the user the numbered lines (text and timing; 50 at a time, `more` gives
+the next page). Fix only what they ask for, naming lines by number, with the
+`revision` you just read (leave it out if it is null):
 
 ```bash
 python3 scripts/patch_cards.py --job-id <job> --language <lang> --revision <rev> \
-  --edits '[{"card_id":"<id>","text":"corrected line"}]'
+  --edits '[{"line":3,"text":"corrected line"}]'
 ```
 
 Show every `before → after` it reports. Splitting, merging or re-assigning a
@@ -154,7 +158,10 @@ voice to reuse it stops with `VOICE_DECISION_NEEDED`: ask, then pass
 
 ### 7. Export and download ⏸
 
-Confirm first: exporting renders a video and spends credits.
+Confirm first: exporting renders a video and spends credits. Ask whether they
+want subtitles burned in; if so add `--subtitles <lang>` (usually the same
+language). A language with no subtitle lines is refused with `no_subtitles`:
+making them costs credits too, so ask, then add `--generate-subtitles`.
 
 ```bash
 python3 scripts/export_dub.py --job-id <job> --language <tgt> --revision <rev>
@@ -174,8 +181,8 @@ changed during review, and anything left unresolved. Links expire. Mention if
 
 ## Rules
 
-- **Never show ids** (jobs, cards, voices, exports). Say "Speaker 1", "the Hindi
-  version". Keep ids for the next command.
+- **Never show ids** (jobs, voices, exports). Say "line 3", "Speaker 1", "the
+  Hindi version". Keep ids for the next command.
 - **Ask at every ⏸, and only there.** Decisions about voices, memories, text
   and spending belong to the user; everything else has a safe default.
 - **Show every change as before → after.** The user must never discover an

@@ -144,7 +144,7 @@ class ImageSkillsTest(unittest.TestCase):
         self.assertEqual(created["engine"], "azure")
 
     def test_every_skill_has_an_access_check(self) -> None:
-        for skill in ("image-creator", "image-resize", "image-translation", "video-dubbing"):
+        for skill in ("image-creator", "image-resize", "image-translation", "video-dubbing", "video-subtitles"):
             code, out = self.run_script(skill, "check_access")
             self.assertEqual((code, out["status"]), (0, "unknown"), skill)
 
