@@ -1,7 +1,8 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
-# jobs; each `name` must be a tool the Vitra MCP server offers.
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
 about: >-
   Make subtitles from a video, or translate a subtitle file you already have,
   without opening the editor. Review and correct lines by number, add more
@@ -32,3 +33,20 @@ use-cases:
     description: Translate one SRT into every market's language with consistent terminology.
   - title: Social clips
     description: Burn subtitles into short videos for sound-off viewing.
+mcp-toolset: subtitles
+mcp-tools:
+  - name: start_subtitles
+    title: Make or translate subtitles
+  - name: get_subtitles
+    title: Check or read subtitles
+  - name: edit_subtitle_lines
+    title: Edit subtitle lines
+  - name: add_subtitle_language
+    title: Add subtitle languages
+  - name: download_subtitles
+    title: Get subtitles as a file
+  - name: burn_subtitles
+    title: Render video with subtitles
+related-skills:
+  - name: video-dubbing
+    why: A voice-over in other languages; it can burn these subtitles into the dubbed video.

@@ -1,0 +1,111 @@
+{
+  "_about": "The Vitra MCP server's tools, by toolset. validate.mjs checks every listing.yaml `mcp-tools` name and `mcp-toolset` against this list: update it whenever the MCP server adds, renames or removes a tool.",
+  "url": "https://universe-api.vitra.ai/v1/mcp",
+  "toolsets": {
+    "context": [
+      "list_projects",
+      "list_tasks",
+      "search_org_knowledge",
+      "search_prompts"
+    ],
+    "core": [
+      "create_upload_url",
+      "find_assets",
+      "get_credits",
+      "get_download_url",
+      "get_guide",
+      "get_upload_link",
+      "list_brand_kits",
+      "list_languages",
+      "list_translation_memories",
+      "list_voices",
+      "register_upload"
+    ],
+    "documents": [
+      "clone_voice",
+      "get_document_translation",
+      "get_lip_sync",
+      "get_speech_job",
+      "lip_sync",
+      "list_cloned_voices",
+      "list_lip_sync_models",
+      "save_document_to_drive",
+      "text_to_speech",
+      "translate_document"
+    ],
+    "dub": [
+      "add_dub_language",
+      "edit_dub_lines",
+      "export_dub",
+      "fix_dub_issues",
+      "get_dub",
+      "get_dub_export",
+      "get_dub_lines",
+      "list_dub_issues",
+      "regenerate_dub_audio",
+      "retry_dub",
+      "set_speaker_voices",
+      "start_dub"
+    ],
+    "flows": [
+      "cancel_flow_run",
+      "decide_flow_step",
+      "get_flow_run",
+      "list_flows",
+      "run_flow"
+    ],
+    "hyperlocal": [
+      "create_broadcast",
+      "create_contact_group",
+      "estimate_broadcast",
+      "find_contacts",
+      "get_broadcast",
+      "list_contact_groups",
+      "list_contact_places",
+      "list_creative_templates"
+    ],
+    "hyperlocal_send": [
+      "control_broadcast",
+      "schedule_broadcast",
+      "send_broadcast",
+      "submit_whatsapp_template"
+    ],
+    "image": [
+      "adapt_image_sizes",
+      "edit_image",
+      "generate_image",
+      "get_adapted_sizes",
+      "get_image_translation",
+      "resize_image_translation",
+      "save_image_to_drive",
+      "translate_image"
+    ],
+    "memory": [
+      "correct_memory_term",
+      "get_memory_translation",
+      "get_style_guide",
+      "list_glossaries",
+      "search_memory_terms",
+      "translate_with_memory"
+    ],
+    "quality": [
+      "adjudicate_decision",
+      "check_content",
+      "fix_flagged_image",
+      "get_content_check",
+      "get_image_fix",
+      "get_quality_report",
+      "list_qc_regions",
+      "list_review_queue",
+      "run_quality_report"
+    ],
+    "subtitles": [
+      "add_subtitle_language",
+      "burn_subtitles",
+      "download_subtitles",
+      "edit_subtitle_lines",
+      "get_subtitles",
+      "start_subtitles"
+    ]
+  }
+}

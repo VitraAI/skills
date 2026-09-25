@@ -1,7 +1,8 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
-# jobs; each `name` must be a tool the Vitra MCP server offers.
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
 about: >-
   Translate the text baked into an image — signage, packaging, ad creatives,
   screenshots, menus — and get back a new image with the translated text set
@@ -32,6 +33,7 @@ use-cases:
     description: Localize store screenshots while keeping the UI layout intact.
   - title: Menus and flyers
     description: Translate printed material and keep its design.
+mcp-toolset: image
 mcp-tools:
   - name: translate_image
     title: Translate the text in an image
@@ -41,3 +43,12 @@ mcp-tools:
     title: Resize a translated image
   - name: list_translation_memories
     title: List translation memories
+  - name: find_assets
+    title: Find files in the Drive
+  - name: get_upload_link
+    title: Get a link to upload a file
+related-skills:
+  - name: image-resize
+    why: Exact pixel sizes for the translated image, or any other.
+  - name: image-creator
+    why: Create a new image instead of translating one.

@@ -71,7 +71,11 @@ pull request.
 2. Add `metadata` for the Skill Library: `skill-author`, `version`,
    `display-name`, `category`, `tags`, `source`, `added` (all quoted strings).
 3. Add `listing.yaml` for the skill's page: `about`, `when-to-use`, `features`,
-   `use-cases`, and `mcp-tools` (Vitra MCP tools that do the same jobs).
+   `use-cases`; `mcp-toolset` and `mcp-tools` (the Vitra MCP tools that do the
+   same jobs, named exactly as in `scripts/mcp-tools.json`); and
+   `related-skills` (each `name` + `why`: the skills people move on to from
+   this one). `npm run validate` rejects a tool or skill that doesn't exist.
+   When the MCP server adds or renames a tool, update `scripts/mcp-tools.json`.
 4. Add `README.md` for people, and `.env.sample` if the skill reads a key.
 5. If it uses the shared helpers, add its targets to `sync-lib.sh`.
 6. Add `./<name>` to `skills` in `.claude-plugin/plugin.json`.

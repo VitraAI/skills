@@ -1,7 +1,8 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
-# jobs; each `name` must be a tool the Vitra MCP server offers.
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
 about: >-
   Dub a video into one or more languages, from upload to a reviewed, verified
   download, without opening the editor. The run pauses so you decide each
@@ -36,12 +37,32 @@ use-cases:
     description: Voice-translate short clips for regional channels.
   - title: Reviewed releases
     description: Check every line before exporting a language for publication.
+mcp-toolset: dub
 mcp-tools:
   - name: start_dub
     title: Start a video dub
+  - name: get_dub
+    title: Check a dub
   - name: set_speaker_voices
     title: Answer the voice decision
+  - name: get_dub_lines
+    title: Read a dub, line by line
   - name: edit_dub_lines
     title: Edit translated lines
+  - name: regenerate_dub_audio
+    title: Regenerate line audio
+  - name: list_dub_issues
+    title: List what blocks export
+  - name: fix_dub_issues
+    title: Fix issues automatically
+  - name: add_dub_language
+    title: Add a language to a dub
   - name: export_dub
     title: Export a dubbed language
+  - name: get_dub_export
+    title: Get an exported dub
+  - name: retry_dub
+    title: Retry a failed dub
+related-skills:
+  - name: video-subtitles
+    why: Subtitles without a voice-over, or translated captions for the same video.
