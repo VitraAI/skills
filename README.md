@@ -16,16 +16,28 @@ plus the scripts it runs.
 | [`image-translation`](image-translation/) | Translate the text baked into an image and keep its layout |
 | [`video-dubbing`](video-dubbing/) | Dub a video into other languages, review it line by line, export it |
 | [`video-subtitles`](video-subtitles/) | Make or translate subtitles, review them line by line, download or burn them in |
+| [`subtitle-translation`](subtitle-translation/) | Translate SRT/VTT subtitle files into many languages in one command |
+| [`document-translation`](document-translation/) | Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML, XLIFF and text, formatting kept |
+| [`translation-memory`](translation-memory/) | Look up, correct and import approved wording; translate strings memory-first |
+| [`translation-quality`](translation-quality/) | Score a translation line by line and explain the worst lines |
+| [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images |
+| [`text-to-speech`](text-to-speech/) | Turn text into speech in catalog or cloned voices |
+| [`voice-cloning`](voice-cloning/) | Clone a voice from a few samples, with consent |
+| [`lip-sync`](lip-sync/) | Make a video's lips match a new audio track |
+| [`hyperlocal-campaigns`](hyperlocal-campaigns/) | Personalized WhatsApp and Facebook campaigns to your contact network |
+| [`workflows`](workflows/) | Run your organization's Cosmos workflows and relay approvals |
 
 ## Status
 
 Version 0.3, ahead of the production release it depends on. Until that release
 is live on `universe-api.vitra.ai`:
 
-- `image-creator` (generate, edit, save to Drive), `image-resize` and
-  `image-translation` work.
-- `image-creator`'s brand-kit scripts, `video-dubbing`, `video-subtitles` and
-  the Vitra MCP server that the Claude Code plugin adds need that release.
+- Document, subtitle file and memory translation, quality and compliance
+  checks, speech, voice cloning, lip-sync, campaigns, workflows and the image
+  skills work on the current API.
+- Line-by-line editing in the video and subtitle skills, `image-creator`'s
+  brand-kit scripts, and the Vitra MCP server that the Claude Code plugin adds
+  need that release.
 
 ## Install
 

@@ -1,0 +1,42 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Turn scripts, announcements and narration into natural speech in hundreds of
+  voices across languages, or in your organization's own cloned voices. Long
+  text is split into passages that are generated together and saved as audio
+  files, ready to use.
+when-to-use: >-
+  Reach for it whenever text needs to be heard: voice-overs, e-learning
+  narration, IVR prompts, product videos, accessibility audio.
+features:
+  - title: Catalog and cloned voices
+    description: Search voices by language, gender or style, with previews, including your own clones.
+  - title: Long scripts
+    description: Paragraphs become separate clips, generated together.
+  - title: Expressive delivery
+    description: Ask for a tone such as happy or calm where the voice supports it.
+  - title: Safe to re-run
+    description: Finished clips are kept; only failed ones are made again.
+use-cases:
+  - title: Video narration
+    description: Voice-overs for product, explainer and training videos.
+  - title: Phone and kiosk prompts
+    description: Consistent prompts in every language you serve.
+  - title: Accessible content
+    description: Audio versions of articles and notices.
+mcp-toolset: documents
+mcp-tools:
+  - name: text_to_speech
+    title: Generate speech from text
+  - name: get_speech_job
+    title: Check a speech job
+  - name: list_voices
+    title: List voices
+related-skills:
+  - name: voice-cloning
+    why: Create a voice from recordings, then speak any text in it here.
+  - name: lip-sync
+    why: Make a video's lips follow the speech you generated.

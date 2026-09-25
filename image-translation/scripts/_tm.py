@@ -208,3 +208,53 @@ def create_tm(
     if status not in (200, 201) or not tm_id:
         return None, f"{status}: {_common.api_message(payload)}"
     return str(tm_id), None
+
+
+def resolve(base: str, headers: dict, name: str) -> dict:
+    """The full row of the memory called `name` (see resolve_by_name)."""
+    tm_id = resolve_by_name(base, headers, name)
+    return next(t for t in list_tms(base, headers) if str(t.get("id")) == tm_id)
+
+
+def choose(base: str, headers: dict, target: str | None, name: str | None = None) -> dict:
+    """The memory to use: the one named, else the only one covering `target`.
+
+    Several that fit → stops with TM_CHOICE_NEEDED and their names (the user
+    picks: the wrong one writes the wrong wording into a shared memory). None
+    → stops with TM_NEEDED. Never guesses.
+    """
+    if name:
+        tm = resolve(base, headers, name)
+        if target and not covers(tm, None, target, load_language_codes(base, headers)):
+            _common.die(_common.EXIT_API_ERROR,
+                        f'"{tm.get("name")}" does not translate into {target}. It covers: '
+                        f'{", ".join(targets_of(tm)) or "none"}.', error_code="TM_LANGUAGE_MISMATCH")
+        return tm
+    codes = load_language_codes(base, headers)
+    fits = [t for t in list_tms(base, headers) if t.get("id") and covers(t, None, target, codes)]
+    if len(fits) == 1:
+        return fits[0]
+    if fits:
+        _common.die(_common.EXIT_API_ERROR,
+                    "several translation memories fit; the user must choose one.",
+                    error_code="TM_CHOICE_NEEDED",
+                    ask="Which translation memory should this use?",
+                    choices=[describe(t) for t in fits])
+    _common.die(_common.EXIT_API_ERROR,
+                f"no translation memory covers {target or 'this language'} yet.",
+                error_code="TM_NEEDED",
+                ask="There's no translation memory for this language yet. Create one? If so: "
+                    "who is it for (the client or product, and the audience)?")
+    return {}  # unreachable
+
+
+def target_in(tm: dict, wanted: str, base: str, headers: dict) -> str:
+    """The memory's own spelling of a requested target language."""
+    codes = load_language_codes(base, headers)
+    for t in targets_of(tm):
+        if norm(t) == norm(wanted) or same_language(t, wanted, codes):
+            return t
+    _common.die(_common.EXIT_API_ERROR,
+                f'"{tm.get("name")}" does not translate into {wanted}. It covers: '
+                f'{", ".join(targets_of(tm)) or "none"}.', error_code="TM_LANGUAGE_MISMATCH")
+    return ""  # unreachable

@@ -214,21 +214,25 @@ def download_to_file(
     dest: Path,
     max_bytes: int | None = None,
     timeout: float = 120.0,
+    headers: dict[str, str] | None = None,
 ) -> int:
     """Stream a URL to `dest`, aborting mid-stream once `max_bytes` is exceeded.
 
-    `max_bytes=None` means NO cap — used where the API itself imposes no size
+    `headers` authenticate a download from the Vitra API itself (a translated
+    file); a public or presigned URL needs none. `max_bytes=None` means NO cap — used where the API itself imposes no size
     limit (video dubbing), so the skill does not invent one the product does
     not have. Pass a number where a real limit exists (the image APIs).
 
     Returns the byte count on success. Raises NetworkError on connection
     failure, ValueError when the response is not 2xx or the size cap is hit.
     """
-    req = urllib.request.Request(url, method="GET")
+    req = urllib.request.Request(url, method="GET", headers=headers or {})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             if resp.status // 100 != 2:
                 raise ValueError(f"source URL returned HTTP {resp.status}")
+            last_headers.clear()
+            last_headers.update({k.lower(): v for k, v in resp.headers.items()})
             written = 0
             with dest.open("wb") as fh:
                 while True:
@@ -258,15 +262,22 @@ def post_multipart_json(
 ) -> tuple[int, object]:
     """POST one file (plus optional text fields) as multipart/form-data.
 
-    Stdlib has no builder for this. `field_name` is the file part the API
-    expects (e.g. `files`, `file`, `image`); `fields` are extra text parts.
-    Returns (status_code, json_payload).
+    `field_name` is the file part the API expects (e.g. `files`, `file`,
+    `image`); `fields` are extra text parts. Returns (status_code, payload).
     """
-    boundary = "----vitraSkill" + secrets.token_hex(16)
-    filename = file_path.name
-    mime = mimetypes.guess_type(filename)[0] or "application/octet-stream"
-    data = file_path.read_bytes()
+    return post_multipart_files(url, headers, [(field_name, file_path)], fields, timeout)
 
+
+def post_multipart_files(
+    url: str,
+    headers: dict[str, str],
+    files: list[tuple[str, Path]],
+    fields: dict[str, str] | None = None,
+    timeout: float = 600.0,
+) -> tuple[int, object]:
+    """POST several files — each `(field name, path)` — plus text fields, as
+    multipart/form-data (stdlib has no builder for it)."""
+    boundary = "----vitraSkill" + secrets.token_hex(16)
     parts: list[bytes] = []
     for key, value in (fields or {}).items():
         parts += [
@@ -275,22 +286,24 @@ def post_multipart_json(
             str(value).encode(),
             b"\r\n",
         ]
-    parts += [
-        f"--{boundary}\r\n".encode(),
-        (
-            f'Content-Disposition: form-data; name="{field_name}"; '
-            f'filename="{filename}"\r\n'
-        ).encode(),
-        f"Content-Type: {mime}\r\n\r\n".encode(),
-        data,
-        f"\r\n--{boundary}--\r\n".encode(),
-    ]
-    body = b"".join(parts)
+    for field_name, file_path in files:
+        mime = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
+        parts += [
+            f"--{boundary}\r\n".encode(),
+            (
+                f'Content-Disposition: form-data; name="{field_name}"; '
+                f'filename="{file_path.name}"\r\n'
+            ).encode(),
+            f"Content-Type: {mime}\r\n\r\n".encode(),
+            file_path.read_bytes(),
+            b"\r\n",
+        ]
+    parts.append(f"--{boundary}--\r\n".encode())
     return request_json(
         "POST",
         url,
         headers,
-        body=body,
+        body=b"".join(parts),
         content_type=f"multipart/form-data; boundary={boundary}",
         timeout=timeout,
     )

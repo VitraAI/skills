@@ -1,0 +1,50 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Reach every retailer or partner in your network with their own personalized
+  creative over WhatsApp or Facebook. Pick the audience by group or geography,
+  see reach and cost first, prepare the creatives, then send now or schedule —
+  nothing goes out without your explicit yes — and follow delivery and reads.
+when-to-use: >-
+  Reach for it for trade promotions, product launches, festival offers and
+  partner updates that should look local and personal at scale.
+features:
+  - title: Audience by geography or group
+    description: Target states, sales zones, areas or saved contact groups.
+  - title: Know the cost first
+    description: Reach and credits before anything is created.
+  - title: A creative per contact
+    description: Each contact gets their own personalized image.
+  - title: Send safely
+    description: Nothing is sent without an explicit yes; schedule, pause, resume or stop.
+  - title: Delivery tracking
+    description: Sent, delivered, read and failed, per channel.
+use-cases:
+  - title: Festival offers
+    description: Personalized WhatsApp offers to every retailer in a region.
+  - title: Product launches
+    description: Announce a launch to the whole partner network at a set time.
+mcp-toolset: hyperlocal
+mcp-tools:
+  - name: find_contacts
+    title: Find Hyperlocal contacts
+  - name: list_contact_places
+    title: List contact states, zones or areas
+  - name: list_contact_groups
+    title: List contact groups
+  - name: list_creative_templates
+    title: List Hyperlocal creative templates
+  - name: estimate_broadcast
+    title: Estimate a broadcast
+  - name: create_broadcast
+    title: Prepare a broadcast
+  - name: get_broadcast
+    title: Check a broadcast
+related-skills:
+  - name: image-creator
+    why: Design a new creative before building the campaign.
+  - name: content-compliance
+    why: Check the creative against each market's rules before it goes out.
