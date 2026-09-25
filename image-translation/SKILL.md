@@ -1,23 +1,21 @@
 ---
 name: image-translation
 description: >-
-  Translates the text baked into an image — signage, packaging, ad creatives,
-  screenshots, menus — using the Vitra Universe Image Translator API, and
-  re-renders it in the target language with the original layout preserved. Use
-  for "translate this poster into French", "what does this sign say, and make me
-  a Spanish version", "localize this ad creative". Input is a local image file OR
-  a public image URL, plus a target language. Do NOT use for generating a new
-  image from a prompt, for resizing to other aspect ratios, or for translating a
-  document/subtitle file — those are the image-creator, image-resize and
-  document skills.
+  Translates the text inside an image — signage, packaging, ad creatives,
+  screenshots, menus, infographics — with the Vitra Universe Image Translator,
+  and re-renders the image in the target language with the original layout
+  kept; it can then re-render the translated image in other aspect ratios. Use it
+  whenever the user wants an image, poster, banner or creative localized or its
+  text translated — "translate this poster into French", "make a Spanish version
+  of this ad", "localize these product images" — even if they only say "translate
+  this". Not for generating new images (image-creator), resizing an untranslated
+  image (image-resize), or translating documents or subtitles.
 compatibility: >-
-  Python 3, standard library only. Outbound HTTPS. One env var:
-  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization). The key is bound
-  to one organization and acts with its creator's role there — that member needs
-  translate_photo.image_translator create/read.
+  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
+  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.1"
+  version: "2.0"
   display-name: Image Translation
   category: Localization
   tags: Image, Translation
@@ -26,175 +24,99 @@ metadata:
   updated: "2026-09-25"
 ---
 
-# image-translation
+# Image Translation
 
-Translates the text inside an image and re-renders it in place.
+Finds the text in an image, translates it and sets it back in place, as a new
+image. Every script prints one line of JSON and waits for its own job (up to 10
+minutes by default): don't poll and don't re-run a slow call.
 
-**`translate_image.py`** does the whole job in one call — it mirrors the four
-steps the webapp performs:
-
-1. `analyze` — upload the image; the API finds the text regions.
-2. poll until analysis is done.
-3. `translate` — translate into the target language.
-4. poll until the re-rendered image exists → `translatedImageUrl`.
-
-**`resize_translated.py`** is the follow-up: re-render a translated image at a
-different aspect ratio, reusing the translation already done.
-
-## Critical
-
-- **One env var:** `VITRA_UNIVERSE_API_KEY` — a `uvk_` key for one Vitra
-  organization. If it is missing, stop and show the caller BOTH
-  setup options (see "When the key is missing"). Never echo the key.
-- **The organization comes from the key.** Never ask the caller which org.
-- **ALWAYS ask which Translation Memory to use when more than one covers the
-  language pair.** Run `list_tms.py` first and put the choice to the caller —
-  never pick silently. Picking wrong writes the wrong wording into a memory the
-  whole organization reuses, and that is not visibly undone later.
-- **Never show the caller a job id or version id.** They are plumbing — report
-  the finished image URL.
-- **Max 10MB** per image. A larger file exits 6; ask for a smaller one rather
-  than retrying.
-- **This is not OCR-then-translate-text.** The output is a new *image* with the
-  translated text set back into the original layout. If the caller only wants to
-  know what the text says, tell them the skill returns a rendered image.
-
-## Usage
+## Step 0: Check access
 
 ```bash
-python3 scripts/translate_image.py --file poster.png --target-language French
-python3 scripts/translate_image.py --url "https://example.com/sign.jpg" --target-language "Hindi"
+python3 scripts/check_access.py
 ```
 
-Prints `{"status":"completed","image_url":"…","target_language":"French"}`.
-Give the caller the `image_url`.
+`ready`/`unknown`: continue. `partial`: continue without the steps in `cannot`.
+`blocked`: stop and tell the user which steps their key can't do; their Vitra
+admin can grant them. Key missing (exit 2): relay the setup lines it prints.
 
-Options:
+## Collect the inputs
 
-- `--source-language` — defaults to `auto` (detected). Pass it when the caller
-  states the source language, or when auto-detection guessed wrong.
-- `--tm-name` — a Translation Memory to reuse, by the name `list_tms.py` shows.
-  See "Translation Memory" below.
-- `--max-wait` — seconds before giving up (default 600).
+| Input | Required | How |
+|---|---|---|
+| The image | yes | A local file (max 10 MB) or a public http(s) URL |
+| Target language | yes | Ask if it isn't in the request, e.g. `French` |
+| Source language | no | Auto-detected; pass `--source-language` only if the user says it or detection was wrong |
 
-## Translation Memory — ask, don't guess
+## The flow
 
-A TM holds the organization's approved wording. Reusing one keeps product names,
-tone and terminology identical to what they've translated before; without one,
-every run is translated fresh and the same phrase can come out differently.
+```
+- [ ] 1. Pick a translation memory   (⏸ ask if several)
+- [ ] 2. Translate                   → show the image
+- [ ] 3. Other shapes                (only if asked)
+```
 
-So **before translating, check what's available for that language pair**:
+### 1. Translation memory
 
 ```bash
 python3 scripts/list_tms.py --source-language English --target-language French
 ```
 
-Then act on what came back:
+⏸ **Several:** ask which, by name, and offer "none"; the wrong one writes the
+wrong wording into a memory the whole organization reuses. **One:** use it and
+say so. **None:** ask whether to create one; if yes, ⏸ ask one sentence on who it
+is for (the client or product, and the audience) — the server requires it and
+uses it for every translation through that memory.
 
-- **Several listed → ASK.** Show the caller the TM names and let them pick.
-  Offer "none" and "make a new one" as real options too. Pass their choice,
-  exactly as listed, as `--tm-name`. Do not pick for them: two TMs for one pair usually
-  means different clients or products, and choosing wrong silently contaminates
-  a memory with the wrong wording.
+`list_tms.py` filters by target language; VitraTM memories accept any source,
+so one listed with a different source still works. Only offer a provider choice
+if `list_providers.py` lists more than one; a VitraTM memory's engine is
+`gemini` (default, follows the style guide) or `azure` (ignores it).
 
-  > I found two translation memories for English → French:
-  > **Acme Marketing** and **Acme Legal**. Which should I use — or neither?
-
-- **Exactly one → use it, and say so** in one line. Don't make anyone choose
-  from a list of one.
-
-  > Using the **Acme Marketing** translation memory.
-
-- **None listed → create one**, so the next run for this pair is consistent
-  with this one:
-
-  ```bash
-  python3 scripts/translate_image.py --file poster.png \
-    --source-language English --target-language French --create-tm
-  ```
-
-  `--create-tm` finds-or-creates a TM named `image · <source> → <target>`, so
-  repeated runs of the same pair share one memory instead of spawning
-  duplicates. It never fails the run: if creation doesn't work, the translation
-  proceeds without a TM.
-
-Never invent a `--tm-name`. `list_tms.py` already filters to TMs that can serve
-the request, so anything it lists is safe to offer. Its lines carry no ids, and
-nothing you show the caller should either.
-
-Note it filters on the **target** language, not the source: VitraTM memories are
-multi-source, so a TM created for one source language still serves another.
-That is why a TM whose listed source differs from this run can still appear —
-it is not a bug, and it is fine to use.
-
-### Which provider?
-
-Only ask when there is a real choice. Check first:
+### 2. Translate
 
 ```bash
-python3 scripts/list_providers.py
+python3 scripts/translate_image.py --file poster.png --target-language French \
+  [--tm-name "<memory>"]
 ```
 
-- **One line on stdout** (the usual case — only VitraTM) → **don't ask.** Use
-  it silently. Offering a choice of one wastes the caller's time.
-- **Two or more** → ask, in the same breath as the TM question:
-
-  > This organization has both **VitraTM** and **Phrase** connected. Which
-  > should I use for this translation?
-
-Pass the answer as `--tm-provider`. Anything the script printed to *stderr* is
-NOT connected for this org — never offer it, and never suggest they "switch to
-Phrase" as a fix.
-
-The two differ in one way that matters here: **VitraTM memories are
-multi-source** (one memory serves any source language), **Phrase memories are
-tied to their source language**.
-
-## Resizing after a translation
-
-When the caller wants the translated image in another shape ("also give me a
-portrait version", "make it square for Instagram"), use the `job_id` from
-`translate_image.py`:
+or, to create the memory for this language pair:
 
 ```bash
-python3 scripts/resize_translated.py --job-id "<job_id>" --aspect-ratio 9:16
+python3 scripts/translate_image.py --file poster.png --target-language French \
+  --create-tm --tm-context "Acme's retail posters for shoppers in France" [--tm-engine gemini]
 ```
 
-Synchronous, and it returns a new version each time — so several ratios means
-several calls against the same `job_id`. Take **ratios** (`9:16`, `1:1`, `16:9`),
-not pixel sizes; map a platform name to its ratio yourself.
+Returns `image_url` (show it), `memory` (the memory used, or none) and `job_id`
+(keep it for step 3). If it stops with `TM_CONTEXT_NEEDED`, ask the question in
+`error.ask` and run again with `--tm-context`.
 
-Use this only for an image this skill already translated. To resize an arbitrary
-image at exact pixel dimensions, that is the **image-resize** skill.
+### 3. Other aspect ratios (only if asked)
 
-## Asking the caller
+```bash
+python3 scripts/resize_translated.py --job-id <job_id> --aspect-ratio 9:16
+```
 
-Only one thing is genuinely required: **the target language.** Ask for it if it
-isn't in the request. Everything else has a sane default — don't interrogate.
+Reuses the translation already done: one call per ratio (`9:16`, `1:1`, `16:9`).
+Map a platform to its ratio yourself ("Instagram story" → `9:16`). For exact
+pixel sizes, or an image that wasn't translated here, use image-resize.
 
-## When the key is missing
+## Rules
 
-The script exits 2 and prints the setup guidance. Relay BOTH options — the
-right one depends on how this agent is run, and the caller knows that better
-than you do:
+- **Never show ids.** Show the image link, the language, and the memory used.
+- **The result is an image, not text.** If the user only wants to know what the
+  text says, tell them this returns a translated image.
+- **Never invent a memory name.** Offer only what `list_tms.py` printed.
 
-1. **An environment variable** in the process this agent runs in:
-   `export VITRA_UNIVERSE_API_KEY=uvk_...`
-   In a terminal that is a shell export; for a desktop or hosted agent it is
-   that runtime's env/config setting — a terminal export does NOT reach it.
-2. **A `.env` file at the root of this skill folder** (beside `SKILL.md`),
-   containing `VITRA_UNIVERSE_API_KEY=uvk_...`. The scripts read it
-   automatically, and it is gitignored.
+## When something fails
 
-If they have no key at all, tell them to ask whoever administers their Vitra
-organization. Do not offer to mint one yourself, and never echo a key back.
+Failures print `{"status": "failed", "error": {"code", "message", "retryable"}}`.
+Explain `message` plainly; `retryable: true` → run the same command again.
 
-## Failure modes
-
-| Exit | Meaning | Do this |
-| --- | --- | --- |
-| 2 | `VITRA_UNIVERSE_API_KEY` not set | Show the `export` line; stop. |
-| 3 | Key rejected or lacks permission | Needs `translate_photo.image_translator` create/read. |
-| 4 | API error, or no text found in the image | Report the message. If no text was detected, say so — the image may have no readable text. |
-| 5 | Timed out | Re-run; a very dense image can exceed the default wait. |
-| 6 | Source unreadable / too large | Ask for a file under 10MB or a reachable URL. |
+| Exit | Meaning | Tell the user |
+|---|---|---|
+| 2 | API key not set | Show the setup lines the script printed |
+| 3 | Key rejected or not allowed | Their Vitra admin must allow image translation for their role |
+| 4 | API error, or no text found | The message; if no text was found, the image may have no readable text |
+| 5 | Timed out | It's still working: run the same command again |
+| 6 | Image unreadable or too large | Ask for a file under 10 MB or a reachable URL |

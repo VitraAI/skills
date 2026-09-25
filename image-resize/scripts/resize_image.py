@@ -3,14 +3,18 @@
 
 Not a crop — the model re-composes the artwork for each target size.
 
-Mirrors the webapp's four-step Adapts flow exactly:
+The webapp's Adapts flow, with the upload routed through the Vitra API host:
 
-  1. POST .../adapt/upload/presign   -> { designAssetId, uploadUrl, objectKey,
-                                          objectUrl, headers }
-  2. PUT  <uploadUrl>                 raw bytes, straight to S3
-  3. POST .../adapt/assets            persist the asset row
-  4. POST .../adapt/{id}/adapt        queue one variant per target size
+  1. POST /v1/assets-management/multi-upload   the image, as multipart, into
+                                               the org's Drive -> its storage key
+  2. POST .../adapt/assets   { designAssetId, sourceKey }  adopt that image
+  3. POST .../adapt/{id}/adapt   queue one variant per target size
      poll GET .../adapt/{id}/variants until each variant settles
+
+Why not the webapp's presign + PUT straight to S3: sandboxed agents may only
+reach the API host, and a bucket host is exactly what their network rules
+block. Adopting by key (`sourceKey`) is the route the server offers for images
+the org already owns; it verifies the key is the org's own.
 
 Prints JSON:
   { "status": "completed",
@@ -27,6 +31,7 @@ import sys
 sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 
 import argparse
+import uuid
 import json
 import mimetypes
 import os
@@ -43,7 +48,7 @@ import _http  # noqa: E402
 # Mounted at `adapt` (renamed from `design-agent` on 2026-08-26, after Adapts
 # v1 was removed and freed the prefix). `design-agent` now 404s.
 ADAPT = "/v1/galaxy/translate-photo/adapt"
-PRESIGN_PATH = ADAPT + "/upload/presign"
+DRIVE_UPLOAD_PATH = "/v1/assets-management/multi-upload"
 ASSETS_PATH = ADAPT + "/assets"
 VARIANTS_PATH = ADAPT + "/{asset_id}/adapt"
 POLL_PATH = ADAPT + "/{asset_id}/variants"
@@ -166,31 +171,28 @@ def call(base: str, headers: dict, path: str, body: dict, label: str) -> dict:
     return unwrap(payload)
 
 
-def upload(base: str, headers: dict, path: Path) -> tuple[str, dict]:
-    """Steps 1-2: presign, then PUT the bytes straight to S3."""
-    content_type = mimetypes.guess_type(path.name)[0] or "image/png"
-    pre = call(
-        base,
-        headers,
-        PRESIGN_PATH,
-        {"fileName": path.name, "contentType": content_type, "name": path.name},
-        "presign",
-    )
-    upload_url = pre.get("uploadUrl")
-    asset_id = pre.get("designAssetId")
-    if not upload_url or not asset_id:
-        die(_common.EXIT_API_ERROR, f"bad presign response: {_common.api_message(pre)}")
+def upload(base: str, headers: dict, path: Path) -> str:
+    """Step 1: the image into the org's Drive, through the API host.
 
-    # Send back EXACTLY the headers the presign signed — no auth header.
-    put_headers = pre.get("headers") or {"Content-Type": content_type}
-    sys.stderr.write("[upload] putting bytes to S3…\n")
+    Returns its storage key, which step 2 adopts.
+    """
+    sys.stderr.write("[upload] uploading the image…\n")
     try:
-        code = _http.put_file(upload_url, put_headers, path)
+        status, payload = _http.post_multipart_json(
+            base + DRIVE_UPLOAD_PATH, headers, "files", path
+        )
     except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"S3 upload failed: {e}")
-    if code not in (200, 201, 204):
-        die(_common.EXIT_API_ERROR, f"S3 upload rejected ({code}).")
-    return asset_id, pre
+        die(_common.EXIT_API_ERROR, f"network error uploading the image: {e}")
+    if status in (401, 403):
+        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, "upload files to the Drive"))
+    rows = payload if isinstance(payload, list) else (payload or {}).get("data") or []
+    first = rows[0] if rows and isinstance(rows[0], dict) else {}
+    if status not in (200, 201) or first.get("error") or not first.get("key"):
+        die(
+            _common.EXIT_API_ERROR,
+            f"upload failed ({status}): {first.get('error') or _common.api_message(payload)}",
+        )
+    return first["key"]
 
 
 def collect(rows: list) -> list[dict]:
@@ -250,9 +252,11 @@ def main() -> int:
 
     path, is_temp = resolve_source(args.file, args.url)
     try:
-        asset_id, pre = upload(base, headers, path)
+        source_key = upload(base, headers, path)
 
-        # Step 3 — persist the asset row.
+        # Step 2 — adopt the uploaded image as a design asset. The id is ours
+        # to choose (a fresh UUIDv4); the server only refuses one that exists.
+        asset_id = str(uuid.uuid4())
         call(
             base,
             headers,
@@ -261,13 +265,12 @@ def main() -> int:
                 "designAssetId": asset_id,
                 "name": args.name or path.name,
                 "tier": args.tier,
-                "objectKey": pre.get("objectKey"),
-                "objectUrl": pre.get("objectUrl"),
+                "sourceKey": source_key,
             },
             "create asset",
         )
 
-        # Step 4 — queue one variant per requested size.
+        # Step 3 — queue one variant per requested size.
         call(
             base,
             headers,

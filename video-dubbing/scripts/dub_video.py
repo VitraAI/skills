@@ -46,6 +46,7 @@ from urllib.parse import urlencode, urlparse
 sys.path.insert(0, str(Path(__file__).parent))
 import _common  # noqa: E402
 import _http  # noqa: E402
+import _progress  # noqa: E402
 import _tm  # noqa: E402
 
 UPLOAD_PATH = "/v1/galaxy/translate-video/upload"
@@ -260,9 +261,10 @@ def poll_to_gate(
             die(_common.EXIT_API_ERROR, f"status poll failed ({status}): {_common.api_message(payload)}")
 
         state = (payload or {}).get("status")
-        if state != last:
-            sys.stderr.write(f"[poll] job={job_id} status={state}\n")
-            last = state
+        progress_line = _progress.line(_progress.dub_progress(payload))
+        if progress_line != last:
+            sys.stderr.write(progress_line + "\n")
+            last = progress_line
 
         if payload.get("awaitingHumanValidation"):
             return payload

@@ -126,7 +126,9 @@ def describe(tm: dict) -> str:
     shown = ", ".join(targets[:6]) + (f" (+{len(targets) - 6} more)" if len(targets) > 6 else "")
     pair = f"{tm.get('sourceLanguage') or 'any source'} → {shown}" if targets else ""
     provider = tm.get("provider") or ""
-    return "  ".join(x for x in (tm.get("name") or "(unnamed)", pair, f"[{provider}]" if provider else "") if x)
+    engine = tm.get("engine") if provider == "vitratm" else None
+    label = f"[{provider} · {engine}]" if engine else f"[{provider}]" if provider else ""
+    return "  ".join(x for x in (tm.get("name") or "(unnamed)", pair, label) if x)
 
 
 def list_tms(base: str, headers: dict) -> list[dict]:

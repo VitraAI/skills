@@ -28,6 +28,10 @@ TARGETS=(
   "_common.py video-dubbing/scripts/_core.py"
   "_tm.py image-translation/scripts/_tm.py"
   "_tm.py video-dubbing/scripts/_tm.py"
+  "_access.py image-creator/scripts/_access.py"
+  "_access.py image-resize/scripts/_access.py"
+  "_access.py image-translation/scripts/_access.py"
+  "_access.py video-dubbing/scripts/_access.py"
 )
 
 DRIFT=0

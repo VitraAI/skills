@@ -146,6 +146,8 @@ def find_or_create_tm(
     source_language: str,
     target_language: str,
     provider: str = "vitratm",
+    context: str | None = None,
+    engine: str | None = None,
 ) -> str | None:
     """Reuse the TM for this language pair, or make one.
 
@@ -180,6 +182,12 @@ def find_or_create_tm(
         "tmMode": "create",
         "provider": provider,
     }
+    if provider == "vitratm":
+        # The server requires a VitraTM memory's context (who it is for): it is
+        # sent to the model with every translation made through the memory.
+        body["context"] = context or ""
+        if engine:
+            body["engine"] = engine
     try:
         status, payload = _http.post_json(base + TM_PATH, headers, body)
     except _http.NetworkError as e:
@@ -205,7 +213,8 @@ def find_or_create_tm(
     tm_id = (payload or {}).get("id") if isinstance(payload, dict) else None
     if status not in (200, 201) or not tm_id:
         sys.stderr.write(
-            f"[tm] create failed ({status}); continuing without one\n"
+            f"[tm] could not create the memory ({status}: "
+            f"{_common.api_message(payload)}); continuing without one\n"
         )
         return None
     sys.stderr.write(f"[tm] created “{name}”\n")
@@ -355,9 +364,35 @@ def main() -> int:
         help="If no --tm-name is given, find-or-create the TM for this language "
              "pair so terminology stays consistent across runs.",
     )
+    parser.add_argument(
+        "--tm-context",
+        help="With --create-tm: one sentence on who the memory is for (client, "
+             "product, audience). Required for a VitraTM memory; ask the user.",
+    )
+    parser.add_argument(
+        "--tm-engine",
+        choices=["gemini", "azure"],
+        help="With --create-tm: the engine for text the memory doesn't know yet. "
+             "gemini (default) follows the style guide; azure ignores it.",
+    )
     parser.add_argument("--poll-interval", type=int, default=DEFAULT_POLL_INTERVAL)
     parser.add_argument("--max-wait", type=int, default=DEFAULT_MAX_WAIT)
     args = parser.parse_args()
+
+    needs_context = (
+        args.create_tm and not (args.tm_name or args.tm_id)
+        and args.tm_provider == "vitratm" and not (args.tm_context or "").strip()
+    )
+    if needs_context:
+        # A checkpoint, not an error to work around: only the user knows this.
+        die(
+            _common.EXIT_API_ERROR,
+            "a new translation memory needs one sentence on who it is for "
+            "(client, product, audience). Ask the user, then pass --tm-context.",
+            error_code="TM_CONTEXT_NEEDED",
+            ask="Who will this translation memory be for? One sentence: the "
+                "client or product, and the audience.",
+        )
 
     base = _common.base_url()
     headers = _common.headers()
@@ -367,10 +402,14 @@ def main() -> int:
     tm_id = args.tm_id or (
         _tm.resolve_by_name(base, headers, args.tm_name) if args.tm_name else None
     )
+    memory = args.tm_name if tm_id else None
     if not tm_id and args.create_tm:
         tm_id = find_or_create_tm(
-            base, headers, args.source_language, args.target_language, args.tm_provider
+            base, headers, args.source_language, args.target_language, args.tm_provider,
+            context=args.tm_context, engine=args.tm_engine,
         )
+        if tm_id:
+            memory = f"image · {args.source_language} → {args.target_language}"
 
     path, is_temp = resolve_source(args.file, args.url)
     try:
@@ -429,6 +468,8 @@ def main() -> int:
                 "image_url": url,
                 "job_id": job_id,
                 "target_language": row.get("targetLanguage") or args.target_language,
+                # The translation memory used, by name (None: translated fresh).
+                "memory": memory,
             }
         )
     )

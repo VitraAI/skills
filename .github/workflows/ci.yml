@@ -22,9 +22,16 @@ jobs:
 
       - run: npm ci
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       # SKILL.md spec, listings, references, secrets, manifest versions,
       # and the vendored _lib helpers in every skill.
       - run: npm run validate
+
+      # Every skill's scripts against a local fake Vitra API (no network).
+      - run: npm test
 
       # The catalog and archives Pages would publish.
       - run: npm run build
