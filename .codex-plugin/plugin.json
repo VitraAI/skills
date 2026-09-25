@@ -1,0 +1,26 @@
+{
+  "name": "vitra",
+  "version": "0.1.0",
+  "description": "Generate, edit and resize images, translate the text in images, and dub videos, with your Vitra organization's account.",
+  "author": {
+    "name": "Vitra.ai",
+    "url": "https://www.vitra.ai"
+  },
+  "homepage": "https://universe.vitra.ai/skills",
+  "repository": "https://github.com/VitraAI/skills",
+  "license": "MIT",
+  "skills": "./",
+  "interface": {
+    "displayName": "Vitra",
+    "shortDescription": "Images, image translation and video dubbing with Vitra",
+    "developerName": "Vitra.ai",
+    "category": "Design",
+    "websiteURL": "https://www.vitra.ai",
+    "defaultPrompt": [
+      "Generate a banner of a mountain at sunrise with Vitra",
+      "Translate the text in this poster into French",
+      "Resize this creative for Instagram Story and LinkedIn",
+      "Dub this video into Spanish"
+    ]
+  }
+}

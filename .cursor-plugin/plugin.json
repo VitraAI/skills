@@ -1,0 +1,12 @@
+{
+  "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
+  "name": "vitra",
+  "displayName": "Vitra",
+  "version": "0.1.0",
+  "description": "Generate, edit and resize images, translate the text in images, and dub videos, with your Vitra organization's account.",
+  "author": { "name": "Vitra.ai" },
+  "homepage": "https://universe.vitra.ai/skills",
+  "repository": "https://github.com/VitraAI/skills",
+  "license": "MIT",
+  "keywords": ["vitra", "image-generation", "image-translation", "video-dubbing", "localization"]
+}

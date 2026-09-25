@@ -1,0 +1,42 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
+# jobs; each `name` must be a tool the Vitra MCP server offers.
+about: >-
+  Generate an image from a plain-language prompt, then keep refining it the same
+  way — "make the background darker", "remove the text" — until it's right.
+  Each call returns a finished image URL, edits chain from the image before, and
+  results can be filed straight into your organization's Drive. Point it at a
+  brand kit and every image comes out on-brand.
+when-to-use: >-
+  Reach for it when you need a new visual from a description — a banner, poster,
+  ad creative or illustration — and for follow-up edits to an image it made. To
+  translate the text inside an existing image or resize one to other formats,
+  use Image Translation or Adaptive Resize instead.
+features:
+  - title: Prompt to finished image
+    description: One synchronous call returns a finished image URL — no job to poll.
+  - title: Edits in plain language
+    description: Describe the change; each edit is a new image derived from the last, so edits chain.
+  - title: On-brand output
+    description: Resolves your saved brand kit for a domain and folds its colors and style into the prompt.
+  - title: Brand kit from a live site
+    description: When no saved kit matches a domain, extracts one from the website and can save it.
+  - title: Saves to your Drive
+    description: Files any generated image into the organization's Drive in one step.
+use-cases:
+  - title: Campaign creatives
+    description: Draft banners and social posts from a brief, then tweak copy space and color.
+  - title: On-brand visuals
+    description: Produce images in a client's brand colors straight from their domain.
+  - title: Iterating with stakeholders
+    description: Apply feedback as plain-language edits without starting over.
+mcp-tools:
+  - name: generate_image
+    title: Generate an image
+  - name: edit_image
+    title: Edit a generated image
+  - name: save_image_to_drive
+    title: Save a generated image to the Drive
+  - name: list_brand_kits
+    title: List brand kits

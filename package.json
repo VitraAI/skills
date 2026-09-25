@@ -1,0 +1,17 @@
+{
+  "name": "vitra-skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build and validate the Vitra agent skills catalog.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "validate": "node scripts/validate.mjs && ./sync-lib.sh --check",
+    "build": "node scripts/build.mjs",
+    "check": "npm run validate && npm run build"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "yaml": "^2.9.0"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "vitra",
+  "version": "0.1.0",
+  "description": "Vitra Universe skills: generate, edit and resize images, translate the text in images, and dub videos into other languages, using your Vitra organization's account.",
+  "author": {
+    "name": "Vitra.ai",
+    "url": "https://www.vitra.ai"
+  },
+  "homepage": "https://universe.vitra.ai/skills",
+  "repository": "https://github.com/VitraAI/skills",
+  "license": "MIT",
+  "keywords": [
+    "vitra",
+    "image-generation",
+    "image-translation",
+    "image-resize",
+    "video-dubbing",
+    "localization",
+    "translation"
+  ],
+  "skills": [
+    "./image-creator",
+    "./image-resize",
+    "./image-translation",
+    "./video-dubbing"
+  ]
+}

@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Validate and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # SKILL.md spec, listings, references, secrets, manifest versions,
+      # and the vendored _lib helpers in every skill.
+      - run: npm run validate
+
+      # The catalog and archives Pages would publish.
+      - run: npm run build

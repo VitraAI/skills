@@ -1,0 +1,47 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
+# jobs; each `name` must be a tool the Vitra MCP server offers.
+about: >-
+  Dub a video into one or more languages, from upload to a reviewed, verified
+  download, without opening the editor. The run pauses so you decide each
+  speaker's voice — keep their own or pick another — then generates the dub and
+  stops for review. Lines can be corrected card by card, blocking issues are
+  listed and repaired, and each language is exported and downloaded one at a
+  time. Failed runs resume from the failed step instead of repeating paid work.
+when-to-use: >-
+  Reach for it to dub or voice-translate a video — "make a Spanish version of
+  this clip", "add a Hindi voiceover". Input is a local video file or a public
+  URL, a source language and one or more target languages. For subtitles only,
+  audio-only files, or translating images and text, use a different skill.
+features:
+  - title: Speaker-by-speaker voices
+    description: Pauses at the voice gate so each speaker keeps their own voice or gets a new one.
+  - title: Review before render
+    description: Stops after generating so text, timing, emotion and rate can be checked first.
+  - title: Line-level corrections
+    description: Edit, split, merge, re-translate or re-voice single lines and subtitles.
+  - title: More languages, same voices
+    description: Adds languages to the same dub, reusing each speaker's voice.
+  - title: Issues repaired
+    description: Lists blocking issues and fixes them within a budget, disclosing every change.
+  - title: Resumable runs
+    description: Picks up from the failed step and reuses identical uploads instead of redoing paid work.
+use-cases:
+  - title: Localized marketing video
+    description: Turn one product video into several market-ready language versions.
+  - title: Training and e-learning
+    description: Dub course content while keeping the instructor's voice.
+  - title: Social clips
+    description: Voice-translate short clips for regional channels.
+  - title: Reviewed releases
+    description: Check every line before exporting a language for publication.
+mcp-tools:
+  - name: start_dub
+    title: Start a video dub
+  - name: set_speaker_voices
+    title: Answer the voice decision
+  - name: edit_dub_lines
+    title: Edit translated lines
+  - name: export_dub
+    title: Export a dubbed language

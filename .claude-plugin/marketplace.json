@@ -1,0 +1,16 @@
+{
+  "name": "vitra",
+  "description": "Vitra.ai's official agent skills for images, image translation and video dubbing.",
+  "owner": {
+    "name": "Vitra.ai",
+    "url": "https://www.vitra.ai"
+  },
+  "plugins": [
+    {
+      "name": "vitra",
+      "source": "./",
+      "description": "Generate, edit and resize images, translate the text in images, and dub videos, with your Vitra organization's account.",
+      "version": "0.1.0"
+    }
+  ]
+}
