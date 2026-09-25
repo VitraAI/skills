@@ -36,7 +36,7 @@ use-cases:
 mcp-toolset: subtitles
 mcp-tools:
   - name: start_subtitles
-    title: Make or translate subtitles
+    title: Make subtitles from a video
   - name: get_subtitles
     title: Check or read subtitles
   - name: edit_subtitle_lines

@@ -105,7 +105,8 @@
       "download_subtitles",
       "edit_subtitle_lines",
       "get_subtitles",
-      "start_subtitles"
+      "start_subtitles",
+      "translate_subtitle_file"
     ]
   }
 }
