@@ -1,16 +1,15 @@
 ---
 name: video-subtitles
 description: >-
-  Makes, translates and edits subtitles with the Vitra Universe API: transcribes
-  a video into timed subtitles, translates an existing subtitle file (SRT, VTT,
-  ASS, SSA) into other languages, adds translated subtitle languages to a job,
-  corrects lines, downloads them as SRT, VTT, TXT and other formats, and renders
-  the video with subtitles burned in. Use it whenever the user wants captions or
-  subtitles made, translated, fixed, downloaded or burned into a video —
-  "subtitle this video", "translate this SRT into Spanish", "add Hindi captions",
-  "give me an SRT", "burn the subtitles in" — even if they only say "captions".
-  Not for dubbing or voice-over (video-dubbing, which can also burn subtitles
-  into a dubbed video), or translating the text inside images.
+  Makes subtitles from a video with the Vitra Universe API: transcribes it into
+  timed subtitles (optionally following a script), lets the user review and
+  correct lines, adds translated subtitle languages, downloads them as SRT, VTT,
+  TXT and other formats, and renders the video with subtitles burned in. Use it
+  whenever the user wants captions for a video — "subtitle this video", "add
+  Hindi captions to this clip", "give me an SRT for this", "burn the subtitles
+  in" — even if they only say "captions". Not for translating a subtitle file
+  on its own (subtitle-translation), dubbing or voice-over (video-dubbing), or
+  text inside images.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).

@@ -1,0 +1,45 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Know before you publish: check copy, images, audio and video against the
+  rules of every market you sell in, see exactly which rules a piece breaks and
+  why, catch unsafe content, and regenerate a flagged image so it passes.
+when-to-use: >-
+  Reach for it before a campaign goes live in a new market, when a creative is
+  reused across regions, or when a reviewer asks "is this OK there?".
+features:
+  - title: Per-market verdicts
+    description: APPROVED, REVIEW or BLOCKED for each market, with a score.
+  - title: Rules explained
+    description: The rules content breaks, worst first, each with the reason.
+  - title: Every format
+    description: Text, images, audio and video, including what's said in a video.
+  - title: Fix flagged images
+    description: Regenerate an image so it meets a market's rules, keeping what you ask to keep.
+use-cases:
+  - title: Global campaigns
+    description: Clear one creative for many markets at once.
+  - title: Brand safety
+    description: Catch unsafe or sensitive content before it ships.
+  - title: Regional adaptation
+    description: Turn a blocked image into one that passes.
+mcp-toolset: quality
+mcp-tools:
+  - name: list_qc_regions
+    title: List markets for content checks
+  - name: check_content
+    title: Check content against market rules
+  - name: get_content_check
+    title: Get a content check result
+  - name: fix_flagged_image
+    title: Fix a flagged image
+  - name: get_image_fix
+    title: Get an image fix
+related-skills:
+  - name: image-translation
+    why: Translate a creative's text for the market you just cleared it for.
+  - name: translation-quality
+    why: Score the wording itself, not just its fit for the market.

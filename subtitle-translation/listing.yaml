@@ -1,0 +1,47 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Translate SRT, VTT, ASS and SSA subtitle files into every language you need
+  in one command, with each cue's timing kept, and get back ready-to-use files
+  in the format your player or platform wants. Review and correct lines by
+  number, and add more languages to the same job later.
+when-to-use: >-
+  Reach for it whenever you already have a subtitle file and need it in other
+  languages or another format. To make subtitles from a video, use Video
+  Subtitles; for a voice-over, Video Dubbing.
+features:
+  - title: One command, every language
+    description: Uploads, translates, waits and saves one file per language.
+  - title: Timing kept
+    description: Each cue keeps its start and end, so files drop straight into the player.
+  - title: Any format out
+    description: SRT, VTT, TXT, timed TXT, DFXP, STL, EDL, XML or JSON.
+  - title: Review by line number
+    description: Correct wording or timing, split or merge lines, then download again.
+use-cases:
+  - title: Course and training captions
+    description: One caption file, every language your learners speak.
+  - title: Social and streaming
+    description: Translated captions in the format each platform accepts.
+  - title: Broadcast delivery
+    description: STL or DFXP files for broadcast workflows.
+mcp-toolset: subtitles
+mcp-tools:
+  - name: start_subtitles
+    title: Make or translate subtitles
+  - name: get_subtitles
+    title: Check or read subtitles
+  - name: edit_subtitle_lines
+    title: Edit subtitle lines
+  - name: add_subtitle_language
+    title: Add subtitle languages
+  - name: download_subtitles
+    title: Get subtitles as a file
+related-skills:
+  - name: video-subtitles
+    why: Make subtitles from a video, or burn translated ones into it.
+  - name: document-translation
+    why: Translate documents, spreadsheets and text files instead.

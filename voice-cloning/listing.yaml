@@ -1,0 +1,35 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Create a cloned voice from one to five recordings of a speaker — with their
+  consent — and use it everywhere Vitra speaks: text-to-speech, dubbing and
+  lip-sync.
+when-to-use: >-
+  Reach for it when a brand, narrator or presenter should sound like
+  themselves in every language and every new piece of content.
+features:
+  - title: From a few samples
+    description: One to five recordings; background noise can be removed.
+  - title: Ready to use
+    description: The voice appears in text-to-speech and dubbing as soon as it is cloned.
+  - title: Consent first
+    description: The skill asks for the speaker's permission before cloning.
+use-cases:
+  - title: Brand voice
+    description: One recognizable voice across every market's content.
+  - title: Presenter continuity
+    description: The same presenter voices new videos without re-recording.
+mcp-toolset: documents
+mcp-tools:
+  - name: clone_voice
+    title: Clone a voice
+  - name: list_cloned_voices
+    title: List cloned voices
+related-skills:
+  - name: text-to-speech
+    why: Speak any text in the voice you just cloned.
+  - name: video-dubbing
+    why: Dub videos so each speaker keeps their own voice in other languages.

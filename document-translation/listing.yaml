@@ -1,0 +1,49 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML and XLIFF files
+  — or plain text — without losing their layout. One command translates into
+  several languages at once and saves each file, reusing your organization's
+  translation memory so approved terminology stays consistent.
+when-to-use: >-
+  Reach for it whenever a file or text needs to exist in another language —
+  contracts, decks, spreadsheets, product strings, web pages, manuals. For
+  subtitles, images or video, use the matching Vitra skill.
+features:
+  - title: Formatting kept
+    description: Office files are translated in place, run by run; PDFs keep their images and layout.
+  - title: Many languages, one command
+    description: One translation per language, started together and saved side by side.
+  - title: Memory-backed
+    description: Every translation reuses and feeds your organization's approved wording.
+  - title: Spreadsheet control
+    description: Pick which CSV columns to translate, or keep Excel headings as they are.
+  - title: Safe to re-run
+    description: Reconnects to translations already started, so nothing is charged twice.
+use-cases:
+  - title: Legal and HR documents
+    description: Contracts and policies in every language your teams work in.
+  - title: Sales decks
+    description: One PowerPoint, ready for each market.
+  - title: App and web strings
+    description: JSON, XML and XLIFF resource files, keys untouched.
+  - title: Catalogs and price lists
+    description: Excel and CSV product data with only the prose translated.
+mcp-toolset: documents
+mcp-tools:
+  - name: translate_document
+    title: Translate a document or text
+  - name: get_document_translation
+    title: Check a document translation
+  - name: save_document_to_drive
+    title: Save a translated document to the Drive
+  - name: list_translation_memories
+    title: List translation memories
+related-skills:
+  - name: subtitle-translation
+    why: Translate subtitle files (SRT, VTT) instead of documents.
+  - name: image-translation
+    why: Translate text that is inside images, keeping their design.

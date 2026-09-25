@@ -1,0 +1,51 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Keep every translation on-brand: ask how a phrase is translated, fix it once
+  for everyone, translate app strings and product copy memory-first, load the
+  translations you already have, and read the glossaries and style guides your
+  translations follow.
+when-to-use: >-
+  Reach for it whenever terminology or consistency matters — before a launch,
+  after a review, when onboarding a client's existing translations, or to
+  translate short strings exactly the way you always have.
+features:
+  - title: Look up approved wording
+    description: See how a phrase was translated before, and whether it's verified or approved.
+  - title: Fix it once
+    description: Correct an entry and every future translation uses it.
+  - title: Memory-first translation
+    description: Short texts reuse exact and close matches; only the rest is machine-translated.
+  - title: Bring your history
+    description: Import TMX, XLIFF, Excel, CSV or TSV translations.
+  - title: Glossaries and style guides
+    description: See the terms and tone rules translations follow.
+use-cases:
+  - title: App localization
+    description: Translate UI strings consistently across releases.
+  - title: Client onboarding
+    description: Load a client's existing translations before the first project.
+  - title: Review follow-up
+    description: Turn a reviewer's corrections into approved wording for everyone.
+mcp-toolset: memory
+mcp-tools:
+  - name: translate_with_memory
+    title: Translate text with a translation memory
+  - name: get_memory_translation
+    title: Get a large memory translation
+  - name: search_memory_terms
+    title: Search a translation memory
+  - name: correct_memory_term
+    title: Correct a translation memory entry
+  - name: list_glossaries
+    title: List glossaries and style guides
+  - name: get_style_guide
+    title: Read a style guide
+related-skills:
+  - name: document-translation
+    why: Translate whole documents through the same memory.
+  - name: translation-quality
+    why: Score translations and find the lines worth correcting here.

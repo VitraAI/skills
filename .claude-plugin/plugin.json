@@ -1,7 +1,7 @@
 {
   "name": "vitra",
   "version": "0.3.0",
-  "description": "Vitra Universe skills: generate, edit and resize images, translate the text in images, dub videos, and make, translate and burn in subtitles, using your Vitra organization's account.",
+  "description": "Vitra Universe skills: translate documents, subtitles, images and text; dub videos, generate speech, clone voices and lip-sync; manage translation memories; score translation quality and check content compliance; run campaigns and workflows — using your Vitra organization's account.",
   "author": {
     "name": "Vitra.ai",
     "url": "https://www.vitra.ai"
@@ -17,13 +17,32 @@
     "video-dubbing",
     "subtitles",
     "localization",
-    "translation"
+    "translation",
+    "document-translation",
+    "text-to-speech",
+    "voice-cloning",
+    "lip-sync",
+    "translation-memory",
+    "quality",
+    "compliance",
+    "whatsapp",
+    "workflows"
   ],
   "skills": [
+    "./content-compliance",
+    "./document-translation",
+    "./hyperlocal-campaigns",
     "./image-creator",
     "./image-resize",
     "./image-translation",
+    "./lip-sync",
+    "./subtitle-translation",
+    "./text-to-speech",
+    "./translation-memory",
+    "./translation-quality",
     "./video-dubbing",
-    "./video-subtitles"
+    "./video-subtitles",
+    "./voice-cloning",
+    "./workflows"
   ]
 }

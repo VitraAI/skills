@@ -1,0 +1,37 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Re-render a video so the speaker's lips follow a new audio track — a dubbed
+  language, a corrected line or a fresh voice-over — for results that look
+  natural on camera.
+when-to-use: >-
+  Reach for it after replacing a video's speech, when viewers will see the
+  speaker's face.
+features:
+  - title: Any audio in
+    description: A dub, a text-to-speech clip or a new recording.
+  - title: Model choice
+    description: Use your organization's default model or pick another it has access to.
+  - title: Several speakers
+    description: Tell it how many people speak on screen.
+use-cases:
+  - title: Dubbed marketing video
+    description: Localized videos where the presenter's lips match every language.
+  - title: Script fixes
+    description: Replace a line without a reshoot.
+mcp-toolset: documents
+mcp-tools:
+  - name: lip_sync
+    title: Lip-sync a video
+  - name: get_lip_sync
+    title: Check a lip-sync job
+  - name: list_lip_sync_models
+    title: List lip-sync models
+related-skills:
+  - name: video-dubbing
+    why: Dub the video first; its export can lip-sync too.
+  - name: text-to-speech
+    why: Generate the new audio track to sync to.
