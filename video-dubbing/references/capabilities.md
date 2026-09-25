@@ -18,12 +18,13 @@ server without it still works (the script falls back, as noted).
 | `inspect_process.py` | `GET …/{id}/status`, `GET …/{id}/editor-output?includeRevision=true`, `GET …/{id}/pending-children`, `GET /v1/credits/balance` | balance is null when the key can't read credits |
 | `get_card_media.py` | `GET …/{id}/editor-output`, the card's audio url | no separate playback file exists (see below) |
 | `patch_cards.py` | `POST process-log/transcript/action`: `update`, `updateEmotion`, `updateRate`, `updateKeepSource`, `updateLipSync`, `updateReviewStatus`, `saveAudio` | each with `expectedRevision`; chains on `X-Transcript-Revision` |
-| `card_ops.py` | `transcript/action`: `split`, `merge`, `add`, `delete`; `PUT …/{id}/assign-speaker`; `POST …/{id}/speakers`; `PUT …/{id}/speaker-voice`; `POST process-log/sync-services/action`: `text-translation`, `text-to-speech`; `POST process-log/subtitle/action`: `updateById`, `delete`, `split`, `merge` | structural + subtitle actions revision-guarded; billed sync actions are not |
+| `card_ops.py` | `transcript/action`: `split`, `merge`, `add` (after/before a line, times, text: the API builds the line), `delete`; `PUT …/{id}/assign-speaker`; `POST …/{id}/speakers`; `PUT …/{id}/speaker-voice`; `POST process-log/sync-services/action`: `text-translation`, `text-to-speech` | structural actions revision-guarded; billed sync actions are not |
+| `edit_subtitles.py` | `POST process-log/subtitle/action`: `updateById` (text / timing), `split` (`atWord`), `merge`, `delete` | the API builds split and merged lines; revision-guarded |
 | `regenerate_cards.py` | `POST …/{id}/generate-all` `{transcriptIds}`, `GET …/{id}/pending-children` | verifies by hashing the audio (same url after regeneration) |
 | `add_language.py` | `POST …/{id}/add-language` (`Idempotency-Key`, `expectedSourceRevision`), `GET …/{id}/pending-children`, `POST …/{id}/rollback-add-language` | voices reused per speaker like the editor |
 | `list_issues.py` | `GET process-log/transcript/issues?id&lang` | |
 | `fix_issues.py` | `transcript/issues`, `POST …/{id}/autofix-all`, `POST …/{id}/generate-all`, `pending-children`, `editor-output` | bounded; discloses every change |
-| `export_dub.py` | `transcript/issues`, `editor-output?includeRevision=true`, `POST process-log/export-video` (`Idempotency-Key`), `GET …/{exportId}/editor-output`, `pending-children` | refuses on issues / stale audio / moved revision |
+| `export_dub.py` | `transcript/issues`, `editor-output?includeRevision=true`, `POST process-log/subtitle/action` `generate` (only with `--generate-subtitles`), `POST process-log/export-video` (`Idempotency-Key`; `embedSubtitle` + `subtitleLanguage` with `--subtitles`), `GET …/{exportId}/editor-output`, `pending-children` | refuses on issues / stale audio / moved revision / no subtitle lines |
 | `download_export.py` | `GET …/{exportId}/editor-output`, `POST process-log/presigned-export-url` | Range resume; ffprobe/ffmpeg checks when installed |
 | `run_manifest.py` | local file; `validate` adds `status` + `editor-output` | |
 
@@ -45,6 +46,7 @@ server without it still works (the script falls back, as noted).
 | Idempotency keys stored server-side | ✅ optional server feature | `publish`, `add-language`, `export-video` |
 | 429 with `Retry-After` | ✅ | scripts wait (with jitter) and retry |
 | Polling guidance | ✅ optional server feature | `nextPollAfterSeconds` on status |
+| Progress in the webapp's steps | ✅ optional server feature | `progressSteps` on status; without it, overall percent |
 | Request id | ✅ | `x-request-id` on every response; in every failure JSON |
 | Credits | ✅ | balance from `credits/balance`; unknown stays null |
 

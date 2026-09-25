@@ -10,7 +10,7 @@
       "name": "vitra",
       "source": "./",
       "description": "Generate, edit and resize images, translate the text in images, and dub videos, with your Vitra organization's account.",
-      "version": "0.2.0"
+      "version": "0.3.0"
     }
   ]
 }

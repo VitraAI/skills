@@ -27,7 +27,7 @@ exact cards. It never loops until "clean".
 
 Prints JSON:
   { "status": "clean" | "partial" | "failed", "language", "attempts",
-    "changes": [{card_id, field, before, after}], "approved_text_changed": [...],
+    "changes": [{line, field, before, after}], "approved_text_changed": [...],
     "remaining_errors": [...], "remaining_warnings": [...], "next_action": ... }
 
 Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
@@ -49,7 +49,6 @@ import _cards  # noqa: E402
 import _common  # noqa: E402
 import _http  # noqa: E402
 import _jobs  # noqa: E402
-from list_issues import normalize  # noqa: E402
 
 PL = "/v1/galaxy/translate-video/process-log"
 ISSUES_PATH = PL + "/transcript/issues"
@@ -75,7 +74,20 @@ def read_issues(base: str, headers: dict, job_id: str, lang: str) -> tuple[list,
         die(_common.EXIT_API_ERROR, f"could not read issues ({status}): {_common.api_message(payload)}")
     body = payload if isinstance(payload, dict) else {}
     data = body.get("data") if isinstance(body.get("data"), dict) else body
-    return normalize(data.get("errors")), normalize(data.get("warnings"))
+    return _issues(data.get("errors")), _issues(data.get("warnings"))
+
+
+def _issues(raw: object) -> list[dict]:
+    """Issues with the card each names — for this script; shown() makes them lines."""
+    return [{"card_id": i.get("transcriptId"), "type": i.get("type"), "message": i.get("msg"),
+             "suggestion": i.get("suggestion")} for i in (raw if isinstance(raw, list) else [])
+            if isinstance(i, dict)]
+
+
+def shown(items: list, numbers: dict) -> list:
+    """The same list with each card named by its line number."""
+    return [{("line" if k == "card_id" else k): (numbers.get(str(v)) if k == "card_id" else v)
+             for k, v in item.items()} for item in items]
 
 
 def snapshot(cards: list, lang: str) -> dict[str, dict]:
@@ -145,6 +157,8 @@ def main() -> int:
 
     errors, warnings = read_issues(base, headers, args.job_id, lang)
     all_changes, all_approved, attempts = [], [], 0
+    # Numbered as the user saw them before any repair (a repair never adds lines).
+    numbers = _cards.line_numbers(_cards.read_editor(base, headers, args.job_id)[0])
 
     while errors and attempts < max(1, args.budget):
         fixable = [e for e in errors if e["type"] in AUTOFIXABLE]
@@ -175,8 +189,9 @@ def main() -> int:
             print(json.dumps({
                 "status": "failed", "language": lang, "attempts": attempts,
                 "error": row.get("errorMessage") or "the repair job failed",
-                "changes": all_changes, "approved_text_changed": all_approved,
-                "remaining_errors": errors, "next_action": None,
+                "changes": shown(all_changes, numbers),
+                "approved_text_changed": shown(all_approved, numbers),
+                "remaining_errors": shown(errors, numbers), "next_action": None,
             }))
             return _common.EXIT_API_ERROR
 
@@ -194,10 +209,10 @@ def main() -> int:
         "status": status,
         "language": lang,
         "attempts": attempts,
-        "changes": all_changes,
-        "approved_text_changed": all_approved,
-        "remaining_errors": errors,
-        "remaining_warnings": warnings,
+        "changes": shown(all_changes, numbers),
+        "approved_text_changed": shown(all_approved, numbers),
+        "remaining_errors": shown(errors, numbers),
+        "remaining_warnings": shown(warnings, numbers),
         # Left over after the budget: timing/content errors need a person or
         # patch_cards — say which cards, do not retry blindly.
         "next_action": "export_dub" if not errors else "patch_cards",

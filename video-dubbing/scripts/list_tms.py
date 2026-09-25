@@ -8,7 +8,7 @@ run is translated fresh and can word the same phrase differently each time.
   GET /v1/translation-memory   (+ GET /v1/language to match language notations)
 
 Prints one line per TM a person can read — name, languages, provider — and no
-ids. Pass the chosen memory's NAME to `dub_video.py --tm-name`.
+ids. Pass the chosen memory's NAME to the skill's main script as `--tm-name`.
 
 `--target-language` is the real filter. VitraTM memories are multi-source
 (`supportsMultiSource: true` on /translation-memory/providers), so a TM stored

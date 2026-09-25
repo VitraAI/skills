@@ -42,14 +42,15 @@ cards are listed under `audio_stale` (and saved to the run manifest) — run
 status and volume need no regeneration.
 
 --edits: JSON list of
-  { "card_id": "...", "text"?: "...", "start"?: 12.3, "end"?: 15.0,
+  { "line": 3, "text"?: "...", "start"?: 12.3, "end"?: 15.0,
     "emotion"?: "calm", "rate"?: 1.1, "keep_source"?: true, "lip_sync"?: false,
     "review_status"?: "a", "volume"?: 0.8 }
-(or the short form {"<cardId>": "new text"}).
+(or the short form {"3": "new text"}). `line` is the number inspect_process
+--cards lists.
 
 Prints JSON:
   { "status": "patched" | "dry_run" | "unchanged", "language",
-    "revision_before", "revision_after", "changes": [{card_id, field, before, after}],
+    "revision_before", "revision_after", "changes": [{line, field, before, after}],
     "audio_cleared": [...], "audio_stale": [...], "affected_languages": [...],
     "next_action": ... }
 
@@ -75,7 +76,7 @@ PL = "/v1/galaxy/translate-video/process-log"
 STATUS_PATH = PL + "/{job_id}/status"
 ACTION_PATH = PL + "/transcript/action"
 
-# The server's emotion vocabulary (ELEVENLABS_EMOTION_TAGS).
+# The emotions the API accepts for a line.
 EMOTIONS = {
     "neutral", "happy", "excited", "calm", "sad", "angry", "frustrated", "anxious",
     "surprised", "playful", "confident", "hesitant", "tired", "mysterious",
@@ -103,22 +104,24 @@ def parse_edits(raw: str) -> list[dict]:
     except ValueError:
         die(_common.EXIT_API_ERROR, "--edits must be JSON")
     if isinstance(edits, dict):
-        edits = [{"card_id": k, "text": v} for k, v in edits.items()]
+        edits = [{("line" if str(k).isdigit() else "card_id"): (int(k) if str(k).isdigit() else k), "text": v}
+                 for k, v in edits.items()]
     if not isinstance(edits, list) or not edits:
         die(_common.EXIT_API_ERROR, "--edits must be a non-empty list of edits")
     out = []
     for e in edits:
-        if not isinstance(e, dict) or not e.get("card_id"):
-            die(_common.EXIT_API_ERROR, f"each edit needs a card_id: {e!r}")
-        edit = {"card_id": str(e["card_id"])}
+        if not isinstance(e, dict) or not (e.get("line") or e.get("card_id")):
+            die(_common.EXIT_API_ERROR, 'each edit needs a "line" (the number inspect_process lists)')
+        edit = {"line": e["line"]} if e.get("line") else {"card_id": str(e["card_id"])}
+        who = f"line {e['line']}" if e.get("line") else "that line"
         if "text" in e:
             if not isinstance(e["text"], str) or not e["text"].strip():
-                die(_common.EXIT_API_ERROR, f"card {edit['card_id']}: text must be non-empty")
+                die(_common.EXIT_API_ERROR, f"{who}: text must be non-empty")
             edit["text"] = e["text"].strip()
         if "emotion" in e:
             if e["emotion"] not in EMOTIONS:
                 die(_common.EXIT_API_ERROR,
-                    f"card {edit['card_id']}: emotion must be one of {', '.join(sorted(EMOTIONS))}")
+                    f"{who}: emotion must be one of {', '.join(sorted(EMOTIONS))}")
             edit["emotion"] = e["emotion"]
         if "rate" in e:
             try:
@@ -127,17 +130,17 @@ def parse_edits(raw: str) -> list[dict]:
                 rate = -1
             if not MIN_RATE <= rate <= MAX_RATE:
                 die(_common.EXIT_API_ERROR,
-                    f"card {edit['card_id']}: rate must be between {MIN_RATE} and {MAX_RATE}")
+                    f"{who}: rate must be between {MIN_RATE} and {MAX_RATE}")
             edit["rate"] = rate
         for field in ("start", "end"):
             if field in e:
                 if not isinstance(e[field], (int, float)) or isinstance(e[field], bool) or e[field] < 0:
-                    die(_common.EXIT_API_ERROR, f"card {edit['card_id']}: {field} must be seconds >= 0")
+                    die(_common.EXIT_API_ERROR, f"{who}: {field} must be seconds >= 0")
                 edit[field] = float(e[field])
         if "review_status" in e:
             if e["review_status"] not in REVIEW_STATUSES:
                 die(_common.EXIT_API_ERROR,
-                    f"card {edit['card_id']}: review_status must be u (unverified), v (verified) or a (approved)")
+                    f"{who}: review_status must be u (unverified), v (verified) or a (approved)")
             edit["review_status"] = e["review_status"]
         if "volume" in e:
             try:
@@ -145,15 +148,15 @@ def parse_edits(raw: str) -> list[dict]:
             except (TypeError, ValueError):
                 volume = -1
             if not 0.0 <= volume <= 1.0:
-                die(_common.EXIT_API_ERROR, f"card {edit['card_id']}: volume must be between 0 and 1")
+                die(_common.EXIT_API_ERROR, f"{who}: volume must be between 0 and 1")
             edit["volume"] = volume
         for flag in ("keep_source", "lip_sync"):
             if flag in e:
                 if not isinstance(e[flag], bool):
-                    die(_common.EXIT_API_ERROR, f"card {edit['card_id']}: {flag} must be true or false")
+                    die(_common.EXIT_API_ERROR, f"{who}: {flag} must be true or false")
                 edit[flag] = e[flag]
         if len(edit) == 1:
-            die(_common.EXIT_API_ERROR, f"card {edit['card_id']}: nothing to change")
+            die(_common.EXIT_API_ERROR, f"{who}: nothing to change")
         out.append(edit)
     return out
 
@@ -235,7 +238,7 @@ def main() -> int:
     is_source = lang == source_lang
     if not is_source and lang not in targets:
         die(_common.EXIT_API_ERROR, f"{lang} is not a language of this dub.")
-    if is_source and any(set(e) - {"card_id", "text", "start", "end"} for e in edits):
+    if is_source and any(set(e) - {"line", "card_id", "text", "start", "end"} for e in edits):
         die(_common.EXIT_API_ERROR,
             "only text and timing can be changed in the source language; emotion, "
             "rate, Keep Source, lip-sync, review status and volume belong to a "
@@ -252,6 +255,26 @@ def main() -> int:
         )
     revision = args.revision if args.revision is not None else current
 
+    # Lines are what people name; the API names cards. Field edits never
+    # renumber, so the numbers read now hold for the whole run.
+    numbers = _cards.line_numbers(cards)
+    for e in edits:
+        if "line" in e:
+            e["card_id"] = _cards.card_at_line(cards, e.pop("line"))
+
+    def label(cid: str) -> str:
+        return f"line {numbers.get(cid, '?')}"
+
+    def shown(res: dict) -> dict:
+        out = dict(res)
+        if isinstance(out.get("changes"), list):
+            out["changes"] = [{("line" if k == "card_id" else k): (numbers.get(v, v) if k == "card_id" else v)
+                               for k, v in c.items()} for c in out["changes"]]
+        for key in ("audio_cleared", "audio_stale"):
+            if isinstance(out.get(key), list):
+                out[key] = [numbers.get(c, c) for c in out[key]]
+        return out
+
     # Validate everything against the current cards before sending anything.
     index = _cards.by_id(cards)
     changes, text_data, grouped, stale = [], [], {}, set()
@@ -261,10 +284,10 @@ def main() -> int:
         cid = edit["card_id"]
         card = index.get(cid)
         if card is None:
-            die(_common.EXIT_API_ERROR, f"card {cid} is not in this dub.")
+            die(_common.EXIT_API_ERROR, f"{label(cid)} is not in this dub.")
         blk = _cards.block(card, lang)
         if not blk:
-            die(_common.EXIT_API_ERROR, f"card {cid} has no {lang} line.")
+            die(_common.EXIT_API_ERROR, f"{label(cid)} has no {lang} line.")
         update: dict = {}
         if "text" in edit:
             tr = blk.get("tr") if isinstance(blk.get("tr"), dict) else {}
@@ -276,16 +299,16 @@ def main() -> int:
             st = edit.get("start", v.get("st"))
             et = edit.get("end", v.get("et"))
             if st is None or et is None or st >= et:
-                die(_common.EXIT_API_ERROR, f"card {cid}: start must be before end ({st} / {et}).")
+                die(_common.EXIT_API_ERROR, f"{label(cid)}: start must be before end ({st} / {et}).")
             if duration and et > duration + 1e-6:
-                die(_common.EXIT_API_ERROR, f"card {cid}: end {et}s is past the end of the video ({duration}s).")
+                die(_common.EXIT_API_ERROR, f"{label(cid)}: end {et}s is past the end of the video ({duration}s).")
             prev, nxt = _cards.neighbours(cards, cid, lang)
             prev_end = (_cards.block(prev, lang).get("v") or {}).get("et") if prev else None
             next_start = (_cards.block(nxt, lang).get("v") or {}).get("st") if nxt else None
             if prev_end is not None and st < prev_end - 1e-6:
-                die(_common.EXIT_API_ERROR, f"card {cid}: start {st}s overlaps the previous line (ends {prev_end}s).")
+                die(_common.EXIT_API_ERROR, f"{label(cid)}: start {st}s overlaps the previous line (ends {prev_end}s).")
             if next_start is not None and et > next_start + 1e-6:
-                die(_common.EXIT_API_ERROR, f"card {cid}: end {et}s overlaps the next line (starts {next_start}s).")
+                die(_common.EXIT_API_ERROR, f"{label(cid)}: end {et}s overlaps the next line (starts {next_start}s).")
             if (st, et) != (v.get("st"), v.get("et")):
                 # `v` goes WHOLE too — the one-level merge would drop the rest.
                 update["v"] = {**v, "st": st, "et": et}
@@ -297,7 +320,7 @@ def main() -> int:
         if "volume" in edit:
             audio = blk.get("a") if isinstance(blk.get("a"), dict) else {}
             if not audio.get("url"):
-                die(_common.EXIT_API_ERROR, f"card {cid} has no audio to set the volume of.")
+                die(_common.EXIT_API_ERROR, f"{label(cid)} has no audio to set the volume of.")
             if audio.get("volume") != edit["volume"]:
                 volume_calls.append({"transcriptId": cid, "language": lang, "volume": edit["volume"]})
                 changes.append({"card_id": cid, "field": "volume", "before": audio.get("volume"), "after": edit["volume"]})
@@ -306,7 +329,7 @@ def main() -> int:
                 continue
             before = read(blk)
             if field == "rate" and blk.get("keepSourceAudio"):
-                die(_common.EXIT_API_ERROR, f"card {cid} plays the original audio (Keep Source); its rate cannot change.")
+                die(_common.EXIT_API_ERROR, f"{label(cid)} plays the original audio (Keep Source); its rate cannot change.")
             if before == edit[field]:
                 continue
             grouped.setdefault((action, key, edit[field]), []).append(cid)
@@ -324,11 +347,11 @@ def main() -> int:
         "affected_languages": affected,
     }
     if not changes:
-        print(json.dumps({"status": "unchanged", **result, "revision_after": revision,
+        print(json.dumps({"status": "unchanged", **shown(result), "revision_after": revision,
                           "next_action": "list_issues"}))
         return _common.EXIT_OK
     if args.dry_run:
-        print(json.dumps({"status": "dry_run", **result, "revision_after": None,
+        print(json.dumps({"status": "dry_run", **shown(result), "revision_after": None,
                           "next_action": "patch_cards"}))
         return _common.EXIT_OK
     if revision is None:
@@ -383,7 +406,7 @@ def main() -> int:
 
     sys.stderr.write(f"[patch] {len(changes)} change(s) saved in {lang}\n")
     print(json.dumps({
-        "status": "patched", **result, "revision_after": revision,
+        "status": "patched", **shown(result), "revision_after": revision,
         "next_action": "regenerate_cards" if stale or cleared else ("retranslate" if affected else "list_issues"),
     }))
     return _common.EXIT_OK

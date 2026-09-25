@@ -67,7 +67,7 @@ Both `KEY=value` and `export KEY=value` are accepted.
 
 ### Getting a key
 
-A key is minted per organization by someone who is a member of it:
+A key is minted per organization by one of its owners or admins:
 
 ```
 POST /v1/api-keys
@@ -87,8 +87,8 @@ Never hardcode the key into a script, and never commit `.env`.
 With the key set, from this folder:
 
 ```bash
-python3 scripts/list_languages.py
-# -> one line per language key: "<key>  <label>"   (proves auth + connectivity)
+python3 scripts/list_languages.py hindi
+# -> "<key>  <label>" for each match   (proves auth + connectivity)
 ```
 
 Then a real dub against a short public video:

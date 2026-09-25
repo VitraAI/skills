@@ -12,7 +12,7 @@ WARNINGS do not block. Report them and let the caller decide.
 
 Prints JSON:
   { "status": "blocked" | "clean", "language": "...",
-    "errors": [{"card_id": "...", "type": "...", "message": "...",
+    "errors": [{"line": 3, "type": "...", "message": "...",
                 "suggestion": "..."}],
     "warnings": [...], "next_action": "export_dub" }
 
@@ -35,6 +35,7 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _cards  # noqa: E402
 import _common  # noqa: E402
 import _http  # noqa: E402
 
@@ -43,7 +44,7 @@ ISSUES_PATH = "/v1/galaxy/translate-video/process-log/transcript/issues"
 die = _common.die
 
 
-def normalize(raw: object) -> list[dict]:
+def normalize(raw: object, numbers: dict) -> list[dict]:
     """Server issue -> a shape the agent can report without decoding internals.
 
     `transcript` on the server row carries the full card text; it is dropped
@@ -56,7 +57,7 @@ def normalize(raw: object) -> list[dict]:
             continue
         out.append(
             {
-                "card_id": item.get("transcriptId"),
+                "line": numbers.get(str(item.get("transcriptId"))),
                 "type": item.get("type"),
                 "message": item.get("msg"),
                 "suggestion": item.get("suggestion"),
@@ -100,8 +101,10 @@ def main() -> int:
 
     body = payload if isinstance(payload, dict) else {}
     data = body.get("data") if isinstance(body.get("data"), dict) else body
-    errors = normalize(data.get("errors"))
-    warnings = normalize(data.get("warnings"))
+    # Issues name cards; people name lines.
+    numbers = _cards.line_numbers(_cards.read_editor(base, headers, args.job_id)[0])
+    errors = normalize(data.get("errors"), numbers)
+    warnings = normalize(data.get("warnings"), numbers)
 
     sys.stderr.write(
         f"[issues] {args.language}: {len(errors)} error(s), {len(warnings)} warning(s)\n"

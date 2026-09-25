@@ -40,9 +40,11 @@ share one shape. Copy `video-dubbing` when in doubt.
 - Wait for their own jobs with backoff; re-running a command reconciles instead
   of starting a job twice.
 - Upload through the Vitra API host only, never straight to storage: sandboxed
-  agents can reach the API but not a bucket.
-- `check_access.py` lists every step with the permissions its routes require
-  (their `@RequireOrgPermissions`), marking optional extras.
+  agents can often reach only the API host.
+- `check_access.py` lists every step with the permissions its API calls
+  require, marking optional extras.
+- Scripts print curated fields only, never a raw API response, and never an
+  id meant for people: agents show names, languages and line numbers.
 
 **Tests**: `tests/<skill>/` (outside the skill, never shipped) runs the real
 scripts against a local fake API. `npm test` runs them all; CI runs it on every

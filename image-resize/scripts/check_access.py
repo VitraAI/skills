@@ -33,8 +33,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 import _access  # noqa: E402
 import _common  # noqa: E402
 
-# Each step of this skill and the permissions its routes require (taken from
-# the routes' @RequireOrgPermissions). Keep in step with the scripts.
+# Each step of this skill and the permissions its API calls require. Keep in
+# step with the scripts.
 STEPS = [
     {"step": "Upload the image", "needs": ["asset:create"]},
     {"step": "Resize to new sizes", "needs": ["translate_photo.design_agent:create", "translate_photo.design_agent:read"]},

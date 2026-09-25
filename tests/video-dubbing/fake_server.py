@@ -168,6 +168,7 @@ class _Handler(BaseHTTPRequestHandler):
                     "inputData": {"speakers": st["speakers"], "emotionDetection": True, "multiSpeaker": True},
                     "humanValidationTaskIdentifier": "INSTANT-VOICE-CLONING-ENGINE",
                     "tasks": st.get("tasks", []),
+                    **({"progressSteps": st["progress_steps"]} if st.get("progress_steps") else {}),
                 })
             if url.path == "/api/auth/my-permissions":
                 perms = st.get("permissions")
@@ -354,7 +355,29 @@ class _Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"success": True, "chunks": new},
                                   {"X-Transcript-Revision": st["revision"]} if "expectedRevision" in body else None)
             elif action == "add":
-                st["cards"].insert(data["index"], data["transcript"])
+                if "transcript" in data:
+                    st["cards"].insert(data["index"], data["transcript"])
+                else:  # intent form: the server builds the line and checks the gap
+                    ids = [c["id"] for c in st["cards"]]
+                    at = ids.index(data.get("after") or data.get("before"))
+                    anchor = st["cards"][at]
+                    src = st["source"]
+                    after = "after" in data
+                    other = st["cards"][at + 1] if after and at + 1 < len(ids) else (
+                        st["cards"][at - 1] if not after and at > 0 else None)
+                    lo = anchor[src]["v"]["et"] if after else (other[src]["v"]["et"] if other else 0)
+                    hi = (other[src]["v"]["st"] if other else 1e9) if after else anchor[src]["v"]["st"]
+                    if data["start"] < lo or data["end"] > hi:
+                        return self._send(400, {"message": "The new line must fit without overlapping"})
+                    card = {"id": "new1"}
+                    for lang in [k for k, v in anchor.items() if isinstance(v, dict)]:
+                        card[lang] = {"tr": {"text": data.get("text", "") if lang == src else ""},
+                                      "a": None, "v": {"st": data["start"], "et": data["end"], "r": 1}, "subs": []}
+                    card[src]["speakerId"] = data.get("speakerId") or anchor[src].get("speakerId")
+                    st["cards"].insert(at + (1 if after else 0), card)
+                    st["last_action"] = body
+                    return self._send(200, {"success": True, "transcript": card},
+                                      {"X-Transcript-Revision": st["revision"]} if "expectedRevision" in body else None)
             elif action == "delete":
                 st["cards"] = [c for c in st["cards"] if c["id"] != data["transcriptId"]]
             st["last_action"] = body

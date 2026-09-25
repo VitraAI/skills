@@ -1,0 +1,34 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-tools` lists Vitra MCP tools that do the same
+# jobs; each `name` must be a tool the Vitra MCP server offers.
+about: >-
+  Make subtitles from a video, or translate a subtitle file you already have,
+  without opening the editor. Review and correct lines by number, add more
+  languages to the same job, then download SRT, VTT or other formats — or
+  render the video with the subtitles burned in. Progress shows in the same
+  steps as the Vitra webapp, and anything that costs credits is confirmed
+  first.
+when-to-use: >-
+  Reach for it for captions or subtitles — "subtitle this video", "translate
+  this SRT into Spanish", "add Hindi captions", "burn the subtitles in". Input
+  is a video or a subtitle file (SRT, VTT, ASS, SSA), local or a public URL.
+  For a voice-over in another language, use Video Dubbing.
+features:
+  - title: From a video or a file
+    description: Transcribes a video into timed subtitles, or translates an existing subtitle file.
+  - title: Script-guided
+    description: Follows a script you already have, keeping a timed script's cues as they are.
+  - title: Line-by-line review
+    description: Correct text and timing, split, merge or delete lines by number.
+  - title: More languages
+    description: Adds translated subtitle languages to the same job, from the reviewed source.
+  - title: Any format, or burned in
+    description: SRT, VTT, DFXP, STL, TXT and more, or the video with subtitles rendered in.
+use-cases:
+  - title: Accessible video
+    description: Caption product and training videos in their own language.
+  - title: Subtitle localization
+    description: Translate one SRT into every market's language with consistent terminology.
+  - title: Social clips
+    description: Burn subtitles into short videos for sound-off viewing.

@@ -16,7 +16,7 @@ stdout (progress goes to stderr). On failure the line is
 | Script | Options | Returns |
 |---|---|---|
 | `check_access` | — | `status`: ready / partial / blocked / unknown; `can`, `cannot` |
-| `list_languages` | — | One line per language: `<key>  <label>` |
+| `list_languages` | `<name> [...]` | `<key>  <label>` per match (search by name, key or code) |
 | `list_tms` | `--source-language`, `--target-language` | Memories that fit: name, languages, provider, engine |
 | `list_providers` | — | Connected providers; `[unavailable]` ones must not be offered |
 | `list_assets` | `--file` \| `--sha256` \| `--name` | Earlier uploads of the same video and the dubs made from them |
@@ -25,7 +25,7 @@ stdout (progress goes to stderr). On failure the line is
 
 | Script | Options | Returns |
 |---|---|---|
-| `dub_video` | `--file` \| `--url`, `--source-language`, `--target-language` (repeatable), `--tm-name`, `--name`, `--no-emotion-detection`, `--new-run` | `awaiting_voices` + `speakers`, `saved_cloned_voices`; or `review_ready` when it reconnected to a dub past that point |
+| `dub_video` | `--file` \| `--url`, `--source-language`, `--target-language` (repeatable), `--script`, `--tm-name`, `--name`, `--no-emotion-detection`, `--new-run` | `awaiting_voices` + `speakers`, `saved_cloned_voices`; or `review_ready` when it reconnected to a dub past that point |
 | `resume_dub` | `--job-id`, `--voice-map`, `--voice-mode clone\|library_auto` | `review_ready` or `failed` |
 | `add_language` | `--job-id`, `--language`, `--voice-map`, `--expected-revision` | `review_ready`, `exists`, `failed`; `VOICE_DECISION_NEEDED` error when a speaker has no voice |
 
@@ -33,19 +33,20 @@ stdout (progress goes to stderr). On failure the line is
 
 | Script | Options | Returns |
 |---|---|---|
-| `inspect_process` | `--job-id`, `--cards <lang>` | `progress` (the webapp's steps), `revision`, per-language `cards` and `issues`, `suggestions`; with `--cards`, every line |
-| `get_card_media` | `--job-id`, `--card-id`, `--language`, `--download DIR` | The source segment and the line's audio |
-| `list_issues` | `--job-id`, `--language` | `clean` or `blocked`, with `errors` and `warnings` |
+| `inspect_process` | `--job-id`, `--cards <lang>`, `--subtitles <lang>`, `--offset`, `--limit` | `progress` (the webapp's steps), `revision`, per-language `cards` and `issues`, `suggestions`; with `--cards`, numbered `lines`; with `--subtitles`, numbered `subtitle_lines` |
+| `get_card_media` | `--job-id`, `--line`, `--language`, `--download DIR` | The source segment and the line's audio |
+| `list_issues` | `--job-id`, `--language` | `clean` or `blocked`, with `errors` and `warnings` (each names its `line`) |
 | `fix_issues` | `--job-id`, `--language`, `--budget` | `clean`, `partial` or `failed`; every change made |
-| `patch_cards` | `--job-id`, `--language`, `--edits`, `--revision`, `--dry-run` | `changes`, `audio_cleared`, `audio_stale`, `affected_languages`, `revision_after` |
-| `card_ops` | an operation + its options (see [editing](editing.md)) | `cards`, `follow_up`, `revision_after` |
-| `regenerate_cards` | `--job-id`, `--language`, `--missing` \| `--stale` \| `--card-ids` | Per line: `has_audio`, `audio_changed`, `verified` |
+| `patch_cards` | `--job-id`, `--language`, `--edits` (by `line`), `--revision`, `--dry-run` | `changes`, `audio_cleared`, `audio_stale` (line numbers), `affected_languages`, `revision_after` |
+| `card_ops` | an operation + its options (see [editing](editing.md)) | `lines`, `renumbered`, `follow_up`, `revision_after` |
+| `edit_subtitles` | `--job-id`, `--language`, `--edits` \| `--split N --at-word W` \| `--merge N,M` \| `--delete N`, `--revision` | `changes`, `renumbered`, `revision_after` |
+| `regenerate_cards` | `--job-id`, `--language`, `--missing` \| `--stale` \| `--lines 3,7` | `lines`: per line `has_audio`, `audio_changed`, `verified` |
 
 ## Delivery
 
 | Script | Options | Returns |
 |---|---|---|
-| `export_dub` | `--job-id`, `--language`, `--revision`, `--resolution 4K\|2K\|1080\|720\|480\|360`, `--lip-sync` | `exported` + `export_id`, or `refused` + `reason` |
+| `export_dub` | `--job-id`, `--language`, `--revision`, `--resolution 4K\|2K\|1080\|720\|480\|360`, `--lip-sync`, `--subtitles <lang>`, `--generate-subtitles` | `exported` + `export_id`, or `refused` + `reason` (`no_subtitles`: that language has no subtitle lines yet) |
 | `download_export` | `--export-id`, `--out`, `--job-id` | `downloaded`, `path`, `sha256`, `media_check` |
 
 ## Recovery

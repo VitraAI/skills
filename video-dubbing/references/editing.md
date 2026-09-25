@@ -1,18 +1,21 @@
 # Editing a dub
 
-Always read first (`inspect_process.py --cards <lang>` gives each line's
-`card_id`, text, timing, emotion, audio and the current `revision`), show the
-user the proposed change, then apply it with that `--revision`. Every command
-reports each change as `before → after`: relay them all.
+Always read first: `inspect_process.py --cards <lang>` lists the lines,
+numbered as the user sees them (`line`), with text, timing, emotion, audio and
+the current `revision`. Show the user the proposed change, then apply it with
+that `--revision` (leave it out if it is null). Refer to lines by number, never
+by anything else. Every command reports each change as `before → after`: relay
+them all. After a split, merge, add or delete (`renumbered: true`), read the
+lines again before the next change.
 
 ## Change lines: `patch_cards.py`
 
 ```bash
 python3 scripts/patch_cards.py --job-id <job> --language <lang> --revision <rev> \
-  --edits '[{"card_id":"<id>","text":"...","emotion":"calm"},
-            {"card_id":"<id2>","start":12.4,"end":15.1},
-            {"card_id":"<id3>","rate":1.1},
-            {"card_id":"<id4>","review_status":"a"}]'
+  --edits '[{"line":3,"text":"...","emotion":"calm"},
+            {"line":4,"start":12.4,"end":15.1},
+            {"line":5,"rate":1.1},
+            {"line":6,"review_status":"a"}]'
 ```
 
 | Field | Values | What happens to the audio |
@@ -36,24 +39,36 @@ lists languages translated from the old text (re-translate those lines).
 
 | Operation | Command | Leaves to do |
 |---|---|---|
-| Split a line (2–3 parts, the source words unchanged) | `split --card-id <id> --chunks '["part 1","part 2"]'` | New lines have no translation or audio: `retranslate`, then `speak` or `regenerate_cards --missing` |
-| Merge consecutive lines of one speaker | `merge --card-ids <a>,<b>` | Merged line needs audio: `regenerate_cards --missing` |
-| Add a line in a gap | `add --after <id> --start S --end E --text "..."` | Empty in every dubbed language: `retranslate`, then `speak` |
-| Delete a line | `delete --card-id <id>` | — |
-| Move a line to another speaker | `assign-speaker --card-id <id> --speaker-id N` | Re-voice it: `speak` |
-| New speaker for a line | `add-speaker --card-id <id> --label "Name" --gender male\|female` | Give them a voice: `speaker-voice` |
-| One speaker's voice in one language | `speaker-voice --speaker-id N --language L --voice-id V --voice-name "..."` | That speaker's lines lose audio: `regenerate_cards --missing` |
-| Re-translate one line from the source | `retranslate --card-id <id> --language L` | Then `speak` |
-| Re-voice one line now (optionally another voice) | `speak --card-id <id> --language L [--voice-id V --voice-name "..."]` | — |
-| Subtitle lines | `sub-update`, `sub-delete`, `sub-split --at-word N`, `sub-merge --subtitle-ids a,b` | — |
+| Split a line (2–3 parts, the source words unchanged) | `split --line N --chunks '["part 1","part 2"]'` | New lines have no translation or audio: `retranslate`, then `speak` or `regenerate_cards --missing` |
+| Merge consecutive lines of one speaker | `merge --lines N,M` | Merged line needs audio: `regenerate_cards --missing` |
+| Add a line in the silence next to line N | `add --after N --start S --end E --text "..."` (or `--before N`) | Empty in every dubbed language: `retranslate`, then `speak` |
+| Delete a line | `delete --line N` | — |
+| Move a line to another speaker | `assign-speaker --line N --speaker-id S` | Re-voice it: `speak` |
+| New speaker for a line | `add-speaker --line N --label "Name" --gender male\|female` | Give them a voice: `speaker-voice` |
+| One speaker's voice in one language | `speaker-voice --speaker-id S --language L --voice-id V --voice-name "..."` | That speaker's lines lose audio: `regenerate_cards --missing` |
+| Re-translate one line from the source | `retranslate --line N --language L` | Then `speak` |
+| Re-voice one line now (optionally another voice) | `speak --line N --language L [--voice-id V --voice-name "..."]` | — |
 
 `retranslate` and `speak` spend credits and run immediately; ask first. Their
 `follow_up` field says what the change left to do.
 
+## Subtitle lines: `edit_subtitles.py`
+
+A dub's subtitles are their own numbered lines per language: list them with
+`inspect_process.py --job-id <job> --subtitles <lang>`, then
+
+```bash
+python3 scripts/edit_subtitles.py --job-id <job> --language <lang> \
+  --edits '[{"line":3,"text":"New text\nsecond row"},{"line":4,"start":12.5,"end":14}]'
+python3 scripts/edit_subtitles.py --job-id <job> --language <lang> --split 3 --at-word 6
+python3 scripts/edit_subtitles.py --job-id <job> --language <lang> --merge 3,4
+python3 scripts/edit_subtitles.py --job-id <job> --language <lang> --delete 3
+```
+
 ## Regenerate speech: `regenerate_cards.py`
 
 `--missing` (lines without audio), `--stale` (lines whose emotion changed) or
-`--card-ids a,b`. Only those lines are re-voiced. It confirms each line's new
+`--lines 3,7`. Only those lines are re-voiced. It confirms each line's new
 audio by comparing the file itself (`audio_changed`, `verified`).
 
 ## Repair blocking issues: `fix_issues.py`

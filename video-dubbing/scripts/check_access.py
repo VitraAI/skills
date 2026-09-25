@@ -35,8 +35,8 @@ import _common  # noqa: E402
 
 PL = "translate_video.process_log"
 
-# Each step of this skill and the permissions its routes require (taken from
-# the routes' @RequireOrgPermissions). Keep in step with the scripts.
+# Each step of this skill and the permissions its API calls require. Keep in
+# step with the scripts.
 STEPS = [
     {"step": "Upload the video", "needs": ["translate_video.upload:create"]},
     {"step": "Start the dub", "needs": [f"{PL}:create"]},

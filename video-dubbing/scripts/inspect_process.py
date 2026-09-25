@@ -9,7 +9,7 @@ the server actually holds rather than from what it remembers publishing.
   GET .../process-log/{id}/editor-output -> transcripts, speakers, settings
 
 Prints JSON:
-  { "status": "ok", "process_id", "revision", "run_status", "stage",
+  { "status": "ok", "job_id", "revision", "run_status", "progress",
     "source_language", "target_languages",
     "cards":  {"<lang>": {"total": 12, "with_audio": 11, "unreviewed": 4}},
     "issues": {"<lang>": {"errors": 1, "warnings": 2}},
@@ -21,9 +21,10 @@ Prints JSON:
 relay them to the user in order; never run one that spends credits without a
 yes.
 
-Add `--cards <lang>` to also print every card for one language — id, text,
-speaker, emotion, rate and current audio — which is what `patch_cards` needs
-to target a change.
+`--cards <lang>` adds that language's lines, numbered as people see them
+(`line`, text, speaker, timing, emotion, audio, review), 50 at a time (`more`
+gives the next page): what patch_cards and card_ops take. `--subtitles <lang>`
+lists its subtitle lines the same way, for edit_subtitles.py.
 
 Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
@@ -40,7 +41,9 @@ import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _cards  # noqa: E402
 import _common  # noqa: E402
+import _cue  # noqa: E402
 import _http  # noqa: E402
 import _progress  # noqa: E402
 
@@ -73,8 +76,7 @@ def fetch(base: str, headers: dict, path: str, label: str) -> dict:
 def transcripts_of(editor: dict) -> list:
     """Cards live at `data.OUTPUT[0].transcripts` in the editor payload.
 
-    The document is the `{ OUTPUT: [root] }` envelope the aggregate worker
-    writes — reading `data.transcripts` directly finds nothing and reports every
+    Reading `data.transcripts` directly finds nothing and would report every
     dub as having zero cards.
     """
     data = editor.get("data") if isinstance(editor.get("data"), dict) else editor
@@ -111,10 +113,11 @@ def card_summary(rows: list, lang: str) -> dict:
 
 
 def describe_cards(rows: list, lang: str) -> list:
-    """One entry per card — enough for the agent to choose what to patch."""
+    """One entry per line, numbered as people see them; empty fields left out."""
+    numbers = _cards.line_numbers(rows)
     out = []
     for row in rows:
-        if not isinstance(row, dict):
+        if not isinstance(row, dict) or str(row.get("id")) not in numbers:
             continue
         block = row.get(lang)
         if not isinstance(block, dict):
@@ -122,27 +125,21 @@ def describe_cards(rows: list, lang: str) -> list:
         tr = block.get("tr") if isinstance(block.get("tr"), dict) else {}
         audio = block.get("a") if isinstance(block.get("a"), dict) else {}
         video = block.get("v") if isinstance(block.get("v"), dict) else {}
-        out.append(
-            {
-                "card_id": row.get("id"),
-                "text": tr.get("text"),
-                "speaker": block.get("speakerId") or row.get("speakerId"),
-                "emotion": block.get("emotion"),
-                "keep_source": bool(block.get("keepSourceAudio")),
-                "lip_sync": bool(block.get("isLipSync")),
-                "review_status": block.get("rs"),
-                "start": video.get("st"),
-                "end": video.get("et"),
-                # Raw audio plus the rate applied at playback — the rate is not
-                # baked into the file, so report both rather than conflating.
-                "audio": {
-                    "url": audio.get("url"),
-                    # `a.d` is SECONDS (a 4s clip reads 4.47), not ms.
-                    "duration_seconds": audio.get("d"),
-                    "audio_rate": audio.get("r"),
-                },
-            }
-        )
+        line = {
+            "line": numbers[str(row.get("id"))],
+            "text": tr.get("text"),
+            "speaker": block.get("speakerId") or row.get("speakerId"),
+            "start": video.get("st"),
+            "end": video.get("et"),
+            "emotion": block.get("emotion"),
+            # `a.d` is seconds; the rate is applied at playback, not baked in.
+            "audio_seconds": audio.get("d") if audio.get("url") else None,
+            "rate": audio.get("r"),
+            "review": {"v": "verified", "a": "approved"}.get(block.get("rs"), "unreviewed"),
+            "keep_source": bool(block.get("keepSourceAudio")) or None,
+            "lip_sync": bool(block.get("isLipSync")) or None,
+        }
+        out.append({k: v for k, v in line.items() if v is not None})
     return out
 
 
@@ -190,13 +187,13 @@ def suggest(result: dict, job_id: str) -> list[dict]:
     if result.get("background_jobs"):
         add("Wait for the running job, then check again",
             "a job is still changing this dub (" + ", ".join(
-                f"{j.get('operation')} {j.get('language') or ''}".strip()
-                for j in result["background_jobs"]) + ")",
+                j["what"] for j in result["background_jobs"]) + ")",
             f"inspect_process.py --job-id {job_id}", False)
         return out
 
     exports = result.get("exports") or {}
     revision = result.get("revision")
+    rev = f" --revision {revision}" if revision is not None else ""
     stale = result.get("audio_stale") or {}
     for lang in result.get("target_languages") or []:
         cards = (result.get("cards") or {}).get(lang) or {}
@@ -228,11 +225,11 @@ def suggest(result: dict, job_id: str) -> list[dict]:
         if done.get("export_id") and done.get("revision") == revision:
             add(f"Download the {lang} video",
                 "it is already exported at the current version",
-                f"download_export.py --export-id <{lang} export> --out ./{lang}.mp4 --job-id {job_id}", False)
+                f"download_export.py --export-id {done['export_id']} --out ./{lang}.mp4 --job-id {job_id}", False)
         else:
             add(f"Export the {lang} video",
                 "no blocking issues remain" + (" (the earlier export is out of date)" if done else ""),
-                f"export_dub.py --job-id {job_id} --language {lang} --revision {revision}", True)
+                f"export_dub.py --job-id {job_id} --language {lang}{rev}", True)
     return out
 
 
@@ -241,8 +238,7 @@ def running_jobs(base: str, headers: dict, job_id: str) -> list:
     import _jobs
 
     return [
-        {"job_id": r.get("id"), "operation": r.get("operation"),
-         "language": r.get("language"), "status": r.get("status"), "progress": r.get("progress")}
+        {"what": _jobs.describe(r), "progress": r.get("progress")}
         for r in _jobs.list_children(base, headers, job_id)
         if r.get("status") not in (_jobs.DONE, _jobs.FAILED)
     ]
@@ -268,8 +264,14 @@ def main() -> int:
     parser.add_argument(
         "--cards",
         metavar="LANGUAGE_KEY",
-        help="Also print every card for this language (id, text, emotion, audio).",
+        help="Also list this language's lines (text, speaker, timing, emotion, audio).",
     )
+    parser.add_argument(
+        "--subtitles", metavar="LANGUAGE_KEY",
+        help="Also list this language's subtitle lines (for edit_subtitles.py).",
+    )
+    parser.add_argument("--offset", type=int, default=0, help="With --cards/--subtitles: first to show.")
+    parser.add_argument("--limit", type=int, default=50, help="With --cards/--subtitles: how many.")
     args = parser.parse_args()
 
     base = _common.base_url()
@@ -292,13 +294,11 @@ def main() -> int:
 
     result = {
         "status": "ok",
-        "process_id": args.job_id,
-        "stage": status_row.get("stage") or status_row.get("activeTaskIdentifier"),
+        "job_id": args.job_id,
         # Pass to patch_cards as --revision so an edit made against a stale read
         # is refused instead of overwriting someone else's change.
         "revision": editor.get("revision"),
         "run_status": status_row.get("status"),
-        "progress": status_row.get("progress"),
         "source_language": status_row.get("sourceLanguage"),
         "target_languages": targets,
         "cards": {lang: card_summary(rows, lang) for lang in targets},
@@ -308,7 +308,7 @@ def main() -> int:
             "multi_speaker": bool((status_row.get("inputData") or {}).get("multiSpeaker")),
         },
         "awaiting_voices": bool(status_row.get("awaitingHumanValidation")),
-        # The webapp's step-by-step view of the run (see _progress.py).
+        # The run's progress in the webapp's steps, as the API reports it.
         "progress": _progress.dub_progress(status_row),
         "background_jobs": running_jobs(base, headers, args.job_id),
         "usage": usage(base, headers),
@@ -320,7 +320,11 @@ def main() -> int:
     saved = _common.load_manifest(args.job_id)
     if saved:
         result["checkpoint"] = str(_common.manifest_path(args.job_id))
-        result["audio_stale"] = {k: v for k, v in (saved.get("audio_stale") or {}).items() if v}
+        numbers = _cards.line_numbers(rows)
+        result["audio_stale"] = {
+            k: sorted(numbers[c] for c in v if c in numbers)
+            for k, v in (saved.get("audio_stale") or {}).items() if v
+        }
         result["exports"] = {
             lang: {k: e.get(k) for k in ("export_id", "revision", "resolution")}
             for lang, e in (saved.get("exports") or {}).items()
@@ -336,9 +340,18 @@ def main() -> int:
                 f"[warn] '{args.cards}' is not a target language of this dub "
                 f"({', '.join(targets) or 'none'})\n"
             )
-        result["card_detail"] = {args.cards: describe_cards(rows, args.cards)}
+        got = _cue.page(describe_cards(rows, args.cards), args.offset, args.limit, f"--cards {args.cards}")
+        result["lines"] = {"language": args.cards, "total": got["total"], "items": got["items"]}
+        if "more" in got:
+            result["lines"]["more"] = got["more"]
+    if args.subtitles:
+        got = _cue.page(_cue.subtitle_lines(rows, args.subtitles), args.offset, args.limit,
+                        f"--subtitles {args.subtitles}")
+        result["subtitle_lines"] = {"language": args.subtitles, "total": got["total"], "items": got["items"]}
+        if "more" in got:
+            result["subtitle_lines"]["more"] = got["more"]
 
-    print(json.dumps(result))
+    print(json.dumps(result, ensure_ascii=False))
     return _common.EXIT_OK
 
 
