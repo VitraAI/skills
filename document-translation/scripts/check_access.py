@@ -33,6 +33,10 @@ STEPS = [
     {"step": "AI proofreading and back-translation", "needs": ["playground.document:create"], "optional": True},
     {"step": "Quality report on a translation", "needs": ["playground.document:read", "aiqe:create", "aiqe:read"],
      "optional": True},
+    {"step": "Correct and verify lines, sync with the memory", "needs": ["playground.document:update"],
+     "optional": True},
+    {"step": "Rename, file and save translations to the Drive", "needs": ["playground.document:update"],
+     "optional": True},
     {"step": "Apply a quality report's fixes", "needs": ["playground.document:update", "aiqe:read"],
      "optional": True},
 ]

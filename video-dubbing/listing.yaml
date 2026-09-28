@@ -28,6 +28,8 @@ features:
     description: Lists blocking issues and fixes them within a budget, disclosing every change.
   - title: Resumable runs
     description: Picks up from the failed step and reuses identical uploads instead of redoing paid work.
+  - title: Full control
+    description: Stop a job, file it, sync lines with your memory, or export every line as a spreadsheet.
 use-cases:
   - title: Localized marketing video
     description: Turn one product video into several market-ready language versions.
@@ -66,3 +68,5 @@ mcp-tools:
 related-skills:
   - name: video-subtitles
     why: Subtitles without a voice-over, or translated captions for the same video.
+  - name: voice-cloning
+    why: Clone a speaker's voice so the dub keeps it in every language.

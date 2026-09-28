@@ -58,6 +58,11 @@ STEPS = [
      "optional": True},
     {"step": "Type a language's script from Latin letters", "needs": ["translate_video.transliteration:read"],
      "optional": True},
+    {"step": "Stop, file and sync jobs; spreadsheet of lines", "needs": ["translate_video.process_log:update",
+                                                                        "translate_video.process_log:read"],
+     "optional": True},
+    {"step": "Save an export to the Drive", "needs": ["translate_video.process_log:create"], "optional": True},
+    {"step": "Dub a video from the Drive", "needs": ["translate_video.upload:create", "asset:read"], "optional": True},
 ]
 
 

@@ -145,6 +145,18 @@ class DocumentTranslationTest(SkillCase):
         self.assertEqual(out["error"]["code"], "TM_CHOICE_NEEDED")
         self.assertEqual(self.fake.sent("POST", f"{DOC}/translate"), [])
 
+    def test_a_choice_passed_back_as_shown_picks_that_memory(self) -> None:
+        doc = self.dir / "c.docx"
+        doc.write_bytes(b"PK")
+        _, asked = self.run_script("document-translation", "translate_document", "--file", str(doc),
+                                   "--target-language", "French")
+        choice = next(c for c in asked["error"]["choices"] if c.startswith("Beta"))
+        code, out = self.run_script("document-translation", "translate_document", "--file", str(doc),
+                                    "--target-language", "French", "--tm-name", choice,
+                                    "--out-dir", str(self.dir / "out"))
+        self.assertEqual((code, out["memory"]), (0, "Beta"))
+        self.assertIn(b"22222222-2222-4222-8222-222222222222", self.fake.sent("POST", f"{DOC}/translate")[0])
+
     def test_a_file_is_translated_downloaded_and_never_twice(self) -> None:
         doc = self.dir / "c.docx"
         doc.write_bytes(b"PK")
@@ -184,6 +196,20 @@ class SpeechTest(SkillCase):
                                     "--provider", "elevenlabs", "--name", "Hi", "--out-dir", str(self.dir))
         self.assertEqual(code, 0, out)
         self.assertEqual(len(out["files"]), 2)
+        self.assertNotIn("v1", json.dumps(out), "the voice's id is never shown")
+
+    def test_pronunciations_ride_on_every_clip(self) -> None:
+        self.fake.routes[("PUT", f"{PG}/video-process/session/*")] = {"id": "s"}
+        self.fake.routes[("GET", f"{PG}/video-process/*")] = self.cards
+        code, out = self.run_script("text-to-speech", "speak", "--text", "SQL is fast.", "--language",
+                                    "english_united_states", "--voice-id", "v1", "--provider", "elevenlabs",
+                                    "--say", "SQL=sequel", "--out-dir", str(self.dir))
+        self.assertEqual(code, 0, out)
+        cards = [c for _, p, b in self.fake.calls if p.startswith(f"{PG}/video-process/session/") for c in b["cards"]]
+        self.assertTrue(cards and all(c["pronunciations"] == [{"match": "SQL", "alias": "sequel"}] for c in cards))
+        code, bad = self.run_script("text-to-speech", "speak", "--text", "x", "--language", "english_united_states",
+                                    "--voice-id", "v1", "--provider", "elevenlabs", "--say", "SQL")
+        self.assertIn("--say takes WORD=HOW", bad["error"]["message"])
         order = [(m, p) for m, p, _ in self.fake.calls if m in ("PUT", "POST")]
         self.assertTrue(order[0][1].startswith(f"{PG}/video-process/session/"), "the session is saved first")
         gens = self.fake.sent("POST", f"{PG}/tts/generate")
@@ -262,11 +288,13 @@ class MemoryAndQualityTest(SkillCase):
         pairs = self.dir / "p.csv"
         pairs.write_text("source,translation\nA,a\nB,b\n")
         code, out = self.run_script("translation-quality", "evaluate", "--pairs", str(pairs),
-                                    "--source-language", "en-US", "--target-language", "German")
+                                    "--source-language", "English (United States)", "--target-language", "German")
         self.assertEqual(code, 0, out)
         self.assertEqual((out["score"], out["passed"], out["lines_with_errors"]), (82, True, 1))
         self.assertEqual(out["worst"][0]["line"], 2)
         sent = self.fake.sent("POST", "/v1/aiqe/reports")[0]
+        # names and memory spellings go out as the codes the report takes
+        self.assertEqual((sent["sourceLanguage"], sent["targetLanguage"]), ("en-US", "de-DE"))
         self.assertEqual(sent["segments"], [{"key": "1", "source": "A", "target": "a"},
                                             {"key": "2", "source": "B", "target": "b"}])
 

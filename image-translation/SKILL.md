@@ -15,13 +15,13 @@ compatibility: >-
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "2.0"
+  version: "2.1"
   display-name: Image Translation
   category: Localization
   tags: Image, Translation
   source: vitra
   added: "2026-09-10"
-  updated: "2026-09-25"
+  updated: "2026-09-28"
 ---
 
 # Image Translation
@@ -53,7 +53,10 @@ admin can grant them. Key missing (exit 2): relay the setup lines it prints.
 ```
 - [ ] 1. Pick a translation memory   (⏸ ask if several)
 - [ ] 2. Translate                   → show the image
-- [ ] 3. Other shapes                (only if asked)
+- [ ] 3. More languages              (only if asked, or several were asked for)
+- [ ] 4. Other shapes                (only if asked)
+- [ ] 5. Correct the text            (only if asked)
+- [ ] 6. Save, file, find again      (only if asked)
 ```
 
 ### 1. Translation memory
@@ -88,10 +91,24 @@ python3 scripts/translate_image.py --file poster.png --target-language French \
 ```
 
 Returns `image_url` (show it), `memory` (the memory used, or none) and `job_id`
-(keep it for step 3). If it stops with `TM_CONTEXT_NEEDED`, ask the question in
+(keep it for steps 3 and 4; never show it). If it stops with `TM_CONTEXT_NEEDED`, ask the question in
 `error.ask` and run again with `--tm-context`.
 
-### 3. Other aspect ratios (only if asked)
+### 3. More languages
+
+Asked for several languages? Translate the first as in step 2, then add the
+rest to the same image in one command:
+
+```bash
+python3 scripts/add_language.py --job-id <job_id> --target-language German --target-language Spanish
+```
+
+The image is analysed once, so each extra language costs only its translation.
+A language the image already has comes back as is (`reused: true`); add
+`--again` only if the user wants it redone. Show each `image_url` with its
+language.
+
+### 4. Other aspect ratios (only if asked)
 
 ```bash
 python3 scripts/resize_translated.py --job-id <job_id> --aspect-ratio 9:16
@@ -100,6 +117,32 @@ python3 scripts/resize_translated.py --job-id <job_id> --aspect-ratio 9:16
 Reuses the translation already done: one call per ratio (`9:16`, `1:1`, `16:9`).
 Map a platform to its ratio yourself ("Instagram story" → `9:16`). For exact
 pixel sizes, or an image that wasn't translated here, use image-resize.
+
+### 5. Correct the text (only if asked, or the user spots a mistake)
+
+```bash
+python3 scripts/edit_text.py --job-id <job_id> [--language French]          # the lines, numbered
+python3 scripts/edit_text.py --job-id <job_id> --set "3=Promo" [--keep 5]   # ⏸ re-renders
+python3 scripts/edit_text.py --job-id <job_id> --verify all [--sync-to-memory]
+```
+
+Show the lines as `before → after` by number. `--set` changes a line and
+re-renders the image as a new version (only unchanged lines are translated
+again); `--keep` leaves a line in the original language (brand names).
+`--verify` marks lines checked; `--sync-to-memory` saves them to the memory.
+
+### 6. Save, file, find again
+
+```bash
+python3 scripts/save_to_drive.py --job-id <job_id> [--language French] [--folder "Q3 creatives"] [--name …]
+python3 scripts/images.py list [--search poster] [--language French]    # past images, newest first
+python3 scripts/images.py move --job-id <job_id> --folder "Diwali"        # work folder, or Unassigned
+python3 scripts/images.py retry --job-id <job_id>                         # redo what failed
+python3 scripts/images.py template --job-id <job_id> --language French    # campaign images only
+```
+
+`images.py list` gives each image's `job_id` for these commands; show the
+name and languages, never the id.
 
 ## Rules
 

@@ -14,13 +14,13 @@ compatibility: >-
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.0"
+  version: "1.2"
   display-name: Text to Speech
   category: Audio
   tags: Audio, Voice, Popular
   source: vitra
   added: "2026-09-26"
-  updated: "2026-09-26"
+  updated: "2026-09-28"
 ---
 
 # Text to Speech
@@ -73,6 +73,19 @@ python3 scripts/speak.py --text-file script.txt --language <key> --voice-id <id>
 Generates every passage together, waits and saves `files` (one per passage) in
 `--out-dir` (default `./speech`). Re-running the same command reconnects:
 finished clips are kept, failed ones are made again.
+
+**A word read wrong** (a brand, a name, an acronym): add `--say "WORD=HOW"`,
+one per word, spelled the way it should sound, e.g. `--say "SQL=sequel"
+--say "Nguyen=win"`. Changing a `--say` makes new clips rather than reusing old
+ones.
+
+### Save to the Drive
+
+```bash
+python3 scripts/save_speech.py --speech <speech> [--folder "Voiceovers"] [--name "Welcome VO"]
+```
+
+`speech` comes from speak.py; never show it.
 
 ## Rules
 

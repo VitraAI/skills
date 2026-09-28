@@ -100,6 +100,212 @@ class DitaTest(SkillCase):
                          {"playgroundLogId": RUN, "keys": [f"{TOPIC}:4"], "reportId": "r1"})
 
 
+class MissingKeyTest(SkillCase):
+    def test_a_missing_key_says_how_to_get_one(self) -> None:
+        import os, subprocess
+        env = {k: v for k, v in os.environ.items() if k != "VITRA_UNIVERSE_API_KEY"}
+        p = subprocess.run([sys.executable, str(Path(__file__).resolve().parents[2] / "projects" / "scripts" /
+                            "projects.py"), "list"], capture_output=True, text=True, env=env, cwd=self.dir)
+        out = json.loads(p.stdout.strip().splitlines()[-1])
+        self.assertEqual((p.returncode, out["error"]["code"]), (2, "AUTH_MISSING"))
+        self.assertTrue(out["error"]["sign_up"].endswith("/auth/sign-up"))
+        self.assertIn("Settings → API keys", out["error"]["ask"])
+        self.assertEqual(self.fake.calls, [])  # stops before any network call
+
+
+IT = "/v1/galaxy/translate-photo/image-translator"
+JOB = "55555555-5555-4555-8555-555555555555"
+
+
+class ImageAddLanguageTest(SkillCase):
+    routes = {
+        ("GET", f"{IT}/{JOB}/translations"): {"statusCode": 200, "versions": [  # the server's shape: newest first
+            {"id": "v1", "targetLanguage": "French", "status": "completed", "translatedImageUrl": "https://img/fr.png"}]},
+        ("GET", f"{IT}/{JOB}/translations/v1"): {"status": "completed", "translatedImageUrl": "https://img/fr.png",
+                                                 "targetLanguage": "French", "translationData": {
+            "r-a": {"source": "SALE", "translated": "SOLDES", "status": "u"},
+            "r-b": {"source": "Acme", "translated": "Acme", "status": "u"}}},
+        ("GET", "/v1/folder"): [{"id": "f-1", "name": "Diwali"}],
+        ("PATCH", f"{IT}/{JOB}/folder"): {"ok": True},
+        ("PUT", f"{IT}/{JOB}/translations/v1/bulk-region-status"): {"ok": True},
+        ("GET", "/v1/assets-management"): {"data": [{"id": "d-1", "name": "Q3 creatives", "type": "folder"}]},
+        ("POST", f"{IT}/versions/v1/save-to-drive"): {"data": {"id": "a-1", "name": "sale-fr.png"}},
+        ("GET", f"{IT}/jobs/list"): {"data": [{"id": JOB, "name": "poster.png", "tmName": "Acme", "createdAt":
+            "2026-09-28T10:00:00Z", "translationVersions": [
+                {"id": "v1", "targetLanguage": "French", "status": "completed",
+                 "translatedImageUrl": "https://img/fr.png"}]}], "total": 1},
+        ("POST", f"{IT}/{JOB}/translate"): {"translationVersionId": "v2", "status": "processing"},
+        ("GET", f"{IT}/{JOB}/translations/v2"): {"status": "completed", "targetLanguage": "German",
+                                                 "translatedImageUrl": "https://img/de.png"},
+    }
+
+    def test_new_languages_reuse_the_analysis_and_done_ones_are_not_redone(self) -> None:
+        code, out = self.run_script("image-translation", "add_language", "--job-id", JOB,
+                                    "--target-language", "french", "--target-language", "German",
+                                    "--poll-interval", "0")
+        self.assertEqual((code, out["status"]), (0, "completed"), out)
+        self.assertEqual(out["languages"], [
+            {"target_language": "french", "image_url": "https://img/fr.png", "reused": True},
+            {"target_language": "German", "image_url": "https://img/de.png"}])
+        self.assertEqual(self.fake.sent("POST", f"{IT}/{JOB}/translate"), [{"targetLanguage": "German"}])
+        self.assertFalse(ids_in(out, JOB, "v2"))
+
+    def test_lines_are_numbered_and_a_change_rerenders_with_overrides(self) -> None:
+        code, out = self.run_script("image-translation", "edit_text", "--job-id", JOB)
+        self.assertEqual((code, [l["translation"] for l in out["lines"]]), (0, ["SOLDES", "Acme"]), out)
+        self.assertFalse(ids_in(out, "r-a", "v1"))
+        self.fake.routes[("GET", f"{IT}/{JOB}/translations/v2")] = {
+            "status": "completed", "translatedImageUrl": "https://img/fr2.png", "targetLanguage": "French",
+            "translationData": {"r-a": {"source": "SALE", "translated": "PROMO"},
+                                "r-b": {"source": "Acme", "translated": "Acme", "kept": True}}}
+        code, out = self.run_script("image-translation", "edit_text", "--job-id", JOB, "--set", "1=PROMO",
+                                    "--keep", "2", "--poll-interval", "0")
+        self.assertEqual((code, out["status"], out["image_url"]), (0, "edited", "https://img/fr2.png"), out)
+        self.assertEqual(self.fake.sent("POST", f"{IT}/{JOB}/translate")[-1], {
+            "targetLanguage": "French", "overrides": {"r-a": {"editedText": "PROMO"}, "r-b": {"action": "keep"}}})
+
+    def test_verify_save_move_and_list_by_name(self) -> None:
+        code, out = self.run_script("image-translation", "edit_text", "--job-id", JOB, "--verify", "all")
+        self.assertEqual(self.fake.sent("PUT", f"{IT}/{JOB}/translations/v1/bulk-region-status")[0],
+                         {"regionIds": ["r-a", "r-b"], "status": "v"})
+        code, out = self.run_script("image-translation", "save_to_drive", "--job-id", JOB, "--folder", "Q3 creatives")
+        self.assertEqual((code, out["status"], out["folder"]), (0, "saved", "Q3 creatives"), out)
+        self.assertEqual(self.fake.sent("POST", f"{IT}/versions/v1/save-to-drive")[0], {"folderId": "d-1"})
+        code, out = self.run_script("image-translation", "images", "move", "--job-id", JOB, "--folder", "diwali")
+        self.assertEqual(self.fake.sent("PATCH", f"{IT}/{JOB}/folder")[0], {"folderId": "f-1"})
+        code, out = self.run_script("image-translation", "images", "list")
+        self.assertEqual(out["images"][0]["name"], "poster.png")
+        self.assertEqual(out["images"][0]["languages"], ["French"])
+
+
+AD = "/v1/galaxy/translate-photo/adapt"
+STORY = {"id": "var-1", "status": "PLAN_PENDING", "targetConfig": {"width": 1080, "height": 1920, "label": "Story"},
+         "reviewData": {"textReview": {"mapped_text": [
+             {"original_id": "t9", "status": "typo", "detected_text": "SAEL", "suggested_correction": "SALE"},
+             {"original_id": "t10", "status": "ok"}]},
+             "visualReview": {"mapped_visuals": [{"original_id": "v3", "status": "missing", "element_type": "logo",
+                                                  "factual_observation": "logo cut off",
+                                                  "suggested_correction": "show the whole logo"}]}}}
+
+
+class ResizeSizesTest(SkillCase):
+    routes = {("GET", f"{AD}/asset-1/variants"): {"data": [STORY]},
+              ("GET", f"{AD}/variants/var-1"): {"data": STORY},
+              ("POST", f"{AD}/variants/var-1/approve-plan"): {"ok": True},
+              ("POST", f"{AD}/variants/var-1/fix-issues"): {"ok": True},
+              ("POST", f"{AD}/variants/export"): {"data": {"results": [
+                  {"variantId": "var-1", "filename": "story.png", "base64": "UE5H"}], "failed": []}}}
+
+    def test_pro_plan_is_approved_by_label_and_issues_fixed_by_number(self) -> None:
+        code, out = self.run_script("image-resize", "sizes", "list", "--asset", "asset-1")
+        self.assertEqual(out["sizes"][0]["size"], "Story")
+        self.assertIn("approve", out["sizes"][0]["next"])
+        self.assertEqual(out["sizes"][0]["issues"], 2)
+        code, out = self.run_script("image-resize", "sizes", "approve", "--asset", "asset-1", "--size", "1080x1920")
+        self.assertEqual((code, out["status"]), (0, "approved"))
+        code, out = self.run_script("image-resize", "sizes", "fix", "--asset", "asset-1", "--size", "story",
+                                    "--issues", "2")
+        self.assertEqual(self.fake.sent("POST", f"{AD}/variants/var-1/fix-issues")[0], {"selectedIssueIds": ["v3"]})
+        self.assertFalse(ids_in(out, "var-1", "v3"))
+
+    def test_export_writes_each_size(self) -> None:
+        code, out = self.run_script("image-resize", "sizes", "export", "--asset", "asset-1",
+                                    "--out-dir", str(self.dir / "o"))
+        self.assertEqual((code, out["status"]), (0, "exported"), out)
+        self.assertEqual(Path(out["files"][0]["path"]).read_bytes(), b"PNG")
+
+
+SEGS = {"data": [
+    {"id": "01", "segmentId": "s-0", "layerIndex": 0, "source": "Welcome", "target": "Bienvenu", "status": "unverified",
+     "location": {"label": "Slide 1"}},
+    {"id": "02", "segmentId": "s-1", "layerIndex": 1, "source": "Price", "target": "Prix", "status": "verified"}],
+    "total": 2}
+
+
+class DocumentEditTest(SkillCase):
+    routes = {("GET", f"{DOC}/logs/t1/segments"): SEGS,
+              ("PUT", f"{DOC}/update-phrase"): {"ok": True},
+              ("PUT", f"{DOC}/bulk-verify-phrases"): {"ok": True},
+              ("PUT", f"{DOC}/sync-to-tm"): {"ok": True},
+              ("GET", "/v1/folder"): [{"id": "f-9", "name": "Contracts"}],
+              ("PATCH", f"{DOC}/logs/t1/folder"): {"ok": True},
+              ("GET", f"{DOC}/logs"): {"data": [{"id": "t1", "name": "contract.docx", "sourceLanguage": "English",
+                                                 "targetLanguage": "French", "status": "DONE",
+                                                 "PlaygroundLogTm": {"name": "Acme"}}], "totalLogs": 1}}
+
+    def test_lines_are_numbered_with_where_and_corrected_by_number(self) -> None:
+        code, out = self.run_script("document-translation", "edit_document", "--translation", "t1")
+        self.assertEqual((code, out["lines"][0]), (0, {"line": 1, "source": "Welcome", "translation": "Bienvenu",
+                                                        "status": "unverified", "where": "Slide 1"}))
+        self.assertFalse(ids_in(out, "s-0"))
+        code, out = self.run_script("document-translation", "edit_document", "--translation", "t1",
+                                    "--set", "1=Bienvenue", "--everywhere", "--verify", "all", "--sync-to-memory")
+        self.assertEqual(out["changed"], [{"line": 1, "before": "Bienvenu", "after": "Bienvenue"}])
+        self.assertEqual(self.fake.sent("PUT", f"{DOC}/update-phrase")[0], {
+            "playgroundLogId": "t1", "sourceText": "Welcome", "updatePhrase": "Bienvenue", "layerIndex": 0,
+            "propagateToDuplicates": True})
+        self.assertEqual(self.fake.sent("PUT", f"{DOC}/bulk-verify-phrases")[0]["layers"], [0, 1])
+        self.assertEqual(self.fake.sent("PUT", f"{DOC}/sync-to-tm")[0], {"playgroundLogId": "t1"})
+
+    def test_past_translations_listed_by_name_and_moved_by_folder_name(self) -> None:
+        code, out = self.run_script("document-translation", "documents", "list")
+        self.assertEqual((out["documents"][0]["name"], out["documents"][0]["memory"]), ("contract.docx", "Acme"))
+        self.run_script("document-translation", "documents", "move", "--translation", "t1", "--folder", "Contracts")
+        self.assertEqual(self.fake.sent("PATCH", f"{DOC}/logs/t1/folder")[0], {"folderId": "f-9"})
+
+
+PG = "/v1/galaxy/playground"
+
+
+class PlaygroundFollowUpsTest(SkillCase):
+    routes = {("POST", f"{PG}/lip-sync/quote"): {"credits": 90, "balance": 50, "seconds": 45, "model": "sync-3"},
+              ("GET", f"{PG}/voice-clone"): {"data": [{"id": "vc-1", "name": "Priya"}]},
+              ("DELETE", f"{PG}/voice-clone/vc-1"): {"ok": True},
+              ("POST", f"{PG}/tts/sessions/sess-1/save-to-assets"): {"data": {"name": "Welcome VO"}}}
+
+    def test_lip_sync_quote_says_whether_the_balance_covers_it(self) -> None:
+        code, out = self.run_script("lip-sync", "lipsyncs", "quote", "--seconds", "45")
+        self.assertEqual((code, out["credits"], out["enough"]), (0, 90, False))
+
+    def test_a_clone_is_deleted_by_name_after_a_yes(self) -> None:
+        code, out = self.run_script("voice-cloning", "clones", "delete", "--voice", "priya")
+        self.assertEqual(out["error"]["code"], "CONFIRM_NEEDED")
+        self.assertEqual(self.fake.sent("DELETE", f"{PG}/voice-clone/vc-1"), [])
+        code, out = self.run_script("voice-cloning", "clones", "delete", "--voice", "priya", "--confirm")
+        self.assertEqual((code, out["status"]), (0, "deleted"))
+
+    def test_speech_is_saved_to_the_drive(self) -> None:
+        code, out = self.run_script("text-to-speech", "save_speech", "--speech", "sess-1", "--name", "Welcome VO")
+        self.assertEqual((code, out["status"], out["file"]), (0, "saved", "Welcome VO"))
+
+
+PLV = "/v1/galaxy/translate-video/process-log"
+
+
+class JobToolsTest(SkillCase):
+    routes = {("POST", f"{PLV}/job-1/cancel"): {"ok": True},
+              ("POST", f"{PLV}/job-1/sync-to-tm"): {"operationId": None, "total": 42},
+              ("GET", f"{PLV}/job-1/excel-data"): [{"Line": 1, "English": "Hi", "Hindi": "नमस्ते"}],
+              ("GET", "/v1/folder"): [{"id": "f-2", "name": "Webinars"}],
+              ("PATCH", f"{PLV}/job-1/folder"): {"ok": True}}
+
+    def test_cancel_asks_first_and_sync_reports_counts(self) -> None:
+        for skill in ("video-dubbing", "video-subtitles"):
+            code, out = self.run_script(skill, "job_tools", "cancel", "--job-id", "job-1")
+            self.assertEqual(out["error"]["code"], "CONFIRM_NEEDED")
+        self.assertEqual(self.fake.sent("POST", f"{PLV}/job-1/cancel"), [])
+        code, out = self.run_script("video-dubbing", "job_tools", "sync", "--job-id", "job-1", "--to-memory")
+        self.assertEqual((code, out), (0, {"status": "synced_to_memory", "lines": 42}))
+
+    def test_sheet_is_a_csv_excel_can_open_and_move_goes_by_folder_name(self) -> None:
+        code, out = self.run_script("video-dubbing", "job_tools", "sheet", "--job-id", "job-1",
+                                    "--out", str(self.dir / "lines.csv"))
+        self.assertEqual((code, out["rows"]), (0, 1), out)
+        self.assertIn("नमस्ते", (self.dir / "lines.csv").read_text(encoding="utf-8-sig"))
+        self.run_script("video-subtitles", "job_tools", "move", "--job-id", "job-1", "--folder", "webinars")
+        self.assertEqual(self.fake.sent("PATCH", f"{PLV}/job-1/folder")[0], {"folderId": "f-2"})
+
+
 class DocumentExtrasTest(SkillCase):
     routes = {
         ("POST", DOC + "/ai-proofreading/publish"): {"ok": True},

@@ -13,13 +13,13 @@ compatibility: >-
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.0"
+  version: "1.1"
   display-name: Voice Cloning
   category: Audio
   tags: Audio, Voice
   source: vitra
   added: "2026-09-26"
-  updated: "2026-09-26"
+  updated: "2026-09-28"
 ---
 
 # Voice Cloning
@@ -66,6 +66,13 @@ python3 scripts/clone_voice.py --sample a.wav --sample b.wav --name "Priya narra
 Ends with `ready` and the voice's `preview_url`: share it. The voice now shows
 in text-to-speech (`list_voices.py --cloned-only`) and in dubbing's voice
 choices. `processing`: check later with `python3 scripts/list_cloned_voices.py`.
+
+### Retry or delete a clone
+
+```bash
+python3 scripts/clones.py retry --voice "Priya"          # a failed clone, ⏸ paid
+python3 scripts/clones.py delete --voice "Priya"         # asks; then add --confirm
+```
 
 ## Rules
 

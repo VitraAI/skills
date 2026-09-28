@@ -13,13 +13,13 @@ compatibility: >-
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.0"
+  version: "1.1"
   display-name: Lip Sync
   category: Video
   tags: Video, Voice
   source: vitra
   added: "2026-09-26"
-  updated: "2026-09-26"
+  updated: "2026-09-28"
 ---
 
 # Lip Sync
@@ -58,6 +58,17 @@ python3 scripts/lip_sync.py --video clip.mp4 --audio spanish.wav --language span
 
 Uploads both files, renders, waits and saves the video (`path`). If it times
 out, run the same command again: it reconnects to the same render.
+
+### Cost, retry, save
+
+```bash
+python3 scripts/lipsyncs.py quote --seconds 45 [--model sync-3]    # credits and your balance, free
+python3 scripts/lipsyncs.py retry --job <job>                        # a failed render, ⏸ paid
+python3 scripts/lipsyncs.py save --job <job> [--folder "Launch videos"]   # into the Drive
+```
+
+Quote before a long video; say the credits and whether the balance covers
+them. `job` comes from lip_sync.py; never show it.
 
 ## Rules
 

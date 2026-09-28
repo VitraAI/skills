@@ -102,8 +102,8 @@ def main() -> int:
         time.sleep(next(delays))
     if state == "failed" or not row.get("outputUrl"):
         _state.forget("lip-sync", key)  # a re-run starts a fresh render
-        print(json.dumps({"status": "failed", "error": row.get("error") or "the render failed",
-                          "next_action": "lip_sync"}))
+        print(json.dumps({"status": "failed", "error": row.get("error") or "the render failed", "job": job,
+                          "next_action": "lipsyncs.py retry --job <job>"}))
         return _common.EXIT_API_ERROR
     out = Path(args.out or f"{video.stem}.lipsync.mp4").expanduser()
     try:
@@ -111,7 +111,7 @@ def main() -> int:
     except (_http.NetworkError, ValueError) as e:
         die(_common.EXIT_API_ERROR, f"could not download the video: {e}", retryable=True)
     print(json.dumps({"status": "done", "path": str(out), "seconds": row.get("durationSeconds"),
-                      "next_action": None}))
+                      "job": job, "next_action": None}))
     return _common.EXIT_OK
 
 

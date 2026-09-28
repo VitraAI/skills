@@ -58,6 +58,8 @@ DEFAULT_MAX_WAIT = 900
 # Variant lifecycle: PLAN_PENDING → GENERATING → REVIEW_PENDING/APPROVED/FAILED.
 DONE = {"approved", "review_pending", "needs_review", "completed", "done"}
 FAILED = {"failed", "rejected", "error", "cancelled"}
+# PRO: the layout plan waits for the user's approval (sizes.py approve).
+AWAITING = {"plan_pending"}
 DIMENSION_RE = re.compile(r"^(\d+)x(\d+)$")
 
 # Flash renders inline and lands APPROVED; PRO stops at PLAN_PENDING for human
@@ -308,10 +310,11 @@ def main() -> int:
                 last = summary
 
             if len(variants) >= len(sizes) and all(
-                s in DONE or s in FAILED for s in states
+                s in DONE or s in FAILED or s in AWAITING for s in states
             ):
                 ready = [v for v in variants if v["status"] in DONE and v["image_url"]]
-                if not ready:
+                waiting = [v for v in variants if v["status"] in AWAITING]
+                if not ready and not waiting:
                     die(_common.EXIT_API_ERROR, "every requested size failed to render.")
                 break
             if time.monotonic() >= deadline:
@@ -330,7 +333,11 @@ def main() -> int:
     print(
         json.dumps(
             {
-                "status": "completed",
+                "status": "needs_approval" if waiting else "completed",
+                # For sizes.py (approve, fix, save, export); never shown to the user.
+                "asset": asset_id,
+                **({"awaiting_approval": [v["label"] for v in waiting],
+                    "next_action": "ask the user to approve, then sizes.py approve --size <label>"} if waiting else {}),
                 "outputs": [
                     {
                         "label": v["label"],

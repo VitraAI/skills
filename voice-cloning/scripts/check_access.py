@@ -26,6 +26,8 @@ import _common  # noqa: E402
 STEPS = [
     {"step": "Clone a voice", "needs": ["playground.video:create"]},
     {"step": "List cloned voices", "needs": ["playground.video:read"]},
+    {"step": "Retry a clone", "needs": ["playground.video:create"], "optional": True},
+    {"step": "Delete a clone", "needs": ["playground.video:delete"], "optional": True},
 ]
 
 

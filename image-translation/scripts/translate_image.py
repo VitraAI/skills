@@ -218,11 +218,17 @@ def poll(
 def start_translation(
     base: str, headers: dict, job_id: str, target_language: str
 ) -> str:
+    return start_translation_with(base, headers, job_id, {"targetLanguage": target_language})
+
+
+def start_translation_with(base: str, headers: dict, job_id: str, body: dict) -> str:
+    """Render a new version of the analysed image: a language, and optionally
+    per-line overrides ({regionId: {"editedText"} | {"action": "keep"}})."""
     try:
         status, payload = _http.post_json(
             base + TRANSLATE_PATH.format(job_id=job_id),
             headers,
-            {"targetLanguage": target_language},
+            body,
         )
     except _http.NetworkError as e:
         die(_common.EXIT_API_ERROR, f"network error starting translation: {e}")

@@ -27,6 +27,10 @@ features:
     description: Up to 20 files at once, or every file in a Drive folder into a new translated folder.
   - title: Check and polish
     description: A quality score with explained errors, AI proofreading, and back-translation to verify meaning.
+  - title: Correct line by line
+    description: See every line with where it sits, correct or approve lines, and save them to your memory.
+  - title: Keep it organized
+    description: Find past translations, rename them, file them into folders or save them to the Drive.
 use-cases:
   - title: Legal and HR documents
     description: Contracts and policies in every language your teams work in.
@@ -47,6 +51,10 @@ mcp-tools:
   - name: list_translation_memories
     title: List translation memories
 related-skills:
+  - name: translation-memory
+    why: Look up, correct or import the approved wording every translation reuses.
+  - name: dita-translation
+    why: Translate a whole DITA map (zipped topics) instead of single files.
   - name: subtitle-translation
     why: Translate subtitle files (SRT, VTT) instead of documents.
   - name: image-translation

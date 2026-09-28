@@ -26,6 +26,8 @@ features:
     description: Adds translated subtitle languages to the same job, from the reviewed source.
   - title: Any format, or burned in
     description: SRT, VTT, DFXP, STL, TXT and more, or the video with subtitles rendered in.
+  - title: Full control
+    description: Stop a job, file it, sync lines with your memory, or export every line as a spreadsheet.
 use-cases:
   - title: Accessible video
     description: Caption product and training videos in their own language.

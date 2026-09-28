@@ -27,6 +27,7 @@ STEPS = [
     {"step": "Find voices", "needs": ["translate_video.voice:read"]},
     {"step": "Generate speech", "needs": ["playground.video:update", "playground.video:create"]},
     {"step": "Download the audio", "needs": ["playground.video:read"]},
+    {"step": "Save speech to the Drive", "needs": ["playground.video:create"], "optional": True},
 ]
 
 

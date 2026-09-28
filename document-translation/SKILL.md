@@ -15,7 +15,7 @@ compatibility: >-
   Needs VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.1"
+  version: "1.2"
   display-name: Document Translation
   category: Localization
   tags: Documents, Translation, Popular
@@ -58,6 +58,7 @@ say so before translating.
 - [ ] 1. Translation memory   (⏸ ask if several fit)
 - [ ] 2. Translate            (⏸ confirm: spends credits) → translated files
 - [ ] 3. Check and polish     (only if the user wants: ⏸ each spends credits)
+- [ ] 4. Correct, verify, file (only if asked)
 ```
 
 ### 1. Translation memory ⏸
@@ -118,6 +119,22 @@ python3 scripts/back_translate.py --translation <translation>
   language, so someone who can't read the translation can check its meaning.
 
 Lines are named by number; relay suggestions as before → after.
+
+### 4. Correct, verify, file (only if asked)
+
+```bash
+python3 scripts/edit_document.py --translation <t> [--filter unverified] [--search price]   # numbered lines
+python3 scripts/edit_document.py --translation <t> --set "3=Bienvenue" [--everywhere] --out ./fixed.docx
+python3 scripts/edit_document.py --translation <t> --verify all [--approve] [--sync-to-memory]
+python3 scripts/documents.py list [--search contract] [--language French]     # past translations
+python3 scripts/documents.py save --translation <t> [--folder "Contracts"]     # into the Drive
+python3 scripts/documents.py move|rename|retry --translation <t> …
+```
+
+Office lines say where they sit (`where`: slide, page, header). `--everywhere`
+corrects identical lines too. `--sync-to-memory` saves checked lines so every
+later translation reuses them. `documents.py list` gives each past
+translation's `translation` for these commands; show names, never ids.
 
 ## Rules
 

@@ -39,7 +39,7 @@ mcp-tools:
   - name: get_image_fix
     title: Get an image fix
 related-skills:
-  - name: image-translation
-    why: Translate a creative's text for the market you just cleared it for.
-  - name: translation-quality
-    why: Score the wording itself, not just its fit for the market.
+  - name: hyperlocal-campaigns
+    why: Clear a campaign's creative for each market before it is sent.
+  - name: image-creator
+    why: Make a new creative when one is flagged.

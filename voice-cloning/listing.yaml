@@ -17,6 +17,8 @@ features:
     description: The voice appears in text-to-speech and dubbing as soon as it is cloned.
   - title: Consent first
     description: The skill asks for the speaker's permission before cloning.
+  - title: Retry or delete
+    description: Redo a clone that failed, or remove one you no longer use.
 use-cases:
   - title: Brand voice
     description: One recognizable voice across every market's content.

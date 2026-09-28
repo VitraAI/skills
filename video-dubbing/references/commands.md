@@ -63,6 +63,19 @@ stdout (progress goes to stderr). On failure the line is
 | `retry_dub` | `--job-id` | Resumes a failed dub at the failed step: `awaiting_voices`, `review_ready` or `failed` |
 | `run_manifest` | `list` \| `show` \| `validate` \| `forget`, `--job-id` | This machine's record of each dub: what was chosen, exported, and what changed since |
 
+## Job controls (`job_tools.py`)
+
+| Action | Options | Does |
+|---|---|---|
+| `cancel` | `--job-id`, `--confirm` | Stops a running job (asks first) |
+| `cancel-export` | `--job-id` | Stops an export in progress |
+| `sync` | `--job-id`, `--to-memory` \| `--from-memory` | Saves checked lines to the memory, or refreshes lines from it |
+| `emotion` | `--job-id`, `--language`, `--emotion`, `[--lines 1,4\|all]` | Sets the delivery (calm, happy…) for voiced lines; regenerate after |
+| `settings` | `--job-id`, `[--background-volume 0-1]`, `[--break-subtitles yes\|no]` | Shows or changes the video settings |
+| `sheet` | `--job-id`, `--type transcript\|subtitle`, `[--language]`, `--out x.csv` | Every line as a spreadsheet (opens in Excel) |
+| `save` | `--export-id` | Puts a finished export in the Drive |
+| `move` | `--job-id`, `--folder NAME\|Unassigned` | Files the job in a work folder |
+
 Scripts wait for their own jobs with backoff and never start a job twice:
 re-running the same command after a timeout or a dropped connection picks up
 where it stopped.

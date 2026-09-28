@@ -37,6 +37,9 @@ import _common  # noqa: E402
 STEPS = [
     {"step": "Upload the image", "needs": ["asset:create"]},
     {"step": "Resize to new sizes", "needs": ["translate_photo.design_agent:create", "translate_photo.design_agent:read"]},
+    {"step": "Approve, redo, check and fix sizes", "needs": ["translate_photo.design_agent:create", "translate_photo.design_agent:read"], "optional": True},
+    {"step": "Save a size to the Drive", "needs": ["translate_photo.design_agent:create"], "optional": True},
+    {"step": "Download (export) the sizes", "needs": ["translate_photo.design_agent:export"], "optional": True},
 ]
 
 
