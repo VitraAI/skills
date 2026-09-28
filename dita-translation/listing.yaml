@@ -1,28 +1,29 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Translate a whole DITA map in one go: upload the zip of maps, topics and SVG
-  images and get one translated zip per language, structure and markup intact,
-  ready for your DITA-OT build. Your translation memory keeps product
-  terminology consistent across every topic.
+  Follow and finish DITA map translations: progress per language, retry failed
+  topics, preview any file, and download one translated zip per language with
+  structure and markup intact, ready for your DITA-OT build. Score a language
+  and write the fixes back.
 when-to-use: >-
-  Reach for it when technical documentation lives in DITA: product manuals,
-  help centers and release notes that ship in several languages. For single
-  Word, XML or JSON files, use document translation.
+  Reach for it when technical documentation lives in DITA: product manuals, help
+  centers and release notes that ship in several languages. Start the map in the
+  Vitra webapp; follow, fix and deliver it here. For single Word, XML or JSON
+  files, use Document Translation.
 features:
-  - title: The whole map at once
-    description: Every topic, map and SVG in the zip, into several languages in one command.
+  - title: Progress per language
+    description: Files done, running and failed for every language, with their paths.
   - title: Markup kept
     description: Only the text is translated; tags, folders and file names come back as they went in.
   - title: Memory-backed
     description: Reuses and feeds your organization's approved terminology.
   - title: Failed topics, handled
     description: Retry only what failed, or ship now with the original text for those topics.
-  - title: Quality report
-    description: A score per language with the worst phrases explained, and fixes written back into the map.
+  - title: QC and quality reports
+    description: A zip of QC PDFs, or a score with the worst phrases explained and fixes written back.
 use-cases:
   - title: Product manuals
     description: A full manual set, localized for every market at release time.
@@ -30,10 +31,32 @@ use-cases:
     description: Keep translated help topics in step with each documentation release.
   - title: Regulated documentation
     description: Consistent, reviewed terminology for medical, industrial and legal content.
-mcp-toolset: core
+mcp-toolset: documents
 mcp-tools:
-  - name: list_translation_memories
-    title: List translation memories
+  - name: list_dita_maps
+    title: List DITA map translations
+  - name: get_dita_map
+    title: Check a DITA map translation
+  - name: retry_dita_map
+    title: Retry failed DITA map files
+  - name: preview_dita_file
+    title: Read one file of a DITA map
+  - name: download_dita_map
+    title: Download a translated DITA map
+  - name: run_dita_map_qc_report
+    title: Build a DITA map QC report
+  - name: get_dita_map_qc_report
+    title: Get a DITA map QC report
+  - name: run_dita_map_quality_report
+    title: Score a DITA map translation
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_dita_map_quality_fixes
+    title: Apply a quality report's fixes to a DITA map
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: document-translation
     why: Translate single Word, XML, JSON or XLIFF files instead of a whole map.

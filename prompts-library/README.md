@@ -1,24 +1,39 @@
 # prompts-library
 
-An agent skill for your organization's prompt library in Vitra Universe: find
-a saved prompt, fill in its variables and use it; save your own prompts,
-private or shared with the team; edit them with full version history.
+Prompts Library: an agent skill for Vitra Universe. Uses and maintains the organization's prompt library in Vitra Universe: finds saved prompts by name, topic or category, returns a prompt's full text with its {{variables}} filled in, saves new prompts (private or shared with the organization), edits them with version history, restores an earlier version, favorites or deletes prompts, and manages categories.
 
-Drop this folder into your agent's skills directory; the agent reads
-`SKILL.md` and runs the scripts itself.
+Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
+and does the rest; you don't run anything by hand.
 
-## Setup
+## How it works
 
-Set `VITRA_UNIVERSE_API_KEY` (a `uvk_` key for one Vitra organization) in the
-environment the agent runs in, or put it in a `.env` beside `SKILL.md`
-(`cp .env.sample .env`). Keys are created in the Vitra webapp under
-Settings → API keys. Never commit `.env`.
+Every step is a Vitra server tool (the same tools the Vitra MCP connector
+offers). The skill only guides the agent through them:
 
-## Verify it works
+- `scripts/vitra.py` forwards each call to the tools route of the Vitra API
+  (`/v1/agent/tools`) and prints one JSON object. `tools`, `describe`, `call`,
+  `upload` and `download` are its commands.
+- `scripts/login.py` signs this machine in to one Vitra organization.
+
+Anything that spends credits is priced first and needs your yes.
+
+## Sign in
 
 ```bash
-python3 scripts/check_access.py
-python3 scripts/prompts.py list
+python3 scripts/login.py            # opens the browser: sign in, pick the organization
+python3 scripts/login.py --status   # who is signed in, where
+python3 scripts/login.py --logout
 ```
 
-Python 3.10+, standard library only.
+No browser (a server, a container)? An organization owner or admin creates an
+API key in Vitra under Settings -> API keys; set it where the agent runs:
+
+```bash
+export VITRA_UNIVERSE_API_KEY=uvk_your_key_here
+```
+
+The key acts with its creator's role in that one organization. Keep it secret.
+
+## Requirements
+
+Python 3.10+, standard library only. Outbound HTTPS to the Vitra API.

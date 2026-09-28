@@ -1,7 +1,7 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Translate the text baked into an image — signage, packaging, ad creatives,
@@ -41,18 +41,62 @@ use-cases:
     description: Translate printed material and keep its design.
 mcp-toolset: image
 mcp-tools:
+  - name: find_assets
+    title: Find files in the Drive
+  - name: get_download_url
+    title: Get a download link
+  - name: list_languages
+    title: List languages
+  - name: list_translation_memories
+    title: List translation memories
   - name: translate_image
     title: Translate the text in an image
   - name: get_image_translation
     title: Check an image translation
+  - name: add_image_languages
+    title: Render an image in (more) languages
+  - name: get_image_text
+    title: Read the text in a translated image
+  - name: edit_image_text
+    title: Correct the text in a translated image
+  - name: save_image_translation_to_drive
+    title: Save a translated image to the Drive
+  - name: edit_image_element
+    title: Edit an object in a translated image
+  - name: compose_image_asset
+    title: Put a logo or picture into a translated image
+  - name: reanalyze_image
+    title: Re-analyse an image
   - name: resize_image_translation
     title: Resize a translated image
-  - name: list_translation_memories
-    title: List translation memories
-  - name: find_assets
-    title: Find files in the Drive
-  - name: get_upload_link
-    title: Get a link to upload a file
+  - name: image_text_qc_report
+    title: QC report on image text
+  - name: image_text_proofreading
+    title: Proofread image text
+  - name: image_text_back_translation
+    title: Back-translate image text
+  - name: image_text_transcreation
+    title: Transcreate image text
+  - name: run_image_quality_report
+    title: Quality-score a translated image
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_image_quality_fixes
+    title: Apply a quality report to an image
+  - name: list_image_translations
+    title: List image translations
+  - name: get_image_versions
+    title: Version history of an image translation
+  - name: update_image_translation
+    title: Rename, file or restore an image translation
+  - name: retry_image_translation
+    title: Retry a failed image translation
+  - name: delete_image_translation
+    title: Delete an image translation
+  - name: save_image_as_template
+    title: Send a translated image back to Hyperlocal
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: image-resize
     why: Exact pixel sizes for the translated image, or any other.

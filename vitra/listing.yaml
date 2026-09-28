@@ -1,0 +1,141 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  The shared parts of your Vitra organization from any agent: find, upload and
+  organize files in the Drive, keep work folders, check credits and price work
+  before it starts, search the organization's saved knowledge, and follow
+  translations sent from the Figma, Canva, Adobe and Word plugins.
+when-to-use: >-
+  Reach for it for files, folders, credits and saved knowledge, or anything
+  Vitra does that no other Vitra skill covers. The product skills handle images,
+  documents, video, voice, memory, quality, campaigns, workflows and projects.
+features:
+  - title: Drive
+    description: Find, upload, download, move, rename and trash files and folders.
+  - title: Work folders
+    description: Group jobs for one engagement and see what is filed in each.
+  - title: Credits and quotes
+    description: The balance, and the exact price of work before it starts.
+  - title: Organization knowledge
+    description: Search, save and version the facts and guidelines your team keeps.
+  - title: Design-tool jobs
+    description: Review, correct and score translations from Figma, Canva, Adobe and Word.
+use-cases:
+  - title: Find earlier work
+    description: "\"Last week's banner\" instead of uploading it again."
+  - title: Budget check
+    description: See what a batch of jobs will cost before starting any of them.
+  - title: Brief with context
+    description: Pull the organization's notes on an audience into a task.
+mcp-toolset: core
+mcp-tools:
+  - name: get_guide
+    title: Get a workflow guide
+  - name: find_assets
+    title: Find files in the Drive
+  - name: browse_drive
+    title: Browse the Drive
+  - name: get_drive_storage
+    title: Drive storage used
+  - name: get_upload_link
+    title: Get a link to upload a file
+  - name: create_upload_url
+    title: Create an upload URL
+  - name: register_upload
+    title: Register an uploaded file
+  - name: get_download_url
+    title: Get a download link
+  - name: create_drive_folder
+    title: Create a Drive folder
+  - name: rename_drive_item
+    title: Rename a Drive file or folder
+  - name: move_drive_items
+    title: Move Drive files or folders
+  - name: set_drive_favourite
+    title: Add or remove a Drive favourite
+  - name: trash_drive_items
+    title: Move Drive items to the trash
+  - name: restore_drive_items
+    title: Restore Drive items from the trash
+  - name: list_work_folders
+    title: List work folders
+  - name: create_work_folder
+    title: Create a work folder
+  - name: update_work_folder
+    title: Rename or edit a work folder
+  - name: delete_work_folder
+    title: Delete a work folder
+  - name: list_work_folder_jobs
+    title: List a work folder's jobs
+  - name: get_credits
+    title: Get credit balance
+  - name: quote_cost
+    title: Price work in credits
+  - name: search_org_knowledge
+    title: Search the organization's knowledge
+  - name: get_knowledge_entry
+    title: Read a knowledge entry
+  - name: create_knowledge_entry
+    title: Save a new knowledge entry
+  - name: update_knowledge_entry
+    title: Edit a knowledge entry
+  - name: list_knowledge_versions
+    title: See a knowledge entry's versions
+  - name: restore_knowledge_version
+    title: Restore an earlier version of a knowledge entry
+  - name: favorite_knowledge_entry
+    title: Favourite a knowledge entry
+  - name: delete_knowledge_entry
+    title: Delete a knowledge entry
+  - name: list_knowledge_categories
+    title: List knowledge entry categories
+  - name: create_knowledge_category
+    title: Add a knowledge entry category
+  - name: update_knowledge_category
+    title: Rename or recolour a knowledge entry category
+  - name: delete_knowledge_category
+    title: Delete a knowledge entry category
+  - name: list_design_jobs
+    title: List design-tool translation jobs
+  - name: get_design_job
+    title: Get a design-tool job
+  - name: get_design_job_lines
+    title: Read a design job line by line
+  - name: edit_design_job_lines
+    title: Correct, verify or sync a design job
+  - name: manage_design_job
+    title: Rename or file a design-tool job
+  - name: delete_design_job
+    title: Delete a design-tool job
+  - name: proofread_design_job
+    title: AI-proofread a design job
+  - name: back_translate_design_job
+    title: Back-translate a design job
+  - name: qc_design_job
+    title: AI quality-check a design job
+  - name: transcreate_design_line
+    title: Get creative alternatives for a design line
+  - name: run_design_job_quality_report
+    title: Score a design job translation
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_design_job_quality_fixes
+    title: Apply a quality report's fixes to a design job
+  - name: list_languages
+    title: List languages
+  - name: list_voices
+    title: List voices
+  - name: list_translation_memories
+    title: List translation memories
+  - name: list_brand_kits
+    title: List brand kits
+related-skills:
+  - name: document-translation
+    why: Translate the files you found in the Drive.
+  - name: image-translation
+    why: Localize images already in the Drive.
+  - name: translate-video
+    why: Dub or subtitle videos already in the Drive.

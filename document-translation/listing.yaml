@@ -1,13 +1,13 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML and XLIFF files
-  — or plain text — without losing their layout. One command translates into
-  several languages at once and saves each file, reusing your organization's
-  translation memory so approved terminology stays consistent.
+  Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML and XLIFF files —
+  or plain text — without losing their layout: one file, a batch, or a whole
+  Drive folder into several languages, reusing your organization's translation
+  memory so approved terminology stays consistent.
 when-to-use: >-
   Reach for it whenever a file or text needs to exist in another language —
   contracts, decks, spreadsheets, product strings, web pages, manuals. For
@@ -15,14 +15,12 @@ when-to-use: >-
 features:
   - title: Formatting kept
     description: Office files are translated in place, run by run; PDFs keep their images and layout.
-  - title: Many languages, one command
-    description: One translation per language, started together and saved side by side.
+  - title: Whole folders, many languages
+    description: Every file in a Drive folder into up to 10 languages, filed in a translated folder.
   - title: Memory-backed
     description: Every translation reuses and feeds your organization's approved wording.
-  - title: Spreadsheet control
-    description: Pick which CSV columns to translate, or keep Excel headings as they are.
-  - title: Safe to re-run
-    description: Reconnects to translations already started, so nothing is charged twice.
+  - title: Price first
+    description: Folder translations show the files, skips and credits before anything starts.
   - title: Batches and whole folders
     description: Up to 20 files at once, or every file in a Drive folder into a new translated folder.
   - title: Check and polish
@@ -42,20 +40,56 @@ use-cases:
     description: Excel and CSV product data with only the prose translated.
 mcp-toolset: documents
 mcp-tools:
-  - name: translate_document
-    title: Translate a document or text
-  - name: get_document_translation
-    title: Check a document translation
-  - name: save_document_to_drive
-    title: Save a translated document to the Drive
+  - name: find_assets
+    title: Find files in the Drive
   - name: list_translation_memories
     title: List translation memories
+  - name: translate_document
+    title: Translate a document or text
+  - name: translate_document_batch
+    title: Translate several Drive files at once
+  - name: translate_drive_folder
+    title: Translate a whole Drive folder
+  - name: get_document_translation
+    title: Check a document translation
+  - name: get_document_batch
+    title: Check a batch or folder translation
+  - name: save_document_to_drive
+    title: Save a translated document to the Drive
+  - name: get_download_url
+    title: Get a download link
+  - name: get_document_lines
+    title: Read a translated document line by line
+  - name: edit_document_lines
+    title: Correct, verify or sync a translated document
+  - name: review_document_translation
+    title: AI-proofread or back-translate a document
+  - name: get_document_review
+    title: Read AI proofreading or back-translation results
+  - name: run_document_quality_report
+    title: Score a document translation
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_document_quality_fixes
+    title: Apply a quality report’s fixes to a document
+  - name: list_document_translations
+    title: List document translations
+  - name: manage_document_translation
+    title: Rename or file a document translation
+  - name: retry_document_translation
+    title: Retry a failed document translation
+  - name: delete_document_translation
+    title: Delete a document translation
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: translation-memory
     why: Look up, correct or import the approved wording every translation reuses.
   - name: dita-translation
     why: Translate a whole DITA map (zipped topics) instead of single files.
-  - name: subtitle-translation
+  - name: translate-video
     why: Translate subtitle files (SRT, VTT) instead of documents.
   - name: image-translation
     why: Translate text that is inside images, keeping their design.

@@ -198,8 +198,12 @@ def cmd_upload(a: argparse.Namespace) -> int:
         _common.die(_common.EXIT_API_ERROR, "The upload did not finish.", retryable=True)
     asset = _call_tool("register_upload", {"key": key, "file_name": path.name,
                                            "content_type": ctype})
+    # `key` is the storage key: the tools that take an `asset_key` (image
+    # translation, image resize) need it rather than the asset_id.
     return _out({"status": "ok", "file": path.name, "bytes": size, "asset": asset,
-                 "next_action": "Pass the asset to the tool that needs the file."})
+                 "key": key,
+                 "next_action": "Pass asset.asset_id (or key, where a tool asks for "
+                                "asset_key) to the tool that needs the file."})
 
 
 def cmd_download(a: argparse.Namespace) -> int:

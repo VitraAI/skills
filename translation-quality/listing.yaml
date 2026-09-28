@@ -1,13 +1,13 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Get an expert-style review of any translation in minutes: an overall score
-  and pass/fail band, then the worst lines with each error explained —
-  accuracy, fluency, terminology, style — and a suggested better version,
-  judged against your organization's own terminology.
+  Get an expert-style review of any translation in minutes: an overall score and
+  pass/fail band, then the worst lines with each error explained — accuracy,
+  fluency, terminology, style — and a suggested better version, judged against
+  your organization's own terminology.
 when-to-use: >-
   Reach for it before publishing translated content, to check a vendor's work,
   or to compare translations and decide which to keep.
@@ -20,6 +20,10 @@ features:
     description: A corrected translation for lines that need one.
   - title: Your terminology
     description: Judged against your translation memory and glossaries.
+  - title: Reports as PDF
+    description: Share a finished report as a PDF; re-run or cancel reports.
+  - title: Reports as PDF
+    description: Share a finished report as a PDF; re-run or cancel reports.
 use-cases:
   - title: Vendor review
     description: Check a translation agency's delivery before paying.
@@ -29,10 +33,26 @@ use-cases:
     description: Find recurring errors and correct them in the memory.
 mcp-toolset: quality
 mcp-tools:
+  - name: list_translation_memories
+    title: List translation memories
   - name: run_quality_report
     title: Evaluate translation quality
   - name: get_quality_report
     title: Get a quality report
+  - name: get_quality_report_pdf
+    title: Get a quality report as PDF
+  - name: list_quality_reports
+    title: List quality reports
+  - name: rerun_quality_report
+    title: Re-run a quality report
+  - name: cancel_quality_report
+    title: Cancel a quality report
+  - name: delete_quality_report
+    title: Delete a quality report
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: translation-memory
     why: Correct recurring errors once, in the memory everyone uses.

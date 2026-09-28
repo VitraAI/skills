@@ -1,16 +1,16 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Run your localization work from chat. Ask what's due, spin up a project
-  for a new market, move tasks along, and hand them to the right people,
-  without opening the board. Everything is named the way your team names it:
-  projects, statuses, priorities and people.
+  Run your localization work from chat. Ask what's due, spin up a project for a
+  new market, move tasks along, and hand them to the right people, without
+  opening the board. Everything is named the way your team names it: projects,
+  statuses, priorities and people.
 when-to-use: >-
-  Reach for it for the daily stand-up ("what's due today?"), when a new
-  request comes in and needs a project, or when work changes hands.
+  Reach for it for the daily stand-up ("what's due today?"), when a new request
+  comes in and needs a project, or when work changes hands.
 features:
   - title: What's due, at a glance
     description: Tasks due today or overdue, yours or the whole project's, with progress per project.
@@ -22,6 +22,10 @@ features:
     description: Add assignees and watchers, or reassign a task, by name or email.
   - title: Safe changes
     description: Deletes always ask first; ambiguous names come back as a question.
+  - title: Job assignments
+    description: Put people on each language of a dub, document or image job.
+  - title: Job assignments
+    description: Put people on each language of a dub, document or image job.
 use-cases:
   - title: Daily stand-up
     description: What's due, what's overdue, who's on it.
@@ -29,9 +33,56 @@ use-cases:
     description: A project per market with its languages and deadline.
   - title: Hand-offs
     description: Move a task to review and assign the reviewer in one step.
-mcp-toolset: context
+mcp-toolset: work
 mcp-tools:
+  - name: list_tasks
+    title: List tasks, or what's due
   - name: list_projects
     title: List projects
-  - name: list_tasks
-    title: List tasks
+  - name: get_project
+    title: Read a project
+  - name: create_project
+    title: Create a project
+  - name: update_project
+    title: Edit or move a project
+  - name: delete_project
+    title: Delete a project
+  - name: set_project_people
+    title: Put people on a project
+  - name: get_task
+    title: Read a task
+  - name: create_task
+    title: Create a task
+  - name: update_task
+    title: Edit or move a task
+  - name: delete_task
+    title: Delete a task
+  - name: set_task_people
+    title: Assign people to a task
+  - name: add_checklist_items
+    title: Add to a task's checklist
+  - name: update_checklist_items
+    title: Tick, untick or reword checklist items
+  - name: remove_checklist_items
+    title: Remove checklist items
+  - name: get_project_board
+    title: See the organization's project statuses
+  - name: update_project_board
+    title: Edit the organization's project statuses
+  - name: list_task_templates
+    title: List task templates
+  - name: create_task_template
+    title: Create a task template
+  - name: update_task_template
+    title: Edit a task template
+  - name: delete_task_template
+    title: Delete a task template
+  - name: list_job_people
+    title: See who works on a job
+  - name: assign_job_people
+    title: Assign people to a job
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills: []

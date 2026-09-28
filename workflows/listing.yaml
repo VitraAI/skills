@@ -1,12 +1,12 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Run the automated workflows your team built in Vitra Cosmos from any agent:
-  give the inputs, follow every step as it runs, and approve or reject the
-  steps that wait for a person — without opening the canvas.
+  give the inputs, follow every step as it runs, and approve or reject the steps
+  that wait for a person — without opening the canvas.
 when-to-use: >-
   Reach for it whenever a recurring process is already automated in Cosmos —
   launches, weekly localization, review-and-publish chains.
@@ -17,6 +17,10 @@ features:
     description: Every step's status, and the outputs of finished steps.
   - title: Human approvals
     description: Waiting steps are shown to you; your decision is relayed, never guessed.
+  - title: Build with AI
+    description: Describe a workflow in plain words, check it and save it.
+  - title: Build with AI
+    description: Describe a workflow in plain words, check it and save it.
 use-cases:
   - title: Launch day
     description: One command starts translation, dubbing and checks together.
@@ -26,16 +30,38 @@ mcp-toolset: flows
 mcp-tools:
   - name: list_flows
     title: List the organization's workflows
+  - name: find_assets
+    title: Find files in the Drive
   - name: run_flow
     title: Run a workflow
   - name: get_flow_run
     title: Check a workflow run
   - name: decide_flow_step
     title: Approve or reject a workflow step
+  - name: list_flow_runs
+    title: List workflow runs
+  - name: manage_flow_run
+    title: Rename, file, retry or re-staff a workflow run
   - name: cancel_flow_run
     title: Cancel a workflow run
+  - name: design_workflow
+    title: Design a workflow with the AI builder
+  - name: list_workflow_steps
+    title: List the step types a workflow can use
+  - name: validate_workflow
+    title: Check a workflow graph
+  - name: create_workflow
+    title: Save a new workflow
+  - name: get_workflow
+    title: Get a workflow’s graph
+  - name: update_workflow
+    title: Change a saved workflow
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
-  - name: video-dubbing
+  - name: translate-video
     why: Run a single dub directly, outside a workflow.
   - name: document-translation
     why: Translate one document directly, outside a workflow.

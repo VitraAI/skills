@@ -44,12 +44,11 @@
     "./lip-sync",
     "./projects",
     "./prompts-library",
-    "./subtitle-translation",
     "./text-to-speech",
+    "./translate-video",
     "./translation-memory",
     "./translation-quality",
-    "./video-dubbing",
-    "./video-subtitles",
+    "./vitra",
     "./voice-cloning",
     "./workflows"
   ]

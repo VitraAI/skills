@@ -1,13 +1,13 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Your team's best prompts, in every agent. Find a saved prompt by name or
   topic, fill in its variables and use it; save new ones for yourself or the
-  whole organization; and edit safely, since every change is a version you
-  can roll back.
+  whole organization; and edit safely, since every change is a version you can
+  roll back.
 when-to-use: >-
   Reach for it whenever a task has a house way of being asked (product copy,
   reviews, release notes, briefs) or when a prompt that worked deserves to be
@@ -31,4 +31,31 @@ use-cases:
 mcp-toolset: context
 mcp-tools:
   - name: search_prompts
-    title: Search the prompt library
+    title: Search the organization's prompt library
+  - name: get_prompt
+    title: Read a prompt
+  - name: create_prompt
+    title: Save a new prompt
+  - name: update_prompt
+    title: Edit a prompt
+  - name: list_prompt_versions
+    title: See a prompt's versions
+  - name: restore_prompt_version
+    title: Restore an earlier version of a prompt
+  - name: favorite_prompt
+    title: Favourite a prompt
+  - name: delete_prompt
+    title: Delete a prompt
+  - name: list_prompt_categories
+    title: List prompt categories
+  - name: create_prompt_category
+    title: Add a prompt category
+  - name: update_prompt_category
+    title: Rename or recolour a prompt category
+  - name: delete_prompt_category
+    title: Delete a prompt category
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills: []

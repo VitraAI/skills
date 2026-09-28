@@ -1,19 +1,39 @@
 # content-compliance
 
-An agent skill that checks text, images, audio and video against each market's rules with the Vitra Universe API, and fixes flagged images.
+Content Compliance: an agent skill for Vitra Universe. Checks content against each market's rules before it goes out, with the Vitra Universe API: text, images, audio and video are scored per market (approved, review or blocked) with the rules they break, plus unsafe-content detection; a flagged image can be regenerated to meet a market's rules; reviewers' verdicts are relayed; markets and their rules are created, edited or drafted with AI.
 
-Drop this folder into your agent's skills directory; the agent reads
-`SKILL.md` and runs the scripts itself.
+Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
+and does the rest; you don't run anything by hand.
 
-## Setup
+## How it works
 
-Set `VITRA_UNIVERSE_API_KEY` (a `uvk_` key, created in the Vitra webapp under
-Settings → API keys) in the agent's environment, or in a `.env` beside
-`SKILL.md` (`cp .env.sample .env`). Never commit `.env`.
+Every step is a Vitra server tool (the same tools the Vitra MCP connector
+offers). The skill only guides the agent through them:
+
+- `scripts/vitra.py` forwards each call to the tools route of the Vitra API
+  (`/v1/agent/tools`) and prints one JSON object. `tools`, `describe`, `call`,
+  `upload` and `download` are its commands.
+- `scripts/login.py` signs this machine in to one Vitra organization.
+
+Anything that spends credits is priced first and needs your yes.
+
+## Sign in
 
 ```bash
-python3 scripts/check_access.py
-python3 scripts/list_markets.py
+python3 scripts/login.py            # opens the browser: sign in, pick the organization
+python3 scripts/login.py --status   # who is signed in, where
+python3 scripts/login.py --logout
 ```
 
-Python 3.10+, standard library only.
+No browser (a server, a container)? An organization owner or admin creates an
+API key in Vitra under Settings -> API keys; set it where the agent runs:
+
+```bash
+export VITRA_UNIVERSE_API_KEY=uvk_your_key_here
+```
+
+The key acts with its creator's role in that one organization. Keep it secret.
+
+## Requirements
+
+Python 3.10+, standard library only. Outbound HTTPS to the Vitra API.

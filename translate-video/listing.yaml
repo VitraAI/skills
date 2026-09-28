@@ -1,0 +1,141 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Dub a video into other languages, make subtitles from a video, or translate
+  SRT and VTT files — then review every line, fix issues and export. Library
+  voices by default; a speaker's own cloned voice or lip-sync only with their
+  consent.
+when-to-use: >-
+  Reach for it whenever a video has to speak or read in another language, or a
+  subtitle file has to be translated. For narration from a script, use Text to
+  Speech.
+features:
+  - title: Dubbing with a voice decision
+    description: Pauses so each speaker gets a library voice or, with consent, their own.
+  - title: Line-by-line review
+    description: Edit, split, merge, re-voice lines; set emotions and pronunciations.
+  - title: Subtitles two ways
+    description: From a video, or by translating an SRT, VTT, ASS or SSA file, timing kept.
+  - title: Issues fixed before export
+    description: Lists what blocks export and fixes rate and timing problems.
+  - title: Export and deliver
+    description: Dubbed video per language, subtitles burned in, or subtitle files in many formats.
+use-cases:
+  - title: Marketing videos
+    description: Turn one product video into several market-ready language versions.
+  - title: E-learning
+    description: Caption and dub course content, reviewed line by line.
+  - title: Subtitle files
+    description: One caption file, every language your viewers speak.
+mcp-toolset: dub
+mcp-tools:
+  - name: get_guide
+    title: Get a workflow guide
+  - name: find_assets
+    title: Find files in the Drive
+  - name: large_video_upload
+    title: Upload a large video in parts
+  - name: start_dub
+    title: Start a video dub
+  - name: list_languages
+    title: List languages
+  - name: list_translation_memories
+    title: List translation memories
+  - name: get_dub
+    title: Check a dub
+  - name: list_voices
+    title: List voices
+  - name: find_voices_by_accent
+    title: Find voices by accent
+  - name: set_speaker_voices
+    title: Answer the voice decision
+  - name: get_dub_lines
+    title: Read or search a dub, line by line
+  - name: add_dub_language
+    title: Add a language to a dub
+  - name: edit_dub_lines
+    title: Edit translated lines
+  - name: regenerate_dub_audio
+    title: Regenerate line audio
+  - name: rewrite_dub_line
+    title: Rewrite a line to fit, or preview it
+  - name: restructure_dub_lines
+    title: Split, merge, add or delete lines
+  - name: edit_dub_speakers
+    title: Change speakers and their voices
+  - name: set_dub_emotion
+    title: Set the emotion of many lines
+  - name: list_pronunciations
+    title: List pronunciation rules
+  - name: set_pronunciation
+    title: Teach a pronunciation
+  - name: remove_pronunciation
+    title: Remove a pronunciation rule
+  - name: list_dub_issues
+    title: List what blocks export
+  - name: fix_dub_issues
+    title: Fix issues automatically
+  - name: export_dub
+    title: Export a dubbed language
+  - name: lip_sync
+    title: Lip-sync a video
+  - name: get_dub_export
+    title: Get an exported dub
+  - name: save_dub_export_to_drive
+    title: Save an export to the Drive
+  - name: start_subtitles
+    title: Make subtitles from a video
+  - name: translate_subtitle_file
+    title: Translate a subtitle file
+  - name: get_subtitles
+    title: Check, read or search subtitles
+  - name: edit_subtitle_lines
+    title: Edit subtitle lines
+  - name: set_subtitle_style
+    title: Style subtitles
+  - name: add_subtitle_language
+    title: Add subtitle languages
+  - name: download_subtitles
+    title: Get subtitles as a file
+  - name: burn_subtitles
+    title: Render video with subtitles
+  - name: run_dub_quality_report
+    title: Score a dub's translation
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_dub_quality_fixes
+    title: Apply a quality report's fixes
+  - name: sync_dub_memory
+    title: Sync a job with its translation memory
+  - name: get_dub_settings
+    title: Read video, subtitle and audio settings
+  - name: update_dub_settings
+    title: Change video settings
+  - name: dub_background_audio
+    title: Add or replace background music
+  - name: get_dub_spreadsheet
+    title: Every line as a spreadsheet
+  - name: list_dub_jobs
+    title: Find dubs and subtitle jobs
+  - name: update_dub_job
+    title: Rename or file a job
+  - name: retry_dub
+    title: Retry a failed dub or subtitle job
+  - name: stop_dub_work
+    title: Cancel a running job or export
+  - name: remove_dub_language
+    title: Undo a language that failed to add
+  - name: delete_dub_job
+    title: Delete a job
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: voice-cloning
+    why: Clone a narrator once and use the voice in every dub.
+  - name: lip-sync
+    why: Match mouth movements to a new audio track.
+  - name: translation-memory
+    why: Keep names and terms consistent across every dub.

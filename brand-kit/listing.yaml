@@ -1,13 +1,13 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Keep your brand in one place. Point it at your website, a few product
-  images or your brand book and it drafts a kit (colors, fonts, tone of
-  voice, visual style) for you to review and save; then edit or retire kits
-  by name. Vitra's image creator applies them to every image it makes.
+  Keep your brand in one place. Point it at your website, a few product images
+  or your brand book and it drafts a kit (colors, fonts, tone of voice, visual
+  style) for you to review and save; then edit or retire kits by name. Vitra's
+  image creator applies them to every image it makes.
 when-to-use: >-
   Reach for it when you set up a new brand or sub-brand, refresh a palette or
   typeface, or tidy up old kits before a campaign.
@@ -27,10 +27,24 @@ use-cases:
     description: Update the palette and typefaces your generated images follow.
   - title: Agencies
     description: One kit per client brand, picked by name.
-mcp-toolset: core
+mcp-toolset: context
 mcp-tools:
   - name: list_brand_kits
     title: List brand kits
+  - name: get_brand_kit
+    title: Read a brand kit
+  - name: draft_brand_kit
+    title: Draft a brand kit from a website, images or a PDF
+  - name: create_brand_kit
+    title: Save a brand kit
+  - name: update_brand_kit
+    title: Edit a brand kit
+  - name: delete_brand_kit
+    title: Delete a brand kit
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: image-creator
     why: Create and edit images that follow a saved brand kit.

@@ -1,6 +1,6 @@
-# document-translation
+# vitra
 
-Document Translation: an agent skill for Vitra Universe. Translates documents and text with the Vitra Universe API, keeping the original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML, XLIFF and plain text — one file, a batch, or a whole Drive folder — through the organization's translation memory; then reviews it line by line, proofreads, back-translates, scores it with a quality report and writes fixes back.
+Vitra: an agent skill for Vitra Universe. General access to the user's Vitra Universe organization: finds, uploads, downloads, browses, moves, renames and trashes files in the Drive; manages work folders and the jobs filed in them; searches and edits the organization's saved knowledge (facts, guidelines, notes); shows the credit balance and prices work before it starts; follows translations sent from the Figma, Canva, Adobe and Word plugins; and finds any other Vitra tool.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

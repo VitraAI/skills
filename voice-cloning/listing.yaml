@@ -1,18 +1,17 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Create a cloned voice from one to five recordings of a speaker — with their
-  consent — and use it everywhere Vitra speaks: text-to-speech, dubbing and
-  lip-sync.
+  Create a cloned voice from recordings of a speaker — with their consent — and
+  use it everywhere Vitra speaks: text-to-speech and dubbing.
 when-to-use: >-
-  Reach for it when a brand, narrator or presenter should sound like
-  themselves in every language and every new piece of content.
+  Reach for it when a brand, narrator or presenter should sound like themselves
+  in every language and every new piece of content.
 features:
   - title: From a few samples
-    description: One to five recordings; background noise can be removed.
+    description: One to ten clean recordings of the speaker.
   - title: Ready to use
     description: The voice appears in text-to-speech and dubbing as soon as it is cloned.
   - title: Consent first
@@ -26,12 +25,26 @@ use-cases:
     description: The same presenter voices new videos without re-recording.
 mcp-toolset: documents
 mcp-tools:
+  - name: find_assets
+    title: Find files in the Drive
   - name: clone_voice
     title: Clone a voice
   - name: list_cloned_voices
     title: List cloned voices
+  - name: list_playground_jobs
+    title: List speech sessions, voice clones or lip-syncs
+  - name: rename_playground_job
+    title: Rename a Playground job
+  - name: manage_playground_job
+    title: Retry or save a Playground job
+  - name: delete_playground_job
+    title: Delete a Playground job
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: text-to-speech
     why: Speak any text in the voice you just cloned.
-  - name: video-dubbing
+  - name: translate-video
     why: Dub videos so each speaker keeps their own voice in other languages.

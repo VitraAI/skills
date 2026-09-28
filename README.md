@@ -2,8 +2,8 @@
 
 Agent skills that let an AI assistant (Claude Code, claude.ai, Cursor, Codex
 and other Agent Skills–compatible tools) work in your Vitra organization:
-generate and edit images, translate the text in images, adapt images to other
-sizes, and dub videos into other languages.
+images, documents, video, voice, translation memory, quality, campaigns,
+workflows, projects and more.
 
 Each skill is a top-level folder that follows the open
 [Agent Skills](https://agentskills.io) format: a `SKILL.md` the agent reads,
@@ -11,37 +11,32 @@ plus the scripts it runs.
 
 | Skill | What it does |
 | --- | --- |
-| [`image-creator`](image-creator/) | Generate images from a prompt, edit them in plain language, save them to your Drive |
+| [`vitra`](vitra/) | Drive files and folders, work folders, credits and quotes, saved knowledge, design-plugin jobs, any other Vitra tool |
+| [`image-creator`](image-creator/) | Generate images from a prompt, edit them in plain language, multi-format briefs, save them to your Drive |
 | [`image-resize`](image-resize/) | Re-compose one image for other sizes (Story, LinkedIn, 1080x1920…) |
-| [`image-translation`](image-translation/) | Translate the text baked into an image and keep its layout |
-| [`video-dubbing`](video-dubbing/) | Dub a video into other languages, review it line by line, export it |
-| [`video-subtitles`](video-subtitles/) | Make or translate subtitles, review them line by line, download or burn them in |
-| [`subtitle-translation`](subtitle-translation/) | Translate SRT/VTT subtitle files into many languages in one command |
-| [`document-translation`](document-translation/) | Translate files, batches or Drive folders, formatting kept; proofread, back-translate and score them |
-| [`dita-translation`](dita-translation/) | Translate a DITA map zip into one translated zip per language; retry, score and fix it |
-| [`translation-memory`](translation-memory/) | Look up, correct and import approved wording; translate strings memory-first |
+| [`image-translation`](image-translation/) | Translate the text baked into an image and keep its layout; fix lines, objects and logos |
+| [`translate-video`](translate-video/) | Dub a video, make subtitles, translate SRT/VTT files; review line by line, export or burn in |
+| [`document-translation`](document-translation/) | Translate files, batches or Drive folders, formatting kept; review, proofread, back-translate and score them |
+| [`dita-translation`](dita-translation/) | Follow, retry, score and download DITA map translations, one zip per language |
+| [`translation-memory`](translation-memory/) | Memories, glossaries, term bases and style guides; translate strings memory-first |
 | [`translation-quality`](translation-quality/) | Score a translation line by line and explain the worst lines |
-| [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images |
+| [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images; manage markets |
 | [`text-to-speech`](text-to-speech/) | Turn text into speech in catalog or cloned voices |
-| [`voice-cloning`](voice-cloning/) | Clone a voice from a few samples, with consent |
-| [`lip-sync`](lip-sync/) | Make a video's lips match a new audio track |
+| [`voice-cloning`](voice-cloning/) | Clone a voice from samples, with consent |
+| [`lip-sync`](lip-sync/) | Make a video's lips match a new audio track, with consent |
 | [`hyperlocal-campaigns`](hyperlocal-campaigns/) | Personalized WhatsApp and Facebook campaigns to your contact network |
-| [`workflows`](workflows/) | Run your organization's Cosmos workflows and relay approvals |
+| [`workflows`](workflows/) | Run, follow and build your organization's Cosmos workflows; relay approvals |
 | [`brand-kit`](brand-kit/) | Draft a brand kit from a website, images or brand book; edit kits by name |
-| [`projects`](projects/) | Projects and tasks: what's due, create, move, assign, by name |
+| [`projects`](projects/) | Projects, tasks, checklists and job assignments, by name |
 | [`prompts-library`](prompts-library/) | Find, fill, save and version the team's prompts |
 
-## Status
+## How the skills work
 
-Version 0.3, ahead of the production release it depends on. Until that release
-is live on `universe-api.vitra.ai`:
-
-- Document, subtitle file and memory translation, quality and compliance
-  checks, speech, voice cloning, lip-sync, campaigns, workflows and the image
-  skills work on the current API.
-- Line-by-line editing in the video and subtitle skills, `image-creator`'s
-  brand-kit scripts, and the Vitra MCP server that the Claude Code plugin adds
-  need that release.
+Every Vitra feature is a tool on the Vitra server, the same tools the Vitra MCP
+connector offers. A skill is a short guide through those tools: its
+`scripts/vitra.py` forwards each call to the server (`/v1/agent/tools`) and
+`scripts/login.py` signs the machine in. No skill carries its own API logic, so
+a server change reaches every skill at once.
 
 ## Install
 

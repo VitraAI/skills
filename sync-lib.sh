@@ -15,37 +15,34 @@ cd "$(dirname "$0")"
 CHECK=0
 [ "${1:-}" = "--check" ] && CHECK=1
 
-# What each skill vendors from _lib/. The dub skill keeps its own _common.py
-# (run manifest) and imports the shared one as _core (see RENAMES).
-BASE="_http.py _common.py _access.py _api.py login.py vitra.py"
-VIDEO="_tm.py _tv.py _jobs.py _progress.py _cards.py _cue.py list_languages.py list_tms.py list_providers.py"
-SUBTITLES="_subtitles.py inspect_subtitles.py edit_subtitles.py add_subtitle_language.py download_subtitles.py retry_subtitles.py"
+# What each skill vendors from _lib/. Every skill is a thin guide over the
+# Vitra server's tools: it signs in with login.py and calls tools with vitra.py,
+# and keeps no API logic of its own.
+BASE="_http.py _common.py login.py vitra.py"
 
 SKILL_FILES=(
-  "image-creator|${BASE}"
-  "image-resize|${BASE} _drive.py _folders.py"
-  "image-translation|${BASE} _tm.py _drive.py _folders.py list_tms.py list_providers.py"
-  "video-dubbing|_http.py _access.py _api.py login.py vitra.py _drive.py _folders.py ${VIDEO} download_export.py edit_subtitles.py job_tools.py"
-  "video-subtitles|${BASE} _folders.py ${VIDEO} ${SUBTITLES} start_subtitles.py burn_subtitles.py download_export.py job_tools.py"
-  "subtitle-translation|${BASE} ${VIDEO} ${SUBTITLES} translate_subtitles.py"
-  "document-translation|${BASE} _tm.py _state.py _aiqe.py _drive.py _folders.py list_tms.py list_providers.py"
-  "text-to-speech|${BASE} _state.py _drive.py list_voices.py list_languages.py"
-  "voice-cloning|${BASE} _state.py list_languages.py"
-  "lip-sync|${BASE} _state.py _drive.py list_languages.py"
-  "translation-memory|${BASE} _tm.py list_tms.py list_providers.py"
-  "content-compliance|${BASE}"
-  "translation-quality|${BASE} _tm.py _aiqe.py list_tms.py"
-  "hyperlocal-campaigns|${BASE} _state.py"
-  "workflows|${BASE} _state.py"
-  "dita-translation|${BASE} _tm.py _state.py _aiqe.py list_tms.py"
   "brand-kit|${BASE}"
+  "content-compliance|${BASE}"
+  "dita-translation|${BASE}"
+  "document-translation|${BASE}"
+  "hyperlocal-campaigns|${BASE}"
+  "image-creator|${BASE}"
+  "image-resize|${BASE}"
+  "image-translation|${BASE}"
+  "lip-sync|${BASE}"
   "projects|${BASE}"
   "prompts-library|${BASE}"
+  "text-to-speech|${BASE}"
+  "translate-video|${BASE}"
+  "translation-memory|${BASE}"
+  "translation-quality|${BASE}"
+  "vitra|${BASE}"
+  "voice-cloning|${BASE}"
+  "workflows|${BASE}"
 )
-RENAMES=("_common.py video-dubbing/scripts/_core.py")
 
 # (bash 3.2 on macOS has no associative arrays: "skill|files" pairs.)
-TARGETS=("${RENAMES[@]}")
+TARGETS=()
 for entry in "${SKILL_FILES[@]}"; do
   skill="${entry%%|*}"
   for f in ${entry#*|}; do

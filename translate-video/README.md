@@ -1,6 +1,6 @@
-# document-translation
+# translate-video
 
-Document Translation: an agent skill for Vitra Universe. Translates documents and text with the Vitra Universe API, keeping the original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML, XLIFF and plain text — one file, a batch, or a whole Drive folder — through the organization's translation memory; then reviews it line by line, proofreads, back-translates, scores it with a quality report and writes fixes back.
+Translate Video: an agent skill for Vitra Universe. Dubs and subtitles videos and translates subtitle files with Vitra Translate Video: dubs a video into other languages (library voices by default, a speaker's cloned voice only with consent), makes subtitles from a video, translates SRT, VTT, ASS or SSA files, lets the user review and edit lines, speakers, emotions and pronunciations, fixes issues, scores quality, then exports the dubbed video, burns subtitles in or downloads subtitle files.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.
