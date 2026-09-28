@@ -155,12 +155,7 @@ def _read_pending() -> dict:
 
 
 def _write_pending(data: dict) -> None:
-    path = _pending_file()
-    tmp = path.with_suffix(".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        json.dump(data, fh)
-    os.replace(tmp, path)
+    _common.write_private(_pending_file(), data)
 
 
 _PAGE = """<!doctype html><meta charset="utf-8"><title>Vitra</title>
@@ -168,51 +163,68 @@ _PAGE = """<!doctype html><meta charset="utf-8"><title>Vitra</title>
 <h1 style="font-size:1.4rem">{title}</h1><p>{body}</p></body>"""
 
 
+LOOPBACK = ("127.0.0.1", "localhost")
+
+
 def serve() -> int:
     """The background helper: catch the browser's return and keep the token."""
-    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
     plan = json.loads(sys.stdin.read())
     redirect = urllib.parse.urlsplit(plan["redirect_uri"])
+    if redirect.scheme != "http" or redirect.hostname not in LOOPBACK:
+        # Only ever listen on this machine, whatever the server advertises.
+        _write_pending({"status": "failed",
+                        "message": "The server asked for a sign-in address that isn't this machine."})
+        return 1
     result: dict = {}
 
     class Handler(BaseHTTPRequestHandler):
+        timeout = 5  # an idle connection (a browser preconnect) can't stall the helper
+
         def log_message(self, *args):  # silence the default stderr log
             pass
 
-        def do_GET(self):  # noqa: N802
-            parts = urllib.parse.urlsplit(self.path)
-            if parts.path != redirect.path:
-                self.send_response(404)
-                self.end_headers()
-                return
-            q = dict(urllib.parse.parse_qsl(parts.query))
-            if q.get("state") != plan["state"]:
-                result.update(status="failed", message="The sign-in reply didn't match; start again.")
-            elif q.get("error"):
-                result.update(status="failed",
-                              message=q.get("error_description") or "Sign-in was cancelled.")
-            else:
-                result.update(_exchange(plan, q.get("code", ""), self.server.redirect_uri))
-            ok = result.get("status") == "signed_in"
-            page = _PAGE.format(
-                title="You're signed in" if ok else "Sign-in didn't finish",
-                body=("Go back to your agent; it can use Vitra now. You can close this tab."
-                      if ok else result.get("message", "Please try again.")),
-            ).encode()
-            self.send_response(200)
+        def _page(self, status: int, title: str, body: str) -> None:
+            page = _PAGE.format(title=title, body=body).encode()
+            self.send_response(status)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(page)))
             self.end_headers()
             self.wfile.write(page)
 
+        def do_GET(self):  # noqa: N802
+            parts = urllib.parse.urlsplit(self.path)
+            q = dict(urllib.parse.parse_qsl(parts.query))
+            if parts.path != redirect.path or q.get("state") != plan["state"] or result:
+                # Not our sign-in's reply (another tab, a local port scan):
+                # ignore it and keep waiting for the real one.
+                self._page(400, "Not a Vitra sign-in", "This link isn't part of a sign-in in progress.")
+                return
+            if _read_pending().get("pid") != os.getpid():
+                result.update(status="superseded")
+                self._page(200, "Sign-in replaced",
+                           "A newer sign-in was started on this machine; finish that one instead.")
+                return
+            if q.get("error"):
+                result.update(status="failed",
+                              message=q.get("error_description") or "Sign-in was cancelled.")
+            else:
+                result.update(_exchange(plan, q.get("code", ""), self.server.redirect_uri))
+            _write_pending(result)  # before the reply, so --status sees it at once
+            ok = result.get("status") == "signed_in"
+            self._page(200, "You're signed in" if ok else "Sign-in didn't finish",
+                       "Go back to your agent; it can use Vitra now. You can close this tab."
+                       if ok else result.get("message", "Please try again."))
+
     try:
-        httpd = HTTPServer((redirect.hostname or "127.0.0.1", 0), Handler)
+        httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     except OSError as e:
         _write_pending({"status": "failed", "message": str(e)})
         return 1
+    httpd.daemon_threads = True
     port = httpd.server_address[1]
-    httpd.redirect_uri = f"{redirect.scheme}://{redirect.hostname}:{port}{redirect.path}"
+    httpd.redirect_uri = f"http://{redirect.hostname}:{port}{redirect.path}"
     challenge = base64.urlsafe_b64encode(
         hashlib.sha256(plan["verifier"].encode()).digest()).rstrip(b"=").decode()
     url = plan["authorization_endpoint"] + "?" + urllib.parse.urlencode({
@@ -230,8 +242,9 @@ def serve() -> int:
     httpd.timeout = 1
     while not result and time.time() < deadline:
         httpd.handle_request()
+    time.sleep(0.2)  # let the reply page finish sending
     httpd.server_close()
-    if _read_pending().get("pid") != os.getpid():
+    if result.get("status") == "superseded" or _read_pending().get("pid") != os.getpid():
         return 0  # a newer sign-in started meanwhile; its helper owns the file
     _write_pending(result or {"status": "expired",
                               "message": "Nobody finished signing in within 10 minutes."})
@@ -325,6 +338,7 @@ def logout() -> int:
         except (urllib.error.URLError, OSError):
             pass
     _common.write_signin(None)
+    _pending_file().unlink(missing_ok=True)
     return _out({"status": "signed_out", "next_action": None})
 
 

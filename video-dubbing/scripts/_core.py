@@ -119,27 +119,98 @@ def read_signins() -> dict:
     return data if isinstance(data, dict) else {}
 
 
+def write_private(path: Path, data: object) -> None:
+    """Write JSON readable only by this user, atomically.
+
+    A unique temp file per writer, so parallel scripts never trip over each
+    other's half-written file; `os.replace` then swaps it in whole.
+    """
+    import json
+    import tempfile
+    import time
+
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, indent=2)
+        for attempt in range(20):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:  # Windows: a reader has it open for a moment
+                if attempt == 19:
+                    raise
+                time.sleep(0.05)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
+class _SigninLock:
+    """Exclusive lock on the sign-in file, across processes.
+
+    Needed because Vitra rotates the refresh token on every use and treats a
+    second use of an old one as theft: it revokes the whole sign-in. So only
+    one script may renew at a time, and the others must pick up its result.
+    """
+
+    def __enter__(self):
+        path = signin_file().with_name("universe-signin.lock")
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self._fh = open(path, "a+b")
+        if os.name == "nt":
+            import msvcrt
+            import time
+
+            while True:
+                try:
+                    self._fh.seek(0)
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    time.sleep(0.05)
+        else:
+            import fcntl
+
+            fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *exc):
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                self._fh.seek(0)
+                msvcrt.locking(self._fh.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(self._fh.fileno(), fcntl.LOCK_UN)
+        finally:
+            self._fh.close()
+        return False
+
+
 def write_signin(entry: dict | None, base: str | None = None) -> None:
     """Save (or with None, forget) this server's sign-in. Owner-only file."""
-    import json
-
     base = base or base_url()
-    data = read_signins()
-    if entry is None:
-        data.pop(base, None)
-    else:
-        data[base] = entry
-    path = signin_file()
-    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    tmp = path.with_suffix(".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        json.dump(data, fh, indent=2)
-    os.replace(tmp, path)
+    with _SigninLock():
+        data = read_signins()
+        if entry is None:
+            data.pop(base, None)
+        else:
+            data[base] = entry
+        write_private(signin_file(), data)
 
 
-def _refresh(entry: dict) -> dict | None:
-    """Swap the refresh token for a new pair. None when the sign-in is over."""
+def _refresh(entry: dict) -> tuple[str, dict | None]:
+    """Swap the refresh token for a new pair.
+
+    Returns ("ok", entry), ("ended", None) when Vitra refuses the refresh
+    token (signed out, expired, revoked), or ("unreachable", None) when the
+    answer never came — that is NOT a sign-out.
+    """
     import json
     import time
     import urllib.error
@@ -159,11 +230,13 @@ def _refresh(entry: dict) -> dict | None:
     try:
         with urllib.request.urlopen(req, timeout=30) as res:
             tok = json.loads(res.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        return ("ended", None) if e.code in (400, 401) else ("unreachable", None)
     except (urllib.error.URLError, OSError, ValueError):
-        return None
+        return "unreachable", None
     if not tok.get("access_token"):
-        return None
-    return {
+        return "ended", None
+    return "ok", {
         **entry,
         "access_token": tok["access_token"],
         "refresh_token": tok.get("refresh_token") or entry.get("refresh_token"),
@@ -171,27 +244,46 @@ def _refresh(entry: dict) -> dict | None:
     }
 
 
-def signed_in_token() -> str | None:
-    """This server's sign-in token, renewed when due. None if not signed in."""
+_SIGNIN_ENDED = False  # set when this run found the sign-in over
+
+
+def _fresh(entry: object) -> bool:
     import time
 
+    return isinstance(entry, dict) and bool(entry.get("access_token")) and \
+        int(entry.get("expires_at") or 0) - 60 > time.time()
+
+
+def signed_in_token() -> str | None:
+    """This server's sign-in token, renewed when due. None if not signed in."""
     base = base_url()
     entry = read_signins().get(base)
     if not isinstance(entry, dict) or not entry.get("access_token"):
         return None
-    if int(entry.get("expires_at") or 0) - 60 > time.time():
+    if _fresh(entry):
         return entry["access_token"]
-    fresh = _refresh(entry)
-    if fresh is None:
-        # Another script may have renewed it a moment ago (refresh tokens are
-        # single-use): take theirs before calling the sign-in over.
-        again = read_signins().get(base) or {}
-        if again.get("refresh_token") != entry.get("refresh_token") and \
-                int(again.get("expires_at") or 0) - 60 > time.time():
-            return again.get("access_token")
-        return None
-    write_signin(fresh, base)
-    return fresh["access_token"]
+    with _SigninLock():
+        # Another script may have renewed it while this one waited.
+        data = read_signins()
+        entry = data.get(base)
+        if _fresh(entry):
+            return entry["access_token"]
+        if not isinstance(entry, dict) or not entry.get("refresh_token"):
+            return None
+        outcome, renewed = _refresh(entry)
+        if outcome == "unreachable":
+            die(EXIT_API_ERROR,
+                "Network error: couldn't reach Vitra to renew your sign-in. "
+                "Check the connection and run the command again.",
+                error_code="NETWORK_ERROR", retryable=True)
+        if renewed is None:
+            global _SIGNIN_ENDED
+            _SIGNIN_ENDED = True
+            data.pop(base, None)
+        else:
+            data[base] = renewed
+        write_private(signin_file(), data)
+    return renewed["access_token"] if renewed else None
 
 
 def credential() -> str:
@@ -204,7 +296,7 @@ def credential() -> str:
 
 def _missing() -> None:
     app = (os.environ.get(APP_URL_VAR) or DEFAULT_APP_URL).rstrip("/")
-    had = credential() == "signin"
+    had = _SIGNIN_ENDED or credential() == "signin"
     die(
         EXIT_AUTH_MISSING,
         ("Your Vitra sign-in has ended.\n" if had else "Not signed in to Vitra.\n")
