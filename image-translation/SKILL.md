@@ -56,13 +56,19 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 2. **Languages and memory.** Target language keys from `list_languages`.
    `list_translation_memories` for the first target: several → ask which (by name).
 3. **Price, ask, start.** Quick mode renders every language straight away; `review: true`
-   only analyses, so the user can check the text before rendering.
+   only analyses, so the user can check the text before rendering. The job is named after
+   the file (`name` sets another).
    ```bash
    python3 scripts/vitra.py call translate_image '{"file": "summer-poster.png", "target_languages": ["french_france"], "estimate_only": true}'
    ```
    Then the same with `"confirm": true`.
 4. **Wait** per language: `get_image_translation` until `completed` (show `image_url`) or
-   `failed`. `ready_to_translate` → render it with `add_image_languages` (paid).
+   `failed` (tell the user the reason it gives; retry only when it says a retry would help).
+   `ready_to_translate` (review mode) → `get_image_text` shows the analysed lines with
+   their proposed translation, not rendered yet; go through them with the user, then
+   render with `add_image_languages` (paid), passing their wording as `line_edits`
+   (`[{"line": 1, "text": "…"}]`, one language per call) and lines to leave in the
+   original as `keep_lines`.
 5. **Review** ⏸: `get_image_text` shows numbered source → translation lines.
    `edit_image_text` changes lines, keeps lines in the original language (brand names),
    marks them verified or saves them to the memory; a re-render is paid.

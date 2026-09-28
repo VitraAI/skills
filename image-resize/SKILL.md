@@ -55,7 +55,8 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    ```bash
    python3 scripts/vitra.py call adapt_image_sizes '{"file": "summer-banner.png", "sizes": [{"width": 1080, "height": 1920, "label": "Story"}], "estimate_only": true}'
    ```
-   Then the same call with `"confirm": true`.
+   A PRO estimate splits the price: tell the user its summary (credits charged now, more
+   when the plans are approved, and the total). Then the same call with `"confirm": true`.
 4. **Wait**: `get_adapted_sizes` until every size is done or failed. Partial success is
    normal: report the sizes that worked.
 5. **Work on one size** ⏸ with `manage_adapted_size`, naming the size by label or WxH:
