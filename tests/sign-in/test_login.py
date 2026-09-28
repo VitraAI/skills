@@ -16,6 +16,7 @@ import tempfile
 import threading
 import time
 import unittest
+import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -34,6 +35,10 @@ class FakeVitra:
         self.refreshes = 0
         self.revoked: list[str] = []
         self.seen_auth: list[str] = []
+        self.redirect = "http://127.0.0.1/callback"
+        self.token_down = False
+        self.wiped = 0
+        self.lock = threading.Lock()
         fake = self
 
         class H(BaseHTTPRequestHandler):
@@ -56,7 +61,7 @@ class FakeVitra:
                         "client_id": "agent-client",
                         "authorization_endpoint": f"{fake.base}/api/auth/oauth2/authorize",
                         "token_endpoint": f"{fake.base}/api/auth/oauth2/token",
-                        "redirect_uri": "http://127.0.0.1/callback",
+                        "redirect_uri": fake.redirect,
                     })
                 if url.path == "/api/auth/oauth2/authorize":
                     # The user signs in and picks an org; the server redirects.
@@ -95,11 +100,17 @@ class FakeVitra:
                     return self._json(200, {"access_token": "uvo_first", "refresh_token": "r1",
                                             "expires_in": 3600})
                 if form.get("grant_type") == "refresh_token":
-                    fake.refreshes += 1
-                    if form.get("refresh_token") != "r1":
-                        return self._json(400, {"error": "invalid_grant"})
-                    return self._json(200, {"access_token": "uvo_second", "refresh_token": "r2",
-                                            "expires_in": 3600})
+                    if fake.token_down:
+                        return self._json(503, {})
+                    with fake.lock:
+                        fake.refreshes += 1
+                        if form.get("refresh_token") != "r1":
+                            # Vitra (Better Auth) treats reuse as theft: all tokens die.
+                            fake.wiped += 1
+                            return self._json(400, {"error": "invalid_grant"})
+                        time.sleep(0.2)  # widen the race window
+                        return self._json(200, {"access_token": "uvo_second", "refresh_token": "r2",
+                                                "expires_in": 3600})
                 return self._json(400, {})
 
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), H)
@@ -173,6 +184,48 @@ class LoginTest(unittest.TestCase):
         self.assertEqual(self.run_script("login.py", "--logout")["status"], "signed_out")
         self.assertEqual(self.fake.revoked, ["r1"])
         self.assertEqual(self.run_script("login.py", "--status")["status"], "not_signed_in")
+
+
+    def expire(self) -> None:
+        entry = self.store()
+        entry["expires_at"] = 0
+        (Path(self.home) / "universe-signin.json").write_text(json.dumps({self.fake.base: entry}))
+
+    def test_parallel_scripts_renew_once(self) -> None:
+        self.sign_in()
+        self.expire()
+        procs = [subprocess.Popen([sys.executable, str(SCRIPTS / "check_access.py")], env=self.env,
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=self.home)
+                 for _ in range(4)]
+        for p in procs:
+            p.wait(timeout=60)
+        self.assertEqual((self.fake.refreshes, self.fake.wiped), (1, 0))
+        self.assertEqual(self.store()["access_token"], "uvo_second")
+
+    def test_an_outage_is_not_a_sign_out(self) -> None:
+        self.sign_in()
+        self.expire()
+        self.fake.token_down = True
+        out = self.run_script("check_access.py")
+        self.assertEqual((out["error"]["code"], out["error"]["retryable"]), ("NETWORK_ERROR", True))
+        self.assertEqual(self.store()["refresh_token"], "r1")  # still signed in
+
+    def test_a_stray_callback_does_not_end_the_sign_in(self) -> None:
+        started = self.run_script("login.py")
+        port = urlparse(parse_qs(urlparse(started["sign_in_url"]).query)["redirect_uri"][0]).port
+        for bad in ("state=wrong&code=evil", "error=access_denied", "state=wrong"):
+            with self.assertRaises(urllib.error.HTTPError) as caught:
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/callback?{bad}", timeout=10)
+            self.assertEqual(caught.exception.code, 400)
+        self.assertEqual(self.run_script("login.py", "--status")["status"], "waiting_for_browser")
+        with urllib.request.urlopen(started["sign_in_url"], timeout=30) as res:
+            self.assertIn(b"signed in", res.read())
+        self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
+
+    def test_only_listens_on_this_machine(self) -> None:
+        self.fake.redirect = "http://0.0.0.0/callback"
+        out = self.run_script("login.py")
+        self.assertEqual(out["status"], "failed")
 
 
 if __name__ == "__main__":
