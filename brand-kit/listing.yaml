@@ -1,0 +1,36 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Keep your brand in one place. Point it at your website, a few product
+  images or your brand book and it drafts a kit (colors, fonts, tone of
+  voice, visual style) for you to review and save; then edit or retire kits
+  by name. Vitra's image creator applies them to every image it makes.
+when-to-use: >-
+  Reach for it when you set up a new brand or sub-brand, refresh a palette or
+  typeface, or tidy up old kits before a campaign.
+features:
+  - title: Drafted from your material
+    description: Reads colors, fonts, tone and style from a website, up to 6 images or a brand-book PDF.
+  - title: Review before saving
+    description: Extraction only drafts; nothing is saved until you agree.
+  - title: Edit by name
+    description: Rename, recolor, change fonts, tone or logo without rebuilding the kit.
+  - title: Safe deletes
+    description: Deleting asks first, by the kit's name.
+use-cases:
+  - title: New brand setup
+    description: From a website to a saved kit in one conversation.
+  - title: Brand refresh
+    description: Update the palette and typefaces your generated images follow.
+  - title: Agencies
+    description: One kit per client brand, picked by name.
+mcp-toolset: core
+mcp-tools:
+  - name: list_brand_kits
+    title: List brand kits
+related-skills:
+  - name: image-creator
+    why: Create and edit images that follow a saved brand kit.

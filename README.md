@@ -17,7 +17,8 @@ plus the scripts it runs.
 | [`video-dubbing`](video-dubbing/) | Dub a video into other languages, review it line by line, export it |
 | [`video-subtitles`](video-subtitles/) | Make or translate subtitles, review them line by line, download or burn them in |
 | [`subtitle-translation`](subtitle-translation/) | Translate SRT/VTT subtitle files into many languages in one command |
-| [`document-translation`](document-translation/) | Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML, XLIFF and text, formatting kept |
+| [`document-translation`](document-translation/) | Translate files, batches or Drive folders, formatting kept; proofread, back-translate and score them |
+| [`dita-translation`](dita-translation/) | Translate a DITA map zip into one translated zip per language; retry, score and fix it |
 | [`translation-memory`](translation-memory/) | Look up, correct and import approved wording; translate strings memory-first |
 | [`translation-quality`](translation-quality/) | Score a translation line by line and explain the worst lines |
 | [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images |
@@ -26,6 +27,9 @@ plus the scripts it runs.
 | [`lip-sync`](lip-sync/) | Make a video's lips match a new audio track |
 | [`hyperlocal-campaigns`](hyperlocal-campaigns/) | Personalized WhatsApp and Facebook campaigns to your contact network |
 | [`workflows`](workflows/) | Run your organization's Cosmos workflows and relay approvals |
+| [`brand-kit`](brand-kit/) | Draft a brand kit from a website, images or brand book; edit kits by name |
+| [`projects`](projects/) | Projects and tasks: what's due, create, move, assign, by name |
+| [`prompts-library`](prompts-library/) | Find, fill, save and version the team's prompts |
 
 ## Status
 

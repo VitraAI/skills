@@ -1,0 +1,43 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Translate a whole DITA map in one go: upload the zip of maps, topics and SVG
+  images and get one translated zip per language, structure and markup intact,
+  ready for your DITA-OT build. Your translation memory keeps product
+  terminology consistent across every topic.
+when-to-use: >-
+  Reach for it when technical documentation lives in DITA: product manuals,
+  help centers and release notes that ship in several languages. For single
+  Word, XML or JSON files, use document translation.
+features:
+  - title: The whole map at once
+    description: Every topic, map and SVG in the zip, into several languages in one command.
+  - title: Markup kept
+    description: Only the text is translated; tags, folders and file names come back as they went in.
+  - title: Memory-backed
+    description: Reuses and feeds your organization's approved terminology.
+  - title: Failed topics, handled
+    description: Retry only what failed, or ship now with the original text for those topics.
+  - title: Quality report
+    description: A score per language with the worst phrases explained, and fixes written back into the map.
+use-cases:
+  - title: Product manuals
+    description: A full manual set, localized for every market at release time.
+  - title: Help centers
+    description: Keep translated help topics in step with each documentation release.
+  - title: Regulated documentation
+    description: Consistent, reviewed terminology for medical, industrial and legal content.
+mcp-toolset: core
+mcp-tools:
+  - name: list_translation_memories
+    title: List translation memories
+related-skills:
+  - name: document-translation
+    why: Translate single Word, XML, JSON or XLIFF files instead of a whole map.
+  - name: translation-memory
+    why: Create or tidy the memory that keeps your documentation terms consistent.
+  - name: translation-quality
+    why: Score any translated text, not only a map.

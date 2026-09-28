@@ -86,6 +86,12 @@ class Fake:
             def do_PUT(self) -> None:
                 self._reply("PUT")
 
+            def do_PATCH(self) -> None:
+                self._reply("PATCH")
+
+            def do_DELETE(self) -> None:
+                self._reply("DELETE")
+
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.base = f"http://127.0.0.1:{self.httpd.server_address[1]}"
         threading.Thread(target=self.httpd.serve_forever, daemon=True).start()

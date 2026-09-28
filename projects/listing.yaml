@@ -1,0 +1,44 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Run your localization work from chat. Ask what's due, spin up a project
+  for a new market, move tasks along, and hand them to the right people,
+  without opening the board. Everything is named the way your team names it:
+  projects, statuses, priorities and people.
+when-to-use: >-
+  Reach for it for the daily stand-up ("what's due today?"), when a new
+  request comes in and needs a project, or when work changes hands.
+features:
+  - title: What's due, at a glance
+    description: Tasks due today or overdue, yours or the whole project's, with progress per project.
+  - title: Projects in one line
+    description: Type, languages, dates, status and priority, set by name.
+  - title: Your board, your words
+    description: Uses each project's own statuses and priorities; no ids anywhere.
+  - title: People by name
+    description: Add assignees and watchers, or reassign a task, by name or email.
+  - title: Safe changes
+    description: Deletes always ask first; ambiguous names come back as a question.
+use-cases:
+  - title: Daily stand-up
+    description: What's due, what's overdue, who's on it.
+  - title: New market launch
+    description: A project per market with its languages and deadline.
+  - title: Hand-offs
+    description: Move a task to review and assign the reviewer in one step.
+mcp-toolset: context
+mcp-tools:
+  - name: list_projects
+    title: List projects
+  - name: list_tasks
+    title: List tasks
+related-skills:
+  - name: document-translation
+    why: Translate the files a project's tasks are about.
+  - name: video-dubbing
+    why: Dub the videos a localization project covers.
+  - name: translation-quality
+    why: Score a translation before moving its task to done.

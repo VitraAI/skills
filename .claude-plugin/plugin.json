@@ -1,7 +1,7 @@
 {
   "name": "vitra",
   "version": "0.3.0",
-  "description": "Vitra Universe skills: translate documents, subtitles, images and text; dub videos, generate speech, clone voices and lip-sync; manage translation memories; score translation quality and check content compliance; run campaigns and workflows — using your Vitra organization's account.",
+  "description": "Vitra Universe skills: translate documents, subtitles, images and text; dub videos, generate speech, clone voices and lip-sync; manage translation memories; score translation quality and check content compliance; translate DITA maps; manage brand kits, projects, tasks and prompts; run campaigns and workflows — using your Vitra organization's account.",
   "author": {
     "name": "Vitra.ai",
     "url": "https://www.vitra.ai"
@@ -26,16 +26,24 @@
     "quality",
     "compliance",
     "whatsapp",
-    "workflows"
+    "workflows",
+    "dita",
+    "brand-kit",
+    "projects",
+    "prompts"
   ],
   "skills": [
+    "./brand-kit",
     "./content-compliance",
+    "./dita-translation",
     "./document-translation",
     "./hyperlocal-campaigns",
     "./image-creator",
     "./image-resize",
     "./image-translation",
     "./lip-sync",
+    "./projects",
+    "./prompts-library",
     "./subtitle-translation",
     "./text-to-speech",
     "./translation-memory",
