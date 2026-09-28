@@ -79,8 +79,8 @@ class FakeVitra:
                     return self._json(200, {"name": "Acme Studio", "id": "org-1"})
                 if url.path == "/api/auth/get-session":
                     return self._json(200, {"user": {"email": "ana@acme.test", "id": "u1"}})
-                if url.path == "/api/auth/my-permissions":
-                    return self._json(200, {"role": "member", "permissions": ["brand_kit:read"]})
+                if url.path == "/v1/agent/tools":
+                    return self._json(200, {"tools": []})
                 return self._json(404, {"message": "no route"})
 
             def do_POST(self):  # noqa: N802
@@ -150,7 +150,7 @@ class LoginTest(unittest.TestCase):
         return json.loads((Path(self.home) / "universe-signin.json").read_text())[self.fake.base]
 
     def test_not_signed_in_says_how(self) -> None:
-        out = self.run_script("check_access.py")
+        out = self.run_script("vitra.py", "tools")
         self.assertEqual(out["error"]["code"], "AUTH_MISSING")
         self.assertIn("login.py", out["error"]["message"])
 
@@ -162,7 +162,7 @@ class LoginTest(unittest.TestCase):
         self.assertEqual(path.stat().st_mode & 0o777, 0o600)
         self.assertNotIn("verifier", path.read_text())
 
-        self.run_script("check_access.py")
+        self.run_script("vitra.py", "tools")
         self.assertEqual(self.fake.seen_auth[-1], "Bearer uvo_first")
 
     def test_an_expired_token_is_renewed_once(self) -> None:
@@ -170,10 +170,10 @@ class LoginTest(unittest.TestCase):
         entry = self.store()
         entry["expires_at"] = 0
         (Path(self.home) / "universe-signin.json").write_text(json.dumps({self.fake.base: entry}))
-        self.run_script("check_access.py")
+        self.run_script("vitra.py", "tools")
         self.assertEqual(self.fake.seen_auth[-1], "Bearer uvo_second")
         self.assertEqual(self.store()["refresh_token"], "r2")
-        self.run_script("check_access.py")
+        self.run_script("vitra.py", "tools")
         self.assertEqual(self.fake.refreshes, 1)
 
     def test_an_api_key_wins_and_logout_forgets(self) -> None:
@@ -194,7 +194,7 @@ class LoginTest(unittest.TestCase):
     def test_parallel_scripts_renew_once(self) -> None:
         self.sign_in()
         self.expire()
-        procs = [subprocess.Popen([sys.executable, str(SCRIPTS / "check_access.py")], env=self.env,
+        procs = [subprocess.Popen([sys.executable, str(SCRIPTS / "vitra.py"), "tools"], env=self.env,
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=self.home)
                  for _ in range(4)]
         for p in procs:
@@ -206,7 +206,7 @@ class LoginTest(unittest.TestCase):
         self.sign_in()
         self.expire()
         self.fake.token_down = True
-        out = self.run_script("check_access.py")
+        out = self.run_script("vitra.py", "tools")
         self.assertEqual((out["error"]["code"], out["error"]["retryable"]), ("NETWORK_ERROR", True))
         self.assertEqual(self.store()["refresh_token"], "r1")  # still signed in
 

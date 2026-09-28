@@ -1,12 +1,12 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Know before you publish: check copy, images, audio and video against the
-  rules of every market you sell in, see exactly which rules a piece breaks and
-  why, catch unsafe content, and regenerate a flagged image so it passes.
+  Know before you publish: check copy, images, audio and video against the rules
+  of every market you sell in, see exactly which rules a piece breaks and why,
+  catch unsafe content, and regenerate a flagged image so it passes.
 when-to-use: >-
   Reach for it before a campaign goes live in a new market, when a creative is
   reused across regions, or when a reviewer asks "is this OK there?".
@@ -19,6 +19,14 @@ features:
     description: Text, images, audio and video, including what's said in a video.
   - title: Fix flagged images
     description: Regenerate an image so it meets a market's rules, keeping what you ask to keep.
+  - title: Markets and rules
+    description: Create markets, edit their rules, or draft new rules with AI.
+  - title: Review queue
+    description: Relay a reviewer's approve or reject on flagged items.
+  - title: Markets and rules
+    description: Create markets, edit their rules, or draft new rules with AI.
+  - title: Review queue
+    description: Relay a reviewer's approve or reject on flagged items.
 use-cases:
   - title: Global campaigns
     description: Clear one creative for many markets at once.
@@ -30,14 +38,50 @@ mcp-toolset: quality
 mcp-tools:
   - name: list_qc_regions
     title: List markets for content checks
+  - name: find_assets
+    title: Find files in the Drive
   - name: check_content
     title: Check content against market rules
   - name: get_content_check
     title: Get a content check result
+  - name: get_content_decision
+    title: Open a past content check
+  - name: get_decision_media
+    title: Get the media of a past check
   - name: fix_flagged_image
     title: Fix a flagged image
   - name: get_image_fix
     title: Get an image fix
+  - name: list_image_fixes
+    title: List past fixes of a flagged image
+  - name: list_content_checks
+    title: List past content checks
+  - name: delete_content_decision
+    title: Delete a past content check
+  - name: list_review_queue
+    title: List items waiting for review
+  - name: adjudicate_decision
+    title: Record a reviewer's verdict
+  - name: create_qc_market
+    title: Create a market for content checks
+  - name: update_qc_market
+    title: Edit a market
+  - name: delete_qc_market
+    title: Delete a market
+  - name: list_qc_rules
+    title: List a market's rules
+  - name: add_qc_rule
+    title: Add a rule to a market
+  - name: update_qc_rule
+    title: Edit a rule
+  - name: delete_qc_rule
+    title: Delete a rule
+  - name: generate_qc_rules
+    title: Draft rules for a market with AI
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: hyperlocal-campaigns
     why: Clear a campaign's creative for each market before it is sent.

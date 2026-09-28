@@ -1,13 +1,12 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Turn scripts, announcements and narration into natural speech in hundreds of
-  voices across languages, or in your organization's own cloned voices. Long
-  text is split into passages that are generated together and saved as audio
-  files, ready to use.
+  voices across languages and accents, or in your organization's own cloned
+  voices, and keep the audio.
 when-to-use: >-
   Reach for it whenever text needs to be heard: voice-overs, e-learning
   narration, IVR prompts, product videos, accessibility audio.
@@ -15,11 +14,9 @@ features:
   - title: Catalog and cloned voices
     description: Search voices by language, gender or style, with previews, including your own clones.
   - title: Long scripts
-    description: Paragraphs become separate clips, generated together.
-  - title: Expressive delivery
-    description: Ask for a tone such as happy or calm where the voice supports it.
-  - title: Safe to re-run
-    description: Finished clips are kept; only failed ones are made again.
+    description: Up to 5,000 characters per clip; longer scripts go passage by passage.
+  - title: Voices by accent
+    description: Find voices by accent, like British English or Egyptian Arabic.
   - title: Say it right
     description: Tell it how to pronounce brand names, people's names and acronyms.
   - title: Save to the Drive
@@ -33,12 +30,28 @@ use-cases:
     description: Audio versions of articles and notices.
 mcp-toolset: documents
 mcp-tools:
+  - name: list_languages
+    title: List languages
+  - name: list_voices
+    title: List voices
+  - name: find_voices_by_accent
+    title: Find voices by accent
+  - name: list_cloned_voices
+    title: List cloned voices
   - name: text_to_speech
     title: Generate speech from text
   - name: get_speech_job
     title: Check a speech job
-  - name: list_voices
-    title: List voices
+  - name: list_playground_jobs
+    title: List speech sessions, voice clones or lip-syncs
+  - name: rename_playground_job
+    title: Rename a Playground job
+  - name: manage_playground_job
+    title: Retry or save a Playground job
+  - name: delete_playground_job
+    title: Delete a Playground job
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: voice-cloning
     why: Create a voice from recordings, then speak any text in it here.

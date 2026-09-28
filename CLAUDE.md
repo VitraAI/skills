@@ -6,8 +6,8 @@ the Vitra webapp's Skill Library reads the catalog this repo publishes.
 ## Layout
 
 - `<name>/` at the root: one self-contained skill each (SKILL.md, README.md,
-  listing.yaml, scripts/, references/, .env.sample). Same layout as the
-  server repo's old `skills/` folder.
+  listing.yaml, scripts/). Each is a thin guide over the Vitra
+  server's tools: `scripts/vitra.py` calls them, `scripts/login.py` signs in.
 - `_lib/`: shared Python helpers, copied into skills by `sync-lib.sh`.
 - `pack-skill.sh <name>`: zip one skill into `.builds/` by hand.
 - `scripts/catalog.mjs`: reads the skills (the single parser).
@@ -27,13 +27,13 @@ the Vitra webapp's Skill Library reads the catalog this repo publishes.
 
 ## Relationship to the server
 
-- The server (`universe-server`) provides the `/v1` routes these skills call and
-  the Vitra MCP tools. It stores no skills; its `AGENT-SURFACES.md` has the
+- The server (`universe-server`) provides the Vitra tools these skills call
+  (MCP at `/v1/mcp`, REST at `/v1/agent/tools`). It stores no skills; its `AGENT-SURFACES.md` has the
   shared rules and plan.
-- A skill ships only after every route it calls is live in **production**
+- A skill ships only after every tool it uses is live in **production**
   (`https://universe-api.vitra.ai`, the scripts' default base URL). Test against
   a devbox with `VITRA_UNIVERSE_BASE_URL`.
-- `listing.yaml` → `mcp-tools` must name tools the server's MCP registry offers
-  (`buildRegistry()` in `src/core/mcp/mcp.registry.ts`); copy each `title` from there.
-- When the server changes a route a skill calls, update the skill in step and
-  bump its `version`.
+- `scripts/mcp-tools.json` mirrors the server's registry (`buildRegistry()` in
+  `src/core/mcp/mcp.registry.ts`): toolsets, titles, argument names. Every tool a
+  SKILL.md or `listing.yaml` names must be in it (`tests/tool-names`).
+- When the server changes a tool a skill uses, update the skill in step.

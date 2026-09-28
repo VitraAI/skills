@@ -1,7 +1,7 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Reach every retailer or partner in your network with their own personalized
@@ -22,6 +22,10 @@ features:
     description: Nothing is sent without an explicit yes; schedule, pause, resume or stop.
   - title: Delivery tracking
     description: Sent, delivered, read and failed, per channel.
+  - title: Contacts and templates
+    description: Manage contacts, groups, products and creative, WhatsApp and Facebook templates.
+  - title: Contacts and templates
+    description: Manage contacts, groups, products and creative, WhatsApp and Facebook templates.
 use-cases:
   - title: Festival offers
     description: Personalized WhatsApp offers to every retailer in a region.
@@ -31,10 +35,10 @@ mcp-toolset: hyperlocal
 mcp-tools:
   - name: find_contacts
     title: Find Hyperlocal contacts
-  - name: list_contact_places
-    title: List contact states, zones or areas
   - name: list_contact_groups
     title: List contact groups
+  - name: list_contact_places
+    title: List contact states, zones or areas
   - name: list_creative_templates
     title: List Hyperlocal creative templates
   - name: estimate_broadcast
@@ -43,6 +47,128 @@ mcp-tools:
     title: Prepare a broadcast
   - name: get_broadcast
     title: Check a broadcast
+  - name: send_broadcast
+    title: Send a broadcast now
+  - name: schedule_broadcast
+    title: Schedule a broadcast
+  - name: control_broadcast
+    title: Pause, resume, stop or unschedule a broadcast
+  - name: retry_broadcast_send
+    title: Retry one contact's failed message
+  - name: list_broadcast_contacts
+    title: List a broadcast's contacts
+  - name: get_broadcast_contact
+    title: One contact's delivery status
+  - name: refresh_broadcast_analytics
+    title: Refresh Facebook post insights
+  - name: get_contact
+    title: Get one contact
+  - name: create_contact
+    title: Add a contact
+  - name: update_contact
+    title: Edit a contact
+  - name: delete_contact
+    title: Delete a contact
+  - name: set_contact_whatsapp
+    title: Set or remove a contact's WhatsApp number
+  - name: get_contact_facebook
+    title: Check a contact's Facebook connection
+  - name: disconnect_contact_facebook
+    title: Disconnect a contact's Facebook Page
+  - name: estimate_contact_localization
+    title: Estimate contact localization
+  - name: localize_contacts
+    title: Localize contacts
+  - name: preview_contact_localization
+    title: Preview a contact's localization
+  - name: set_contact_localization
+    title: Save a contact's localized values
+  - name: create_contact_group
+    title: Create a contact group
+  - name: update_contact_group
+    title: Rename or describe a contact group
+  - name: delete_contact_group
+    title: Delete a contact group
+  - name: add_contacts_to_group
+    title: Add contacts to a group
+  - name: remove_contacts_from_group
+    title: Remove contacts from a group
+  - name: list_products
+    title: List products or product models
+  - name: create_product
+    title: Add a product
+  - name: update_product
+    title: Edit a product
+  - name: delete_product
+    title: Delete a product
+  - name: create_product_model
+    title: Add a product model
+  - name: update_product_model
+    title: Edit a product model
+  - name: delete_product_model
+    title: Delete a product model
+  - name: get_creative_template
+    title: Get a creative template
+  - name: create_creative_template
+    title: Create a creative template
+  - name: update_creative_template
+    title: Edit a creative template
+  - name: delete_creative_template
+    title: Delete a creative template
+  - name: list_template_localizations
+    title: List a template's localizations
+  - name: create_template_localization
+    title: Localize a template into a language
+  - name: update_template_localization
+    title: Edit a template localization
+  - name: delete_template_localization
+    title: Delete a template localization
+  - name: translate_template_image
+    title: Translate a template's image
+  - name: get_image_translation
+    title: Check an image translation
+  - name: save_image_as_template
+    title: Send a translated image back to Hyperlocal
+  - name: get_template_overlays
+    title: Get a template's overlays
+  - name: edit_template_overlay
+    title: Edit a template's overlay
+  - name: copy_template_overlay
+    title: Copy an overlay to a language
+  - name: preview_overlay_for_contact
+    title: Preview overlay values for a contact
+  - name: create_hyperlocal_upload_url
+    title: Create a Hyperlocal upload URL
+  - name: register_hyperlocal_upload
+    title: Register a Hyperlocal upload
+  - name: get_whatsapp_template
+    title: Get a WhatsApp template
+  - name: create_whatsapp_template
+    title: Create a WhatsApp template
+  - name: update_whatsapp_template
+    title: Edit a WhatsApp template
+  - name: delete_whatsapp_template
+    title: Delete a WhatsApp template
+  - name: submit_whatsapp_template
+    title: Submit a WhatsApp template to Meta
+  - name: refresh_whatsapp_template_status
+    title: Refresh a WhatsApp template's approval status
+  - name: create_facebook_template
+    title: Create a Facebook post template
+  - name: update_facebook_template
+    title: Edit a Facebook post template
+  - name: delete_facebook_template
+    title: Delete a Facebook post template
+  - name: list_broadcasts
+    title: List broadcasts
+  - name: delete_broadcast
+    title: Delete a broadcast
+  - name: regenerate_broadcast_creative
+    title: Regenerate one contact's creative
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: image-creator
     why: Design a new creative before building the campaign.

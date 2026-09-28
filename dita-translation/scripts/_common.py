@@ -64,10 +64,9 @@ ENV_VAR = "VITRA_UNIVERSE_API_KEY"
 def _from_env_file(var_name: str = "VITRA_UNIVERSE_API_KEY") -> str | None:
     """Read the key from a `.env` beside the skill, if there is one.
 
-    The environment wins. This exists because the skill ships a `.env.sample`
-    and the README calls it the template — without this, a user who follows
-    those instructions exactly still gets "missing env var", which is the
-    setup step failing silently for the one reason they cannot guess.
+    The environment wins. Skills sign in with `login.py` now; this stays so
+    existing installs that keep their API key in a local, gitignored `.env`
+    beside SKILL.md keep working.
 
     Deliberately minimal: `KEY=value`, optional `export ` prefix, optional
     quotes, `#` comments. No dependency on python-dotenv (stdlib only).

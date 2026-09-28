@@ -1,13 +1,12 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Keep every translation on-brand: ask how a phrase is translated, fix it once
-  for everyone, translate app strings and product copy memory-first, load the
-  translations you already have, and read the glossaries and style guides your
-  translations follow.
+  for everyone, translate app strings and product copy memory-first, and manage
+  the glossaries, term bases and style guides your translations follow.
 when-to-use: >-
   Reach for it whenever terminology or consistency matters — before a launch,
   after a review, when onboarding a client's existing translations, or to
@@ -19,19 +18,23 @@ features:
     description: Correct an entry and every future translation uses it.
   - title: Memory-first translation
     description: Short texts reuse exact and close matches; only the rest is machine-translated.
-  - title: Bring your history
-    description: Import TMX, XLIFF, Excel, CSV or TSV translations.
-  - title: Glossaries and style guides
-    description: See the terms and tone rules translations follow.
+  - title: Share across organizations
+    description: Share a memory with child organizations, or stop sharing it.
+  - title: Glossaries, term bases, style guides
+    description: Create and edit entries, terms and writing rules, and link them to a memory.
 use-cases:
   - title: App localization
     description: Translate UI strings consistently across releases.
   - title: Client onboarding
-    description: Load a client's existing translations before the first project.
+    description: Set up a client's memory, glossary and style guide before the first project.
   - title: Review follow-up
     description: Turn a reviewer's corrections into approved wording for everyone.
 mcp-toolset: memory
 mcp-tools:
+  - name: list_translation_memories
+    title: List translation memories
+  - name: get_translation_memory
+    title: Read a translation memory
   - name: translate_with_memory
     title: Translate text with a translation memory
   - name: get_memory_translation
@@ -40,10 +43,92 @@ mcp-tools:
     title: Search a translation memory
   - name: correct_memory_term
     title: Correct a translation memory entry
+  - name: set_memory_term_status
+    title: Verify or approve memory entries
+  - name: delete_memory_terms
+    title: Delete memory entries
+  - name: create_translation_memory
+    title: Create a translation memory
+  - name: list_memory_providers
+    title: List translation memory providers
+  - name: update_translation_memory
+    title: Edit a translation memory
+  - name: delete_translation_memory
+    title: Delete a translation memory
+  - name: link_memory_resources
+    title: Link glossaries, term bases or a style guide to a memory
+  - name: list_memory_shares
+    title: List who a memory is shared with
+  - name: share_translation_memory
+    title: Share a memory with organizations
+  - name: unshare_translation_memory
+    title: Stop sharing a memory
+  - name: get_vitratm_settings
+    title: Read VitraTM settings
+  - name: update_vitratm_settings
+    title: Change VitraTM settings
   - name: list_glossaries
-    title: List glossaries and style guides
+    title: List glossaries, term bases and style guides
+  - name: get_glossary
+    title: Read a glossary
+  - name: create_glossary
+    title: Create a glossary
+  - name: update_glossary
+    title: Rename or re-describe a glossary
+  - name: delete_glossary
+    title: Delete a glossary
+  - name: add_glossary_entry
+    title: Add a glossary entry
+  - name: update_glossary_entry
+    title: Edit a glossary entry
+  - name: delete_glossary_entries
+    title: Delete glossary entries
+  - name: get_term_base
+    title: Read a term base
+  - name: create_term_base
+    title: Create a term base
+  - name: update_term_base
+    title: Rename or re-describe a term base
+  - name: delete_term_base
+    title: Delete a term base
+  - name: add_term_base_concept
+    title: Add a concept to a term base
+  - name: add_term_base_term
+    title: Add a term to a concept
+  - name: update_term_base_concept
+    title: Edit a concept's details
+  - name: update_term_base_term
+    title: Edit a term
+  - name: delete_term_base_entry
+    title: Delete a term or concept
   - name: get_style_guide
     title: Read a style guide
+  - name: create_style_guide
+    title: Create a style guide
+  - name: update_style_guide
+    title: Rename or re-describe a style guide
+  - name: delete_style_guide
+    title: Delete a style guide
+  - name: add_style_guide_rules
+    title: Add style guide rules
+  - name: update_style_guide_rule
+    title: Edit a style guide rule
+  - name: bulk_edit_style_guide_rules
+    title: Change or delete many style guide rules
+  - name: reorder_style_guide_rules
+    title: Reorder style guide rules
+  - name: copy_style_guide_language
+    title: Apply one language's rules to another
+  - name: set_style_guide_file_languages
+    title: Change a style guide file's languages
+  - name: remove_style_guide_file
+    title: Remove a style guide file
+  - name: extract_style_guide_rules
+    title: Extract style guide rules from its files
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: document-translation
     why: Translate whole documents through the same memory.

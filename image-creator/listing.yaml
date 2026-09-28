@@ -1,12 +1,12 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Generate an image from a plain-language prompt, then keep refining it the same
-  way — "make the background darker", "remove the text" — until it's right.
-  Each call returns a finished image URL, edits chain from the image before, and
+  way — "make the background darker", "remove the text" — until it's right. Each
+  call returns a finished image URL, edits chain from the image before, and
   results can be filed straight into your organization's Drive. Point it at a
   brand kit and every image comes out on-brand.
 when-to-use: >-
@@ -16,13 +16,15 @@ when-to-use: >-
   use Image Translation or Adaptive Resize instead.
 features:
   - title: Prompt to finished image
-    description: One synchronous call returns a finished image URL — no job to poll.
+    description: See the price, say yes, and get a finished image back — no job to poll.
   - title: Edits in plain language
     description: Describe the change; each edit is a new image derived from the last, so edits chain.
   - title: On-brand output
-    description: Resolves your saved brand kit for a domain and folds its colors and style into the prompt.
-  - title: Brand kit from a live site
-    description: When no saved kit matches a domain, extracts one from the website and can save it.
+    description: Applies a saved brand kit's colors, fonts and style to the prompt.
+  - title: Multi-format briefs
+    description: Shape a brief with Quick Create, then render it in several formats at once.
+  - title: History and collections
+    description: Find, retry or delete past images, and group them into collections.
   - title: Saves to your Drive
     description: Files any generated image into the organization's Drive in one step.
 use-cases:
@@ -34,14 +36,44 @@ use-cases:
     description: Apply feedback as plain-language edits without starting over.
 mcp-toolset: image
 mcp-tools:
+  - name: analyze_image_creation
+    title: List the editable parts of a generated image
+  - name: list_brand_kits
+    title: List brand kits
+  - name: get_brand_kit
+    title: Read a brand kit
   - name: generate_image
     title: Generate an image
   - name: edit_image
     title: Edit a generated image
   - name: save_image_to_drive
     title: Save a generated image to the Drive
-  - name: list_brand_kits
-    title: List brand kits
+  - name: quick_create
+    title: Chat with Quick Create
+  - name: quick_create_render
+    title: Render a Quick Create brief
+  - name: list_quick_create_chats
+    title: List or open Quick Create chats
+  - name: rename_quick_create_chat
+    title: Rename a Quick Create chat
+  - name: delete_quick_create_chat
+    title: Delete a Quick Create chat
+  - name: list_image_creations
+    title: List past Image Creator images
+  - name: retry_image_creation
+    title: Retry a failed Image Creator image
+  - name: delete_image_creation
+    title: Delete an Image Creator image
+  - name: list_image_collections
+    title: List Image Creator collections
+  - name: create_image_collection
+    title: Create an Image Creator collection
+  - name: update_image_collection
+    title: Add, remove or rename in a collection
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: image-resize
     why: Re-compose the finished image for other sizes and platforms.

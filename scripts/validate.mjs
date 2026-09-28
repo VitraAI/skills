@@ -68,8 +68,9 @@ for (const { folder, skill } of results) {
 }
 
 // A stray secret must never reach a public repo. Check what git would commit
-// (tracked + staged); a local, gitignored .env beside a skill is how the
-// skills are meant to be configured, so its presence on disk is fine.
+// (tracked + staged); a local, gitignored .env beside a skill (an API key on a
+// machine with no browser) may exist on disk, but no .env or .env.* file is
+// ever committed.
 let committed;
 try {
   committed = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
@@ -83,7 +84,7 @@ try {
 }
 for (const f of committed ?? []) {
   const base = f.split('/').pop();
-  if (base === '.env' || (base.startsWith('.env.') && base !== '.env.sample')) {
+  if (base === '.env' || base.startsWith('.env.')) {
     report(f, 'would be committed; secrets belong in a gitignored .env');
   }
 }

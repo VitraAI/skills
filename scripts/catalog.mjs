@@ -29,7 +29,7 @@ export function isExcluded(segment) {
     segment === '.builds' ||
     segment.endsWith('.pyc') ||
     segment === '.env' ||
-    (segment.startsWith('.env.') && segment !== '.env.sample')
+    segment.startsWith('.env.')
   );
 }
 

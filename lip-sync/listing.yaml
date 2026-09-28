@@ -1,7 +1,7 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
-# that do the same jobs (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
   Re-render a video so the speaker's lips follow a new audio track — a dubbed
@@ -15,10 +15,8 @@ features:
     description: A dub, a text-to-speech clip or a new recording.
   - title: Model choice
     description: Use your organization's default model or pick another it has access to.
-  - title: Several speakers
-    description: Tell it how many people speak on screen.
-  - title: Price it first
-    description: See the credits for a video's length, against your balance, before starting.
+  - title: Consent first
+    description: Asks that the people on screen agreed before anything renders.
   - title: Retry and save
     description: Redo a failed render, or save the result to the Drive.
 use-cases:
@@ -28,14 +26,28 @@ use-cases:
     description: Replace a line without a reshoot.
 mcp-toolset: documents
 mcp-tools:
+  - name: find_assets
+    title: Find files in the Drive
+  - name: list_languages
+    title: List languages
+  - name: list_lip_sync_models
+    title: List lip-sync models
   - name: lip_sync
     title: Lip-sync a video
   - name: get_lip_sync
     title: Check a lip-sync job
-  - name: list_lip_sync_models
-    title: List lip-sync models
+  - name: list_playground_jobs
+    title: List speech sessions, voice clones or lip-syncs
+  - name: rename_playground_job
+    title: Rename a Playground job
+  - name: manage_playground_job
+    title: Retry or save a Playground job
+  - name: delete_playground_job
+    title: Delete a Playground job
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
-  - name: video-dubbing
+  - name: translate-video
     why: Dub the video first; its export can lip-sync too.
   - name: text-to-speech
     why: Generate the new audio track to sync to.

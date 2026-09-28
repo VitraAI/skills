@@ -43,14 +43,16 @@ zip -r "${OUTPUT_FILE}" "${SKILL_NAME}" \
   "${SKILL_NAME}/.env.local" \
   "${SKILL_NAME}/**/.env" \
   "${SKILL_NAME}/**/.env.local" \
+  "${SKILL_NAME}/.env.*" \
+  "${SKILL_NAME}/**/.env.*" \
   "${SKILL_NAME}/listing.yaml"
 
 SIZE=$(du -h "${OUTPUT_FILE}" | cut -f1)
 echo "packed -> ${OUTPUT_FILE} (${SIZE})"
 
 # Fail loudly if anything sensitive or noisy slipped in.
-if unzip -l "${OUTPUT_FILE}" | grep -E "/\.env($|[^.])|__pycache__|\.pyc|\.DS_Store" >/dev/null; then
+if unzip -l "${OUTPUT_FILE}" | grep -E "/\.env|__pycache__|\.pyc|\.DS_Store" >/dev/null; then
   echo "ERROR: packed zip contains excluded files" >&2
-  unzip -l "${OUTPUT_FILE}" | grep -E "/\.env($|[^.])|__pycache__|\.pyc|\.DS_Store" >&2
+  unzip -l "${OUTPUT_FILE}" | grep -E "/\.env|__pycache__|\.pyc|\.DS_Store" >&2
   exit 1
 fi
