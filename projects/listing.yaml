@@ -35,10 +35,3 @@ mcp-tools:
     title: List projects
   - name: list_tasks
     title: List tasks
-related-skills:
-  - name: document-translation
-    why: Translate the files a project's tasks are about.
-  - name: video-dubbing
-    why: Dub the videos a localization project covers.
-  - name: translation-quality
-    why: Score a translation before moving its task to done.

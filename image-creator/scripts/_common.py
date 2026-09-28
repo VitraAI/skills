@@ -84,26 +84,38 @@ def _from_env_file(var_name: str = "VITRA_UNIVERSE_API_KEY") -> str | None:
     return None
 
 
+APP_URL_VAR = "VITRA_UNIVERSE_APP_URL"
+DEFAULT_APP_URL = "https://universe.vitra.ai"
+
+
 def api_key() -> str:
     key = os.environ.get(ENV_VAR) or _from_env_file(ENV_VAR)
-    if not key:
-        sys.stderr.write(
-            f"Missing {ENV_VAR}.\n"
-            "\n"
-            "This skill needs a Vitra API key (starts `uvk_`). Ask whoever "
-            "administers your Vitra organization for one — a key is bound to a "
-            "single organization and carries its creator's permissions there.\n"
-            "\n"
-            "Then make it available in ONE of these ways:\n"
-            f"  * export {ENV_VAR}=uvk_...        (the agent must inherit this)\n"
-            f"  * put {ENV_VAR}=uvk_... in a `.env` beside this skill\n"
-            "\n"
-            "Note: exporting in your terminal does NOT reach a desktop or "
-            "hosted agent — it must be set in the environment that agent runs "
-            "in.\n"
-        )
-        sys.exit(EXIT_AUTH_MISSING)
-    return key
+    if key:
+        return key
+    app = (os.environ.get(APP_URL_VAR) or DEFAULT_APP_URL).rstrip("/")
+    die(
+        EXIT_AUTH_MISSING,
+        f"Missing {ENV_VAR}: this skill needs a Vitra API key (starts uvk_).\n"
+        "\n"
+        "Get one:\n"
+        f"  1. Sign in to Vitra: {app}/auth/sign-in (new to Vitra? sign up: {app}/auth/sign-up)\n"
+        "  2. Open Settings -> API keys and create a key. Owners and admins can create keys;\n"
+        "     anyone else asks one of them. A key works in one organization, with its\n"
+        "     creator's role.\n"
+        "\n"
+        "Then give it to the agent, in ONE of these ways:\n"
+        f"  * export {ENV_VAR}=uvk_...   (e.g. in ~/.zshrc, then restart the agent)\n"
+        f"  * put {ENV_VAR}=uvk_... in a .env beside this skill's SKILL.md\n"
+        "Exporting in a terminal does not reach a desktop or hosted agent: set it where\n"
+        "the agent runs.",
+        ask=(f"This needs a Vitra API key. Do you have one? If not, sign in at {app}/auth/sign-in "
+             f"(or sign up at {app}/auth/sign-up), open Settings → API keys and create one "
+             "(owners and admins can; otherwise ask one of them). Then set it as "
+             f"{ENV_VAR} and restart the agent; don't paste the key into the chat."),
+        sign_in=f"{app}/auth/sign-in",
+        sign_up=f"{app}/auth/sign-up",
+    )
+    return ""  # unreachable: die() exits
 
 
 def headers() -> dict[str, str]:
@@ -201,7 +213,7 @@ def api_message(payload: object, fallback: str = "the server rejected the reques
     return fallback
 
 
-def auth_error(status: int, what: str = "this request") -> str:
+def auth_error(status: int, what: str = "do this") -> str:
     """Actionable text for a 401/403. They are different problems.
 
     401 = the key itself is not accepted (wrong, revoked, expired).
@@ -222,7 +234,7 @@ def auth_error(status: int, what: str = "this request") -> str:
             "— any job already started keeps running meanwhile."
         )
     return (
-        f"Your API key is valid but not allowed to do {what}. The member who "
+        f"Your API key is valid but not allowed to {what}. The member who "
         "created it lacks that permission in this organization — ask your "
         "Vitra org administrator."
     )

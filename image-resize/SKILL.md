@@ -15,13 +15,13 @@ compatibility: >-
   Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "2.0"
+  version: "2.1"
   display-name: Adaptive Resize
   category: Design
   tags: Image
   source: vitra
   added: "2026-09-10"
-  updated: "2026-09-25"
+  updated: "2026-09-28"
 ---
 
 # Adaptive Resize
@@ -46,6 +46,7 @@ setup lines it prints.
 ```
 - [ ] 1. Sizes   (⏸ ask only if none were given)
 - [ ] 2. Resize  → show each size's link
+- [ ] 3. Check, fix, save  (only if asked)
 ```
 
 ### 1. Sizes ⏸
@@ -66,9 +67,29 @@ with `label`, `dimension` and `image_url`. Some sizes can fail while others
 render: report the ones that worked and name the ones that didn't; the script
 only fails if every size fails.
 
-`--tier PRO` pauses each size for a person to approve its plan in the Vitra
-webapp; use it only if the user will do that. The default (`FLASH`) renders
-straight away.
+`--tier PRO` plans each size first and waits for approval: the script stops
+with `status: needs_approval` and `awaiting_approval` (the sizes). Ask the user,
+then approve here (below). The default (`FLASH`) renders straight away.
+
+Keep `asset` from the result for the commands below; never show it.
+
+### 3. Check, fix, save (only if asked)
+
+```bash
+python3 scripts/sizes.py list --asset <asset>                          # each size and its image
+python3 scripts/sizes.py approve --asset <asset> --size Story           # PRO: ⏸ after the user agrees
+python3 scripts/sizes.py redo --asset <asset> --size Story [--note "keep the logo top left"]   # ⏸ paid
+python3 scripts/sizes.py review --asset <asset> --size Story            # ⏸ paid check: numbered issues
+python3 scripts/sizes.py fix --asset <asset> --size Story --issues 1,3|all    # ⏸ paid
+python3 scripts/sizes.py versions --asset <asset> --size Story / restore … --version 2
+python3 scripts/sizes.py save --asset <asset> --size Story [--folder "Q3 creatives"]   # into the Drive
+python3 scripts/sizes.py export --asset <asset> [--size Story …] [--format jpeg] [--out-dir ./out]
+python3 scripts/sizes.py rename --asset <asset> --name "Diwali banner" / move … --folder "Diwali"
+python3 scripts/sizes.py assets                                          # past resized images
+```
+
+Sizes are named by label or `WxH`; issues by number, with what was found and
+the suggested fix. Relay them as before → after and let the user pick.
 
 ## Rules
 

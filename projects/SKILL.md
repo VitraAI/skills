@@ -1,14 +1,16 @@
 ---
 name: projects
 description: >-
-  Runs the organization's localization projects and tasks in Vitra Universe:
-  lists projects with their status, due dates and progress; creates and
-  updates projects (type, languages, dates, status, priority); adds or removes
-  people; and lists, creates, moves, assigns and deletes tasks, all by name.
-  Use it when the user asks about or changes their work in Vitra — "what's
-  due today?", "create a project to translate the app into Hindi and Tamil",
-  "move the glossary task to In Progress", "assign it to Priya", "add Sam to
-  the Q4 launch project". Doing the translation itself is other skills' job.
+  Tracks the organization's work in Vitra Universe, the Projects board: lists
+  projects with their status, due dates and progress; creates and updates
+  projects (type, languages, dates, status, priority); adds or removes people;
+  and lists, creates, moves, assigns and deletes tasks, all by name. Use it
+  when the user asks about or organizes their work — "what's due today?", "set
+  up a project to track the Hindi launch", "move the glossary task to In
+  Progress", "assign it to Priya", "add Sam to the Q4 launch project". It only
+  tracks work and never produces it: "start a dubbing project" means start a
+  dub (video-dubbing), a campaign is hyperlocal-campaigns, and translating
+  files is document-translation.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API only.
   Needs VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).

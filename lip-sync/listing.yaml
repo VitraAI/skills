@@ -17,6 +17,10 @@ features:
     description: Use your organization's default model or pick another it has access to.
   - title: Several speakers
     description: Tell it how many people speak on screen.
+  - title: Price it first
+    description: See the credits for a video's length, against your balance, before starting.
+  - title: Retry and save
+    description: Redo a failed render, or save the result to the Drive.
 use-cases:
   - title: Dubbed marketing video
     description: Localized videos where the presenter's lips match every language.

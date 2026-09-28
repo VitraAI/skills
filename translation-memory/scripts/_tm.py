@@ -89,6 +89,24 @@ def load_language_codes(base: str, headers: dict) -> dict[str, str]:
     return codes
 
 
+def language_code(base: str, headers: dict, value: str) -> str:
+    """A language as the API's BCP-47 code: `French`, `french_france` → `fr-FR`.
+
+    Routes such as quality reports take codes only. An exact name, label or
+    code wins; otherwise the value is sent as given and the server explains.
+    """
+    try:
+        status, payload = _http.get_json(base + LANGUAGE_PATH, headers=headers)
+    except _http.NetworkError:
+        return value
+    wanted = value.strip().casefold()
+    for field in ("code", "name", "label"):
+        for row in rows_of(payload) if status == 200 else []:
+            if isinstance(row, dict) and str(row.get(field) or "").strip().casefold() == wanted and row.get("code"):
+                return str(row["code"])
+    return value
+
+
 def base_code(value: str, codes: dict[str, str]) -> str:
     """`Spanish (Spain)` / `spanish_spain` / `es-ES` → `es`."""
     v = norm(value)
@@ -156,6 +174,8 @@ def resolve_by_name(base: str, headers: dict, name: str) -> str:
     tms = list_tms(base, headers)
     wanted = name.strip().casefold()
     hits = [t for t in tms if (t.get("name") or "").strip().casefold() == wanted]
+    if not hits:  # a choice passed back as shown: "<name>  <languages>  [<provider>]"
+        hits = [t for t in tms if describe(t).strip().casefold() == wanted]
     if len(hits) == 1 and hits[0].get("id"):
         return str(hits[0]["id"])
     if len(hits) > 1:

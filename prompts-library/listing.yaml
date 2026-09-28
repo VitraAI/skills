@@ -32,8 +32,3 @@ mcp-toolset: context
 mcp-tools:
   - name: search_prompts
     title: Search the prompt library
-related-skills:
-  - name: image-creator
-    why: Create images from a saved image prompt.
-  - name: projects
-    why: Track the work the prompts are used for.

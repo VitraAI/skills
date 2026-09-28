@@ -46,5 +46,7 @@ mcp-tools:
 related-skills:
   - name: image-creator
     why: Design a new creative before building the campaign.
+  - name: image-translation
+    why: Localize a creative; a translated image can be saved as a campaign template.
   - name: content-compliance
     why: Check the creative against each market's rules before it goes out.

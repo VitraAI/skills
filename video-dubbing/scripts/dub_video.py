@@ -3,7 +3,7 @@
 then poll to the speaker-voice review gate and print the detected speakers.
 
 Flow:
-  1. resolve the source (--file or --url; a URL is downloaded to a temp file)
+  1. resolve the source (--file, --url, or --drive-file; a URL is downloaded to a temp file)
   2. POST multipart to /v1/galaxy/translate-video/upload            -> uploadId
      (and the optional --script the same way, sent as a second uploadId)
   3. find or create a translation memory for the run                -> tmId
@@ -45,7 +45,9 @@ from pathlib import Path
 from urllib.parse import urlencode, urlparse
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _api  # noqa: E402
 import _common  # noqa: E402
+import _drive  # noqa: E402
 import _http  # noqa: E402
 import _progress  # noqa: E402
 import _tm  # noqa: E402
@@ -332,6 +334,7 @@ def main() -> int:
     src = parser.add_mutually_exclusive_group(required=True)
     src.add_argument("--file", help="Local video file path.")
     src.add_argument("--url", help="Public http(s) video URL (downloaded, then uploaded).")
+    src.add_argument("--drive-file", help="A video already in the organization's Drive, by its name.")
     parser.add_argument(
         "--source-language",
         required=True,
@@ -398,7 +401,8 @@ def main() -> int:
         die(_common.EXIT_API_ERROR,
             f"--script must be an existing {', '.join(sorted(SCRIPT_EXTENSIONS))} file.")
 
-    path, is_temp = resolve_source(args.file, args.url)
+    drive = _drive.file_id(args.drive_file) if args.drive_file else None
+    path, is_temp = (Path(drive[1]), False) if drive else resolve_source(args.file, args.url)
     try:
         run_name = args.name or f"dub · {path.stem}"
         source_language = args.source_language
@@ -413,13 +417,22 @@ def main() -> int:
         # Hash first: a re-run of the same file reuses the earlier upload
         # instead of sending the bytes again, and the hash anchors the publish
         # idempotency key below.
-        file_sha256 = _common.sha256_file(path)
-        upload_id = find_existing_upload(base, headers, file_sha256)
-        if upload_id:
-            sys.stderr.write("[upload] reusing the earlier upload\n")
+        if drive:  # copied inside Vitra from the Drive; the asset anchors the idempotency key
+            file_sha256 = "drive:" + drive[0]
+            got = _api.data(_api.call("POST", "/v1/galaxy/translate-video/upload/from-assets",
+                                      {"assetIds": [drive[0]]}, what="use the video from the Drive", timeout=600))
+            upload_id = str(((got.get("uploads") or [{}])[0]).get("id") or "")
+            if not upload_id:
+                die(_common.EXIT_API_ERROR, "Vitra did not take the video from the Drive.")
+            sys.stderr.write("[upload] taken from the Drive\n")
         else:
-            upload_id = upload(base, headers, path)
-            sys.stderr.write("[upload] uploaded\n")
+            file_sha256 = _common.sha256_file(path)
+            upload_id = find_existing_upload(base, headers, file_sha256)
+            if upload_id:
+                sys.stderr.write("[upload] reusing the earlier upload\n")
+            else:
+                upload_id = upload(base, headers, path)
+                sys.stderr.write("[upload] uploaded\n")
         script_id, script_sha = _tv.upload(base, headers, script) if script else (None, None)
 
         # A TM the caller chose always wins (see SKILL.md: list, then ask).

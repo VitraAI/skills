@@ -48,6 +48,10 @@ STEPS = [
     {"step": "Create a translation memory", "needs": ["translation_memory:create"], "optional": True},
     {"step": "Retry a failed job", "needs": [f"{PL}:update"], "optional": True},
     {"step": "Show the credit balance", "needs": ["credits:read"], "optional": True},
+    {"step": "Stop, file and sync jobs; spreadsheet of lines", "needs": ["translate_video.process_log:update",
+                                                                        "translate_video.process_log:read"],
+     "optional": True},
+    {"step": "Save an export to the Drive", "needs": ["translate_video.process_log:create"], "optional": True},
 ]
 
 

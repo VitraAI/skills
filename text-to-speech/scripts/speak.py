@@ -10,6 +10,9 @@ in the organization's Video Playground as one session, named --name.
   GET  /v1/galaxy/playground/video-process/{clip}                until done
   then the clip's audio link → --out-dir
 
+Pronunciation: --say "SQL=sequel" (repeat) makes every clip read that word
+the way given; Vitra swaps it in just before the audio is made.
+
 Re-running the same command reconnects to the clips it started: finished
 ones are kept, only failed ones are made again.
 
@@ -81,17 +84,26 @@ def main() -> int:
     parser.add_argument("--provider", required=True, choices=PROVIDERS, help="The voice's provider (list_voices.py).")
     parser.add_argument("--voice-name", help="The voice's name, shown in Vitra.")
     parser.add_argument("--emotion", help="Delivery, e.g. happy, calm (where the voice supports it).")
+    parser.add_argument("--say", action="append", default=[], metavar="WORD=HOW",
+                        help='Read WORD as HOW, e.g. "SQL=sequel" or "Nguyen=win" (repeat).')
     parser.add_argument("--name", default="Speech", help="Name of the set of clips in Vitra.")
     parser.add_argument("--out-dir", default="speech", help="Where audio files go (default ./speech).")
     parser.add_argument("--max-wait", type=int, default=DEFAULT_MAX_WAIT)
     args = parser.parse_args()
 
+    sayings = []
+    for rule in args.say:
+        word, sep, how = rule.partition("=")
+        if not sep or not word.strip() or not how.strip():
+            die(_common.EXIT_API_ERROR, f'--say takes WORD=HOW, e.g. "SQL=sequel" (got "{rule}").')
+        sayings.append({"match": word.strip(), "alias": how.strip()})
     text = args.text if args.text is not None else Path(args.text_file).expanduser().read_text(encoding="utf-8")
     parts = passages(text)
     if not parts:
         die(_common.EXIT_API_ERROR, "there is no text to speak.")
     base, headers = _common.base_url(), _common.headers()
-    key = _common.idempotency_key("tts", text, args.language, args.provider, args.voice_id, args.emotion)
+    key = _common.idempotency_key("tts", text, args.language, args.provider, args.voice_id, args.emotion,
+                                  *([json.dumps(sayings, sort_keys=True)] if sayings else []))
     known = _state.recall("text-to-speech", key)
 
     def generate(card_id: str, text_part: str) -> None:
@@ -115,7 +127,8 @@ def main() -> int:
         voice = {"provider": args.provider, "voiceId": args.voice_id,
                  **({"name": args.voice_name} if args.voice_name else {})}
         cards = [{"id": c, "name": f"{args.name} {i}" if len(parts) > 1 else args.name, "text": t,
-                  "language": args.language, "voice": voice, **({"emotion": args.emotion} if args.emotion else {})}
+                  "language": args.language, "voice": voice, **({"emotion": args.emotion} if args.emotion else {}),
+                  **({"pronunciations": sayings} if sayings else {})}
                  for i, (c, t) in enumerate(zip(clips, parts), 1)]
         # The clips must exist before they're generated: audio made for a clip
         # Vitra doesn't know is never kept.
@@ -158,7 +171,8 @@ def main() -> int:
             die(_common.EXIT_API_ERROR, f"could not download clip {i}: {e}", retryable=True)
         files.append({"clip": i, "path": str(dest), "seconds": row.get("durationSeconds")})
     status = "done" if not failed else ("partial" if failed < len(clips) else "failed")
-    print(json.dumps({"status": status, "voice": args.voice_name or args.voice_id, "files": files,
+    print(json.dumps({"status": status, **({"voice": args.voice_name} if args.voice_name else {}), "files": files,
+                      "speech": session,  # for save_speech.py; never shown
                       "next_action": None if not failed else "speak"}, ensure_ascii=False))
     return _common.EXIT_OK if not failed else _common.EXIT_API_ERROR
 

@@ -20,6 +20,10 @@ features:
     description: Ask for a tone such as happy or calm where the voice supports it.
   - title: Safe to re-run
     description: Finished clips are kept; only failed ones are made again.
+  - title: Say it right
+    description: Tell it how to pronounce brand names, people's names and acronyms.
+  - title: Save to the Drive
+    description: Keep the generated clips in your organization's Drive.
 use-cases:
   - title: Video narration
     description: Voice-overs for product, explainer and training videos.

@@ -22,6 +22,10 @@ features:
     description: Works from a local image file or a public image URL.
   - title: Keeps partial results
     description: If some sizes fail, the ones that rendered are still returned.
+  - title: Approve, check and fix
+    description: Approve PRO plans, run a quality check, fix the issues it finds, or redo a size with a note.
+  - title: Save and export
+    description: Save any size to the Drive or download them all, and find past resizes again.
 use-cases:
   - title: Multi-channel ads
     description: Turn one approved creative into every placement size a campaign needs.

@@ -24,6 +24,12 @@ features:
     description: Lists your org's memories for the language pair and reuses approved wording.
   - title: Resize after translating
     description: Re-render a translated image at another aspect ratio with no re-translation.
+  - title: More languages, one analysis
+    description: Add languages to an image already translated; only the new translations are paid for.
+  - title: Fix any line
+    description: See the image's text line by line, correct or keep lines, and re-render.
+  - title: Save and find again
+    description: Save to the Drive, file into folders, list past images, retry failures.
 use-cases:
   - title: Localized ad creatives
     description: Ship one campaign visual in every market's language.

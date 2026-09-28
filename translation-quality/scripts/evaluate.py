@@ -90,8 +90,10 @@ def main() -> int:
     tm = _tm.choose(base, headers, args.target_language, args.tm_name)
     body = {"memoryId": str(tm["id"]),
             "referenceId": _common.idempotency_key("aiqe", pairs, args.source_language, args.target_language),
-            "referenceType": "skill", "sourceLanguage": args.source_language,
-            "targetLanguage": _tm.target_in(tm, args.target_language, base, headers),
+            "referenceType": "skill",
+            # The report takes BCP-47 codes (en-US), whatever the user or the memory calls them.
+            "sourceLanguage": _tm.language_code(base, headers, args.source_language),
+            "targetLanguage": _tm.language_code(base, headers, _tm.target_in(tm, args.target_language, base, headers)),
             "segments": [{"key": str(i), **p} for i, p in enumerate(pairs, 1)],
             **{k: v for k, v in {"title": args.title, "domain": args.domain,
                                  "additionalInstructions": args.instructions}.items() if v}}

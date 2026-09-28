@@ -26,6 +26,7 @@ import _common  # noqa: E402
 STEPS = [
     {"step": "Start a lip-sync", "needs": ["playground.video:create"]},
     {"step": "Check and download it", "needs": ["playground.video:read"]},
+    {"step": "Price, retry and save lip-syncs", "needs": ["playground.video:create"], "optional": True},
 ]
 
 

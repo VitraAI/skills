@@ -15,13 +15,13 @@ compatibility: >-
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.1"
+  version: "1.2"
   display-name: Video Subtitles
   category: Video
   tags: Video, Subtitles, Translation
   source: vitra
   added: "2026-09-26"
-  updated: "2026-09-26"
+  updated: "2026-09-28"
 ---
 
 # Video Subtitles
@@ -141,6 +141,10 @@ python3 scripts/download_export.py --export-id <export> --out ./<name>.<lang>.mp
 
 Formats: `srt vtt dfxp xml stl edl txt txt-timed json`. Burning in renders the
 original video once per language (only for a job made from a video).
+
+Save a burned-in video to the Drive, stop a job, file it in a folder, sync
+lines with the memory, or get them as a spreadsheet: `job_tools.py`
+([commands](references/commands.md#job-controls-job_toolspy)).
 
 ## Rules
 

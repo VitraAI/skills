@@ -3,22 +3,23 @@ name: video-dubbing
 description: >-
   Dubs a video into other languages with the Vitra Universe API: uploads it,
   pauses so the user chooses each speaker's voice (their own cloned voice or
-  another), generates the dub, lets the user review and correct it line by line,
-  then exports and downloads one verified video per language. Use it whenever
-  the user wants a video dubbed, voice-translated or localized — "dub this
-  video into Hindi", "make a Spanish version of this clip", "add a French
-  voiceover", "translate this webinar and keep my voice" — and whenever they
+  another), generates the dub, lets the user review and correct it line by
+  line, then exports and downloads one verified video per language. Use it
+  whenever the user wants a video dubbed, voice-translated or localized — "dub
+  this video into Hindi", "make a Spanish version of this clip", "add a French
+  voiceover", "start a dubbing project for this webinar" — and whenever they
   want to fix, re-voice, add a language to, or export a dub they already have,
   even if they don't say "dub"; it can also burn subtitles into the dubbed
-  video. Not for subtitles without a voice-over (video-subtitles), audio-only
-  files, translating the text inside images, or document translation.
+  video. A "dubbing project" is a dub, started here, not a board project. Not
+  for subtitles without a voice-over (video-subtitles), audio-only files, text
+  in images, or documents.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization). ffmpeg is
   optional (fuller download checks).
 metadata:
   skill-author: Vitra.ai
-  version: "3.2"
+  version: "3.3"
   display-name: Video Dubbing
   category: Video
   tags: Video, Translation, Popular
@@ -96,6 +97,11 @@ this language pair.
 python3 scripts/dub_video.py --file <path> --source-language <src> \
   --target-language <tgt> [--tm-name "<name>"]
 ```
+
+A video already in the Vitra Drive: `--drive-file "Launch video.mp4"` instead of
+`--file` (no upload). Stop, file, sync with the memory, change delivery or
+background volume, or get every line as a spreadsheet: `job_tools.py`
+([commands](references/commands.md#job-controls-job_toolspy)).
 
 Uploads (or reuses an identical earlier upload), starts the dub, waits, and
 stops at `"status": "awaiting_voices"` with the speakers. If the user has a

@@ -36,7 +36,14 @@ import _common  # noqa: E402
 # step with the scripts.
 STEPS = [
     {"step": "Translate an image", "needs": ["translate_photo.image_translator:create", "translate_photo.image_translator:read"]},
+    {"step": "Add languages to a translated image", "needs": ["translate_photo.image_translator:create",
+                                                               "translate_photo.image_translator:read"]},
     {"step": "Resize a translated image", "needs": ["translate_photo.image_translator:create"]},
+    {"step": "Correct the text in a translated image", "needs": ["translate_photo.image_translator:create", "translate_photo.image_translator:update"],
+     "optional": True},
+    {"step": "Save a translated image to the Drive", "needs": ["translate_photo.image_translator:export"], "optional": True},
+    {"step": "List, retry and file past images", "needs": ["translate_photo.image_translator:read", "translate_photo.image_translator:update"], "optional": True},
+    {"step": "Send a campaign image back to Hyperlocal", "needs": ["translate_photo.image_translator:save_template"], "optional": True},
     {"step": "Choose a translation memory", "needs": ["translation_memory:read"]},
     {"step": "Create a translation memory", "needs": ["translation_memory:create"], "optional": True},
 ]

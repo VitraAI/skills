@@ -4,12 +4,13 @@ description: >-
   Runs Vitra Hyperlocal campaigns through the Vitra Universe API: picks an
   audience of retailers or partners (by group, state, zone or area), estimates
   reach and credits, prepares a personalized creative for every contact, then
-  — only on the user's explicit yes — sends it over WhatsApp or Facebook now or
-  on a schedule, and reports delivery (sent, delivered, read). Use it whenever
-  the user wants to message their contact network — "send the Diwali offer to
-  all retailers in Maharashtra", "schedule a WhatsApp campaign for tomorrow
-  10am", "how did last week's broadcast do?", "pause the campaign". Not for
-  translating content (document-translation, image-translation).
+  — only on the user's explicit yes — sends it over WhatsApp or Facebook now
+  or on a schedule, and reports delivery (sent, delivered, read). Use it
+  whenever the user wants to message their contact network — "send the Diwali
+  offer to all retailers in Maharashtra", "schedule a WhatsApp campaign for
+  tomorrow 10am", "how did last week's broadcast do?", "pause the campaign". A
+  campaign is not a board project (projects). Not for translating content
+  (document-translation, image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
   VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization) whose
