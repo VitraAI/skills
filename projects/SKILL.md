@@ -16,7 +16,7 @@ metadata:
   skill-author: Vitra.ai
   version: "1.0"
   display-name: Projects & Tasks
-  category: Workflow
+  category: Productivity
   tags: Projects, Tasks, Productivity
   source: vitra
   added: "2026-09-28"
