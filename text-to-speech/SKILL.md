@@ -50,7 +50,10 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 2. **Voice** ⏸: `list_voices` for the language (gender, provider, keyword; includes cloned
    voices), or `find_voices_by_accent` for an accent; `list_cloned_voices` for the
    organization's own. Offer a few with their preview links; let the user pick.
-3. **Speak** (ask first: paid). Up to 5,000 characters per clip; split longer text into
+3. **Speak** (ask first: paid). `text_to_speech` has no price check: it is charged per
+   second of the audio it makes, which is only known once it is made. Tell the user that
+   (`quote_cost` with the rate from its listing and 60 seconds gives the per-minute price)
+   and get their yes. Up to 5,000 characters per clip; split longer text into
    passages. `pronunciations` says words differently (`{"word": "SQL", "say_as": "sequel"}`).
    ```bash
    python3 scripts/vitra.py call text_to_speech '{"text": "…", "language": "english_united_kingdom", "provider": "elevenlabs", "voice_id": "…", "confirm": true}'

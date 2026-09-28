@@ -50,9 +50,11 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    agreed (in writing) to this use. No clear yes → stop.
 2. **Samples**: clean recordings of that one speaker. Local files: `vitra.py upload` each;
    in the Drive: `find_assets`. Pass their `asset_id`s as `sample_asset_ids`.
-3. **Clone** (tell the user it spends credits; get the go-ahead). Provider `elevenlabs` or
+3. **Clone**: a flat price per voice. Price it with `estimate_only: true`, tell the user,
+   then call again with `confirm: true` on their go-ahead. Provider `elevenlabs` or
    `cartesia`.
    ```bash
+   python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "english_india", "consent": true, "estimate_only": true}'
    python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "english_india", "consent": true, "confirm": true}'
    ```
 4. **Wait**: `list_cloned_voices` until the voice is ready. Then text-to-speech or
