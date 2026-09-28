@@ -1,7 +1,7 @@
 {
   "name": "vitra",
   "version": "0.3.0",
-  "description": "Vitra Universe skills: translate documents, subtitles, images and text; dub videos, generate speech, clone voices and lip-sync; manage translation memories; score translation quality and check content compliance; translate DITA maps; manage brand kits, projects, tasks and prompts; run campaigns and workflows — using your Vitra organization's account.",
+  "description": "Every Vitra skill in one install: translate documents, DITA maps, subtitles and images; dub videos, generate speech, clone voices and lip-sync; manage translation memories, brand kits, projects, tasks and prompts; score quality and check compliance, with your Vitra organization's account.",
   "author": {
     "name": "Vitra.ai",
     "url": "https://www.vitra.ai"

@@ -1,7 +1,7 @@
 {
   "name": "vitra",
   "version": "0.3.0",
-  "description": "Generate, edit and resize images, translate the text in images, and dub videos, with your Vitra organization's account.",
+  "description": "Every Vitra skill in one install: translate documents, DITA maps, subtitles and images; dub videos, generate speech, clone voices and lip-sync; manage translation memories, brand kits, projects, tasks and prompts; score quality and check compliance, with your Vitra organization's account.",
   "author": {
     "name": "Vitra.ai",
     "url": "https://www.vitra.ai"
