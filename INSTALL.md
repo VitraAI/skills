@@ -9,7 +9,11 @@ Works with Claude Code, Cursor, Codex and 70+ other agents. Needs Node.js.
 ```bash
 npx skills add VitraAI/skills                         # all skills, pick your agents
 npx skills add VitraAI/skills --skill image-creator   # one skill
+npx skills add VitraAI/skills -a antigravity -g        # Antigravity, for every project
 ```
+
+`-g` installs for your user (Antigravity: `~/.gemini/antigravity/skills`, Claude
+Code: `~/.claude/skills`); without it the skills go into the current project only.
 
 Or from the published catalog instead of GitHub:
 
