@@ -56,6 +56,13 @@ async function zipSkill(skill, prefix) {
       createFolders: false,
     });
   }
+  // The repo's MIT licence travels with every archive, since a skill is
+  // usually installed on its own.
+  zip.file(prefix + 'LICENSE', readFileSync(join(ROOT, 'LICENSE')), {
+    unixPermissions: 0o100644,
+    date: FIXED_DATE,
+    createFolders: false,
+  });
   return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', platform: 'UNIX' });
 }
 

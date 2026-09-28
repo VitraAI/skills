@@ -29,6 +29,9 @@ fi
 
 mkdir -p "${BUILDS_DIR}"
 rm -f "${OUTPUT_FILE}"
+# The repo's licence goes inside the skill folder in the archive.
+cp LICENSE "${SKILL_NAME}/LICENSE"
+trap 'rm -f "${SKILL_NAME}/LICENSE"' EXIT
 
 # listing.yaml is the Skill Library page copy (webapp), not part of the skill.
 zip -r "${OUTPUT_FILE}" "${SKILL_NAME}" \

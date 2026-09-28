@@ -12,6 +12,10 @@ jobs:
   check:
     name: Validate and build
     runs-on: ubuntu-latest
+    # The skills promise Python 3.10+: test the oldest and a current one.
+    strategy:
+      matrix:
+        python: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v7
 
@@ -24,7 +28,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
 
       # SKILL.md spec, listings, references, secrets, manifest versions,
       # and the vendored _lib helpers in every skill.

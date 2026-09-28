@@ -10,6 +10,7 @@
   "homepage": "https://universe.vitra.ai/skills",
   "repository": "https://github.com/VitraAI/skills",
   "license": "MIT",
+  "skills": "./",
   "keywords": [
     "vitra",
     "image-generation",
