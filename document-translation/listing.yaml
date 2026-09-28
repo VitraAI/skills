@@ -23,6 +23,10 @@ features:
     description: Pick which CSV columns to translate, or keep Excel headings as they are.
   - title: Safe to re-run
     description: Reconnects to translations already started, so nothing is charged twice.
+  - title: Batches and whole folders
+    description: Up to 20 files at once, or every file in a Drive folder into a new translated folder.
+  - title: Check and polish
+    description: A quality score with explained errors, AI proofreading, and back-translation to verify meaning.
 use-cases:
   - title: Legal and HR documents
     description: Contracts and policies in every language your teams work in.

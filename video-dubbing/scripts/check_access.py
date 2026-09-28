@@ -52,6 +52,13 @@ STEPS = [
     {"step": "Re-translate or re-voice a single line", "needs": [f"{PL}:create", "translate_video.sync_api:create"], "optional": True},
     {"step": "Create a translation memory in another provider", "needs": ["translation_memory:create"], "optional": True},
     {"step": "Show the credit balance", "needs": ["credits:read"], "optional": True},
+    {"step": "See pronunciation rules", "needs": ["translate_video.pronunciation_dictionary:read"], "optional": True},
+    {"step": "Add pronunciation rules", "needs": ["translate_video.pronunciation_dictionary:create"],
+     "optional": True},
+    {"step": "Remove pronunciation rules", "needs": ["translate_video.pronunciation_dictionary:delete"],
+     "optional": True},
+    {"step": "Type a language's script from Latin letters", "needs": ["translate_video.transliteration:read"],
+     "optional": True},
 ]
 
 

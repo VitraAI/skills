@@ -2,20 +2,20 @@
 name: document-translation
 description: >-
   Translates documents and text with the Vitra Universe API, keeping the
-  original layout and formatting: Word (.docx), PowerPoint (.pptx), Excel
-  (.xlsx), CSV, PDF, HTML, JSON, XML, XLIFF and plain text, into one or more
-  languages at once, through the organization's translation memory so approved
-  terminology is reused. Use it whenever the user wants a file or text
-  translated or localized — "translate this contract into German", "make a
-  Spanish version of this deck", "localize our strings.json", "translate this
-  paragraph into Japanese". Not for subtitles (subtitle-translation), text in
+  original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML,
+  JSON, XML, XLIFF and plain text — one file, a batch, or a whole Drive folder
+  — into several languages at once, through the organization's translation
+  memory; then scores, proofreads or back-translates the result on request.
+  Use it whenever the user wants files or text translated or checked —
+  "translate this contract into German", "translate everything in our Q3
+  folder", "proofread the French version", "back-translate it so I can check". Not for subtitles (subtitle-translation), text in
   images (image-translation) or video (video-dubbing).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API only.
   Needs VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
 metadata:
   skill-author: Vitra.ai
-  version: "1.0"
+  version: "1.1"
   display-name: Document Translation
   category: Localization
   tags: Documents, Translation, Popular
@@ -57,6 +57,7 @@ say so before translating.
 ```
 - [ ] 1. Translation memory   (⏸ ask if several fit)
 - [ ] 2. Translate            (⏸ confirm: spends credits) → translated files
+- [ ] 3. Check and polish     (only if the user wants: ⏸ each spends credits)
 ```
 
 ### 1. Translation memory ⏸
@@ -66,36 +67,65 @@ python3 scripts/list_tms.py --target-language French
 ```
 
 **One fits:** use it and say so. **Several:** ask which, by name; the wrong one
-writes the wrong wording into a memory the whole organization reuses. **None:**
-the user needs one first: they can create it in Vitra (Translation Memory), or
-with the translation-memory skill.
+writes the wrong wording into a memory the whole organization reuses.
+**None:** the user needs one first: they can create it in Vitra (Translation
+Memory), or with the translation-memory skill.
 
 ### 2. Translate ⏸
 
-Confirm the file, languages and memory: translation spends credits per word.
+Confirm the files, languages and memory: translation spends credits per word.
+
+| What the user has | Run |
+|---|---|
+| One file, or text | `translate_document.py --file contract.docx --target-language German [--target-language French]` (or `--text "…"`) |
+| Several files of one kind (up to 20) | `translate_batch.py --file a.docx --file b.docx --target-language German` |
+| A whole folder in their Vitra Drive | `translate_folder.py --folder "Q3 manuals" --target-language German` → preview; then add `--confirm` |
+
+All take `[--tm-name "<memory>"]`. `translate_document.py` options:
+`--out-dir` (default `./translated`), `--columns 1,3` (CSV: only those
+columns, 0-based; ask which hold prose if unsure), `--keep-first-row` (Excel:
+leave headings as they are).
+
+A folder run **previews first**: show how many files, what's skipped and the
+output folder, then run it again with `--confirm` once the user agrees. Its
+results land in a new folder in their Drive (`output_folder`); a folder per
+language unless `--layout language-suffix`. Options: `--format DOCX` (only
+some kinds), `--include-subfolders`, `--exclude drafts`.
+
+Each script waits and reports every language. It can stop first with a
+question: `TM_CHOICE_NEEDED` (`choices`: ask, then pass `--tm-name`) or
+`TM_NEEDED`. If it times out, run the same command again: it reconnects,
+nothing is charged twice.
+
+### 3. Check and polish (only if asked) ⏸
+
+`translate_document.py` returns a `translation` for each result; pass it on.
+Each of these spends credits: ask first.
 
 ```bash
-python3 scripts/translate_document.py --file contract.docx \
-  --target-language German --target-language French [--tm-name "<memory>"]
-python3 scripts/translate_document.py --text "Welcome to Acme" --target-language Japanese
+python3 scripts/quality_report.py --translation <translation> [--scope unverified]
+python3 scripts/proofread.py --translation <translation>
+python3 scripts/back_translate.py --translation <translation>
 ```
 
-Options: `--out-dir` (default `./translated`), `--columns 1,3` (CSV: only
-those columns, 0-based; ask which hold prose if unsure), `--keep-first-row`
-(Excel: leave headings as they are).
+- **Quality report:** a score, a pass/fail band and the worst lines, each
+  error explained with a `better` version. To fix them in the document:
+  `quality_report.py --translation <t> --apply-fixes all|4,9 --out ./fixed.docx`.
+- **Proofreading:** a suggested correction per line, with the reasons. Show
+  them; apply only the ones the user accepts:
+  `proofread.py --translation <t> --apply 3,7|all --out ./fixed.docx`.
+- **Back-translation:** each translated line put back into the source
+  language, so someone who can't read the translation can check its meaning.
 
-It starts one translation per language and waits. `results` lists each
-language with its file `path` (or `text`). It can stop first with a question:
-`TM_CHOICE_NEEDED` (`choices`: ask, then pass `--tm-name`) or `TM_NEEDED`.
-If it times out, run the same command again: it reconnects, nothing is
-charged twice.
+Lines are named by number; relay suggestions as before → after.
 
 ## Rules
 
 - **Show names, never ids.** Give each file with its language.
 - **Ask before spending credits**, and at every ⏸.
 - **Never invent a memory name.** Use what `list_tms.py` printed.
-- **One command per request.** Several languages go in one call, not a loop.
+- **One command per request.** Several languages or files go in one call, not a loop.
+- **Apply only what the user accepted.** Proofreading and fixes change the document.
 
 ## When something fails
 

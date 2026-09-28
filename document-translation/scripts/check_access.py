@@ -30,6 +30,12 @@ STEPS = [
     {"step": "Choose a translation memory", "needs": ["translation_memory:read"]},
     {"step": "Translate Office files over 25 MB (through the Drive)", "needs": ["asset:create", "asset:read"],
      "optional": True},
+    {"step": "Translate a Drive folder", "needs": ["asset:read", "playground.document:create"], "optional": True},
+    {"step": "AI proofreading and back-translation", "needs": ["playground.document:create"], "optional": True},
+    {"step": "Quality report on a translation", "needs": ["playground.document:read", "aiqe:create", "aiqe:read"],
+     "optional": True},
+    {"step": "Apply a quality report's fixes", "needs": ["playground.document:update", "aiqe:read"],
+     "optional": True},
 ]
 
 
