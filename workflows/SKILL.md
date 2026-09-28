@@ -65,7 +65,7 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 failed run: paid again, so ask first and pass `confirm: true`; remove step owners), `cancel_flow_run` (confirm).
 **Build or change a workflow**: `design_workflow` (plain words → proposed graph; relay its
 questions), `list_workflow_steps`, `validate_workflow`, then `create_workflow`, or
-`get_workflow` + `update_workflow` (replaces the graph: confirm).
+`get_workflow` + `update_workflow` (replaces the graph: confirm); `delete_workflow` removes one for good (confirm).
 
 ## Rules
 
