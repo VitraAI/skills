@@ -53,15 +53,17 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    rules are set up with the compliance-markets skill.
 2. **Content**: text inline; media from the Drive (`find_assets`) or a local file
    (`vitra.py upload`) as `asset_id`; an image can also be a public `image_url`.
-3. **Check** (ask first: paid):
+3. **Check** (paid, one charge per check whatever the markets): price it with
+   `estimate_only: true` (audio and video need `duration_seconds`, which `vitra.py upload`
+   reports; otherwise ask the user the length), ask, then `confirm: true`:
    ```bash
    python3 scripts/vitra.py call check_content '{"modality": "image", "markets": ["Saudi Arabia"], "asset_id": "…", "confirm": true}'
    ```
 4. **Verdict**: `get_content_check` until done. Explain each flagged concern in plain
    words; `get_content_decision` has per-rule detail, `get_decision_media` the media links
    and a video's flagged frames.
-5. **Fix a flagged image** (paid, ask): `fix_flagged_image` with the check and the market,
-   then `get_image_fix`. Earlier fixes: `list_image_fixes`.
+5. **Fix a flagged image** (paid, flat per fix): `fix_flagged_image` with the check and
+   the market, `estimate_only: true` first, ask, then `confirm: true` → `get_image_fix`. Earlier fixes: `list_image_fixes`.
 
 **History**: `list_content_checks`, `delete_content_decision` (confirm).
 **Review queue**: `list_review_queue`; `adjudicate_decision` ONLY with the user's own
