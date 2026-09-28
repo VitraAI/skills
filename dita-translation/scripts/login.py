@@ -346,6 +346,11 @@ def status() -> int:
     if code == 401:
         return _out({"status": "not_signed_in", "reason": "Vitra no longer accepts this sign-in.",
                      "next_action": "Run login.py to sign in again."})
+    if code != 200 or not isinstance(org, dict):
+        # Signed in on this machine, but Vitra didn't say who: don't guess.
+        return _out({"status": "signed_in", "server": base,
+                     "unverified": f"Vitra didn't answer ({code}); it may be restarting.",
+                     "next_action": "Try login.py --status again in a minute."})
     user = (sess or {}).get("user") if isinstance(sess, dict) else None
     return _out({
         "status": "signed_in",
