@@ -29,6 +29,11 @@ QUOTED = {
     "save_to_drive", "back_translate",  # action values
 }
 
+# Server tools deliberately left out of every skill (e.g. organization-admin
+# tools no customer skill should drive). Every other tool in
+# scripts/mcp-tools.json must be named by at least one SKILL.md.
+NOT_IN_A_SKILL: set[str] = set()
+
 BACKTICKED = re.compile(r"`([a-z][a-z0-9_]*)`")
 COMMAND = re.compile(r"vitra\.py (?:call|describe) ([A-Za-z0-9_<>-]+)")
 
@@ -60,13 +65,19 @@ class ToolNamesTest(unittest.TestCase):
                         "tool, argument or toolset (renamed? update scripts/mcp-tools.json)",
                     )
 
+    def test_exclusions_are_real_tools(self) -> None:
+        self.assertEqual(sorted(NOT_IN_A_SKILL - TOOLS), [], "excluded tools the server doesn't have")
+
     def test_every_tool_is_reachable_from_a_skill(self) -> None:
         named: set[str] = set()
         for path in skill_files():
             text = path.read_text(encoding="utf-8")
             named |= {w for w in BACKTICKED.findall(text) if w in TOOLS}
             named |= {w for w in COMMAND.findall(text) if w in TOOLS}
-        self.assertEqual(sorted(TOOLS - named), [], "server tools no skill mentions")
+        self.assertEqual(sorted(TOOLS - named - NOT_IN_A_SKILL), [],
+                         "server tools no SKILL.md names (name one, or exclude it on purpose)")
+        self.assertEqual(sorted(NOT_IN_A_SKILL & named), [],
+                         "excluded tools a SKILL.md names anyway (drop the exclusion)")
 
     def test_listings_name_tools_their_skill_uses(self) -> None:
         for path in skill_files():

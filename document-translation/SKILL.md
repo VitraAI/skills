@@ -2,16 +2,16 @@
 name: document-translation
 description: >-
   Translates documents and text with the Vitra Universe API, keeping the
-  original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML, JSON,
-  XML, XLIFF and plain text — one file, a batch, or a whole Drive folder —
-  through the organization's translation memory; then reviews it line by line,
-  proofreads, back-translates, scores it with a quality report and writes fixes
-  back. Use it whenever the user wants files or text translated or checked —
-  "translate this contract into German", "translate everything in our Q3
-  folder", "proofread the French version", "back-translate it so I can check",
-  "change line 12 of the Spanish file". Not for subtitles or video
-  (translate-video), text in images (image-translation) or DITA maps
-  (dita-translation).
+  original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML,
+  JSON, XML, XLIFF, InDesign (.idml) and plain text — one file, a batch, or a
+  whole Drive folder — through the organization's translation memory; then
+  reviews it line by line, proofreads, back-translates, scores it with a
+  quality report and writes fixes back. Use it whenever the user wants files
+  or text translated or checked — "translate this contract into German",
+  "translate everything in our Q3 folder", "proofread the French version",
+  "back-translate it so I can check", "change line 12 of the Spanish file".
+  Not for subtitles or video (translate-video), text in images
+  (image-translation) or DITA maps (dita-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -55,7 +55,8 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    name. The source language is the memory's; target languages are written as the memory
    lists them.
 3. **Start** (ask first: paid):
-   - one file or text: `translate_document`
+   - one file or text: `translate_document` (`format` from the file type; InDesign .idml
+     where `describe translate_document` lists IDML)
      ```bash
      python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "<as the memory lists it>", "format": "DOCX", "asset_id": "…", "confirm": true}'
      ```

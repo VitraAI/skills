@@ -1,16 +1,17 @@
 ---
 name: workflows
 description: >-
-  Runs and builds the automated workflows an organization keeps in Vitra Cosmos
-  — chains of steps such as translate, dub, check and publish: starts a workflow
-  with the inputs it needs, follows the run step by step, relays the user's
-  decision when a step waits for approval, retries, renames or cancels runs, and
-  designs, validates and saves workflows with the AI builder. Use it whenever
-  the user names a process their team automated or wants one — "run our
-  product-launch workflow for the new video", "start the weekly localization
-  flow", "approve the review step", "where is my workflow run?", "build a
-  workflow that dubs then checks compliance". Not for one-off jobs a specific
-  skill does directly.
+  Runs and builds the automated workflows an organization keeps in Vitra
+  Cosmos — chains of steps such as translate, dub, check and publish: starts a
+  workflow with the inputs it needs, follows the run step by step, relays the
+  user's decision when a step waits for approval, retries, renames or cancels
+  runs, and designs, validates and saves workflows with the AI builder. Use it
+  whenever the user names a process their team automated or wants one — "run
+  our product-launch workflow for the new video", "start the weekly
+  localization flow", "approve the review step", "where is my workflow run?",
+  "build a workflow that dubs then checks compliance". Not for one-off jobs a
+  specific skill does directly (document-translation, translate-video,
+  image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in

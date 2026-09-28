@@ -1,6 +1,6 @@
 # hyperlocal-campaigns
 
-Hyperlocal Campaigns: an agent skill for Vitra Universe. Runs Vitra Hyperlocal campaigns through the Vitra Universe API: manages contacts, groups, products and creative, WhatsApp and Facebook templates, localizes contacts and templates, picks an audience (by group, state, zone or area), estimates reach and credits, prepares a personalized creative for every contact, then — only on the user's explicit yes — sends it over WhatsApp or Facebook now or on a schedule, and reports delivery.
+Hyperlocal Campaigns: an agent skill for Vitra Universe. Runs Vitra Hyperlocal broadcasts through the Vitra Universe API: picks an audience of retailers or partners (by group, state, zone or area), estimates reach and credits, prepares a personalized creative for every contact, then — only on the user's explicit yes — sends it over WhatsApp or Facebook now or on a schedule; pauses, resumes or stops a broadcast, retries failed sends, deletes old ones and reports delivery (sent, delivered, read) and Facebook insights.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

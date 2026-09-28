@@ -1,15 +1,17 @@
 ---
 name: translation-memory
 description: >-
-  Manages the organization's translation memories, glossaries, term bases and
-  style guides in Vitra Universe — the approved wording every Vitra translation
-  reuses: translates short texts memory-first, looks up how a phrase was
-  translated, corrects, verifies or deletes entries, creates and shares
-  memories, links glossaries, term bases and style guides, and edits their
-  entries, terms and rules. Use it whenever the user talks about terminology or
-  consistency — "how do we translate 'checkout' in German?", "always translate X
-  as Y", "never translate our brand name", "translate these app strings with our
-  memory", "set up a memory for Acme", "add a style rule". Not for whole
+  Manages the organization's translation memories in Vitra Universe — the
+  approved translations every Vitra job reuses: translates short texts
+  memory-first, looks up how a phrase was translated, corrects, verifies or
+  deletes entries, creates, edits and deletes memories, shares them with child
+  organizations, links glossaries, term bases and a style guide to a memory,
+  and changes the organization's VitraTM settings. Use it whenever the user
+  talks about their memory or past translations — "how did we translate
+  'checkout' in German?", "correct that entry", "translate these app strings
+  with our memory", "set up a memory for Acme", "share the Acme memory with
+  our Spain office", "attach the legal glossary to our memory". Not for
+  editing glossaries, term bases or style guides (terminology), whole
   documents (document-translation) or scoring a translation
   (translation-quality).
 compatibility: >-
@@ -22,14 +24,14 @@ metadata:
   version: "1.0"
   display-name: Translation Memory
   category: Localization
-  tags: Translation, Terminology
+  tags: Translation, Memory
   source: vitra
   added: "2026-09-26"
   updated: "2026-09-28"
 ---
 # Translation Memory
 
-Everything the organization's approved wording lives in. Memories are shared by the whole organization: a wrong entry spreads to every later job.
+The organization's translation memories. Memories are shared by the whole organization: a wrong entry spreads to every later job.
 
 ## How to call Vitra
 
@@ -64,24 +66,19 @@ A large batch returns an operation id: `get_memory_translation`.
 after, confirm); `set_memory_term_status` (unverified, verified, approved);
 `delete_memory_terms` (confirm).
 
-**Memories**: `create_translation_memory` (confirm name and languages; `list_memory_providers`
-for VitraTM or Phrase), `update_translation_memory`, `delete_translation_memory` (confirm),
-`link_memory_resources` (glossaries, term bases, one style guide). Sharing with child
-organizations: `list_memory_shares`, `share_translation_memory`,
-`unshare_translation_memory`. Organization settings: `get_vitratm_settings`,
-`update_vitratm_settings` (changes cost: confirm).
+**Memories** ⏸: `create_translation_memory` (confirm name and languages;
+`list_memory_providers` for VitraTM or Phrase), `update_translation_memory`,
+`delete_translation_memory` (confirm).
 
-**Glossaries** (fixed wording, do-not-translate): `list_glossaries`, `get_glossary`,
-`create_glossary`, `update_glossary`, `delete_glossary`, `add_glossary_entry`,
-`update_glossary_entry`, `delete_glossary_entries`.
-**Term bases** (concepts with terms per language): `get_term_base`, `create_term_base`,
-`update_term_base`, `delete_term_base`, `add_term_base_concept`, `add_term_base_term`,
-`update_term_base_concept`, `update_term_base_term`, `delete_term_base_entry`.
-**Style guides** (writing rules): `get_style_guide`, `create_style_guide`,
-`update_style_guide`, `delete_style_guide`, `add_style_guide_rules`,
-`update_style_guide_rule`, `bulk_edit_style_guide_rules`, `reorder_style_guide_rules`,
-`copy_style_guide_language`, `set_style_guide_file_languages`, `remove_style_guide_file`,
-`extract_style_guide_rules` (replaces every rule: clear yes first).
+**Link wording rules**: `link_memory_resources` attaches or detaches glossaries and term
+bases and sets the one style guide a memory follows (names from `list_glossaries`; their
+contents are edited with the terminology skill).
+
+**Share** with child organizations: `list_memory_shares`, `share_translation_memory`,
+`unshare_translation_memory` (confirm both).
+
+**Organization settings**: `get_vitratm_settings`; `update_vitratm_settings` changes how
+every job translates and what it costs: confirm.
 
 ## Rules
 

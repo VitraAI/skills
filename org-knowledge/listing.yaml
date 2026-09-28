@@ -1,0 +1,63 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Search what your organization knows — audience notes, guidelines, decisions
+  — and keep it current: save new entries, edit them with full version
+  history, and organize them by category.
+when-to-use: >-
+  Reach for it when a task needs context your team already wrote down, or when
+  a conversation produced something worth keeping for everyone.
+features:
+  - title: Search
+    description: Find entries by words, category or favourites.
+  - title: Save and share
+    description: Private by default; share with the organization on a yes.
+  - title: Version history
+    description: Every edit is kept; roll back to any version.
+  - title: Categories
+    description: Group entries and keep the list tidy.
+use-cases:
+  - title: Brief with context
+    description: Pull the organization's notes on an audience into a task.
+  - title: Keep decisions
+    description: Save the outcome of a review as a shared guideline.
+mcp-toolset: context
+mcp-tools:
+  - name: search_org_knowledge
+    title: Search the organization's knowledge
+  - name: get_knowledge_entry
+    title: Read a knowledge entry
+  - name: create_knowledge_entry
+    title: Save a new knowledge entry
+  - name: update_knowledge_entry
+    title: Edit a knowledge entry
+  - name: list_knowledge_versions
+    title: See a knowledge entry's versions
+  - name: restore_knowledge_version
+    title: Restore an earlier version of a knowledge entry
+  - name: favorite_knowledge_entry
+    title: Favourite a knowledge entry
+  - name: delete_knowledge_entry
+    title: Delete a knowledge entry
+  - name: list_knowledge_categories
+    title: List knowledge entry categories
+  - name: create_knowledge_category
+    title: Add a knowledge entry category
+  - name: update_knowledge_category
+    title: Rename or recolour a knowledge entry category
+  - name: delete_knowledge_category
+    title: Delete a knowledge entry category
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: prompts-library
+    why: Turn a guideline into a reusable prompt.
+  - name: brand-kit
+    why: Keep colors, fonts and tone of voice as a brand kit.
+  - name: terminology
+    why: Turn wording decisions into glossary terms and style rules.

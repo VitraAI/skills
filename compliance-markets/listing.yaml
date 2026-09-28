@@ -1,0 +1,51 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Define what is allowed in each market: create markets with their own
+  strictness, write the rules content is checked against, or let AI draft a
+  market's rules for you to accept one by one.
+when-to-use: >-
+  Reach for it when entering a new market, when regulations change, or before
+  the first compliance check in a region.
+features:
+  - title: Markets
+    description: Create, rename and tune the threshold of each market.
+  - title: Rules
+    description: Add, edit and delete rules with severity and content types.
+  - title: AI drafts
+    description: Draft a market's rules; keep only the ones you accept.
+use-cases:
+  - title: New market
+    description: Set up Indonesia's rules before the first campaign there.
+  - title: Policy change
+    description: Update a rule the day a regulation changes.
+mcp-toolset: quality
+mcp-tools:
+  - name: list_qc_regions
+    title: List markets for content checks
+  - name: list_qc_rules
+    title: List a market's rules
+  - name: create_qc_market
+    title: Create a market for content checks
+  - name: update_qc_market
+    title: Edit a market
+  - name: delete_qc_market
+    title: Delete a market
+  - name: add_qc_rule
+    title: Add a rule to a market
+  - name: update_qc_rule
+    title: Edit a rule
+  - name: delete_qc_rule
+    title: Delete a rule
+  - name: generate_qc_rules
+    title: Draft rules for a market with AI
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: content-compliance
+    why: Check content against the markets you set up.

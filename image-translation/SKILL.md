@@ -3,16 +3,17 @@ name: image-translation
 description: >-
   Translates the text inside an image — signage, packaging, ad creatives,
   screenshots, menus, infographics — with the Vitra Universe Image Translator
-  and re-renders it in the target languages with the layout kept; then corrects
-  lines, keeps brand names, edits or adds objects and logos, re-renders at other
-  aspect ratios, runs AI QC, proofreading, back-translation, transcreation and
-  quality scores, and saves results to the Drive. Use it whenever the user wants
-  an image, poster, banner or creative localized or its text translated —
-  "translate this poster into French", "make a Spanish version of this ad",
-  "localize these product images", "fix the second line of the German one" —
-  even if they only say "translate this". Not for generating new images
-  (image-creator), resizing an untranslated image (image-resize), or documents
-  and subtitles.
+  and re-renders it in the target languages with the layout kept; then
+  corrects lines, keeps brand names, edits or adds objects and logos,
+  re-renders at other aspect ratios, runs AI QC, proofreading,
+  back-translation, transcreation and quality scores, and saves results to the
+  Drive. Use it whenever the user wants an image, poster, banner or creative
+  localized or its text translated — "translate this poster into French",
+  "make a Spanish version of this ad", "localize these product images", "fix
+  the second line of the German one" — even if they only say "translate this".
+  Not for generating new images (image-creator), resizing an untranslated
+  image (image-resize), or documents (document-translation) and subtitles
+  (translate-video).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in

@@ -1,15 +1,17 @@
 ---
 name: content-compliance
 description: >-
-  Checks content against each market's rules before it goes out, with the Vitra
-  Universe API: text, images, audio and video are scored per market (approved,
-  review or blocked) with the rules they break, plus unsafe-content detection; a
-  flagged image can be regenerated to meet a market's rules; reviewers' verdicts
-  are relayed; markets and their rules are created, edited or drafted with AI.
-  Use it whenever the user asks if content is okay for a market or audience —
-  "is this ad OK for Saudi Arabia?", "check this video for our India rules",
-  "fix this image for the UAE", "what's waiting for review?", "add a rule for
-  Germany". Not for translation quality (translation-quality).
+  Checks content against each market's rules before it goes out, with the
+  Vitra Universe API: text, images, audio and video are scored per market
+  (approved, review or blocked) with the rules they break and the frames or
+  media that break them, plus unsafe-content detection; a flagged image can be
+  regenerated to meet a market's rules; past checks are listed or deleted; and
+  reviewers' own verdicts on the review queue are relayed. Use it whenever the
+  user asks if content is okay for a market or audience — "is this ad OK for
+  Saudi Arabia?", "check this video for our India rules", "will this banner
+  pass in Germany?", "fix this image for the UAE", "what's waiting for
+  review?", "approve the Diwali banner". Not for setting up markets and rules
+  (compliance-markets) or translation quality (translation-quality).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -27,7 +29,7 @@ metadata:
 ---
 # Content Compliance
 
-Checks content against the organization's markets (regions) and their rules. Checks, image fixes and AI-drafted rules spend credits.
+Checks content against the organization's markets (regions) and their rules. Checks and image fixes spend credits.
 
 ## How to call Vitra
 
@@ -47,7 +49,8 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 
 ## Workflow
 
-1. **Markets**: `list_qc_regions` (by name). Ask which if the user didn't say.
+1. **Markets**: `list_qc_regions` (by name). Ask which if the user didn't say. Markets and
+   rules are set up with the compliance-markets skill.
 2. **Content**: text inline; media from the Drive (`find_assets`) or a local file
    (`vitra.py upload`) as `asset_id`; an image can also be a public `image_url`.
 3. **Check** (ask first: paid):
@@ -55,17 +58,14 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    python3 scripts/vitra.py call check_content '{"modality": "image", "markets": ["Saudi Arabia"], "asset_id": "…", "confirm": true}'
    ```
 4. **Verdict**: `get_content_check` until done. Explain each flagged concern in plain
-   words; `get_content_decision` has per-rule detail, `get_decision_media` the media links.
+   words; `get_content_decision` has per-rule detail, `get_decision_media` the media links
+   and a video's flagged frames.
 5. **Fix a flagged image** (paid, ask): `fix_flagged_image` with the check and the market,
    then `get_image_fix`. Earlier fixes: `list_image_fixes`.
 
 **History**: `list_content_checks`, `delete_content_decision` (confirm).
 **Review queue**: `list_review_queue`; `adjudicate_decision` ONLY with the user's own
 verdict (confirm).
-**Markets and rules**: `create_qc_market`, `update_qc_market`, `delete_qc_market`
-(confirm), `list_qc_rules`, `add_qc_rule`, `update_qc_rule`, `delete_qc_rule` (confirm).
-`generate_qc_rules` drafts rules with AI (estimate, then confirm); nothing is saved: add
-the ones the user accepts with `add_qc_rule`.
 
 ## Rules
 

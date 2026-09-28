@@ -1,14 +1,16 @@
 ---
 name: prompts-library
 description: >-
-  Uses and maintains the organization's prompt library in Vitra Universe: finds
-  saved prompts by name, topic or category, returns a prompt's full text with
-  its {{variables}} filled in, saves new prompts (private or shared with the
-  organization), edits them with version history, restores an earlier version,
-  favorites or deletes prompts, and manages categories. Use it when the user
-  wants to reuse or manage team prompts — "use our product-description prompt",
-  "save this as a prompt for the team", "what prompts do we have for reviews?",
-  "roll the email prompt back to last week's version".
+  Uses and maintains the organization's prompt library in Vitra Universe:
+  finds saved prompts by name, topic or category, returns a prompt's full text
+  with its {{variables}} filled in, saves new prompts (private or shared with
+  the organization), edits them with version history, restores an earlier
+  version, favorites or deletes prompts, and manages categories. Use it when
+  the user wants to reuse or manage team prompts — "use our
+  product-description prompt", "save this as a prompt for the team", "what
+  prompts do we have for reviews?", "roll the email prompt back to last week's
+  version". Not for saved facts and guidelines (org-knowledge) or brand kits
+  (brand-kit).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in

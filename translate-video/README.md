@@ -1,6 +1,6 @@
 # translate-video
 
-Translate Video: an agent skill for Vitra Universe. Dubs and subtitles videos and translates subtitle files with Vitra Translate Video: dubs a video into other languages (library voices by default, a speaker's cloned voice only with consent), makes subtitles from a video, translates SRT, VTT, ASS or SSA files, lets the user review and edit lines, speakers, emotions and pronunciations, fixes issues, scores quality, then exports the dubbed video, burns subtitles in or downloads subtitle files.
+Translate Video: an agent skill for Vitra Universe. Dubs and subtitles videos and translates subtitle files with Vitra Translate Video: dubs a video into other languages (voices from the Vitra voice library by default, a speaker's cloned voice only with consent), makes subtitles from a video, translates SRT, VTT, ASS or SSA files, lets the user review and edit lines, speakers, emotions and pronunciations, fixes issues, scores quality, then exports the dubbed video, burns subtitles in or downloads subtitle files.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

@@ -58,3 +58,7 @@ related-skills:
     why: Correct recurring errors once, in the memory everyone uses.
   - name: document-translation
     why: Re-translate content that didn't pass.
+  - name: terminology
+    why: Turn recurring findings into glossary terms and style rules.
+  - name: design-file-translation
+    why: Score translations sent from the design plugins.

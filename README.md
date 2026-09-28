@@ -11,20 +11,27 @@ plus the scripts it runs.
 
 | Skill | What it does |
 | --- | --- |
-| [`vitra`](vitra/) | Drive files and folders, work folders, credits and quotes, saved knowledge, design-plugin jobs, any other Vitra tool |
+| [`vitra`](vitra/) | Sign in, credits and quotes, and finding any other Vitra tool |
+| [`drive`](drive/) | Find, upload, download and organize Drive files and folders; work folders |
+| [`org-knowledge`](org-knowledge/) | Search and maintain the organization's knowledge (Memory), with version history |
 | [`image-creator`](image-creator/) | Generate images from a prompt, edit them in plain language, multi-format briefs, save them to your Drive |
 | [`image-resize`](image-resize/) | Re-compose one image for other sizes (Story, LinkedIn, 1080x1920…) |
 | [`image-translation`](image-translation/) | Translate the text baked into an image and keep its layout; fix lines, objects and logos |
-| [`translate-video`](translate-video/) | Dub a video, make subtitles, translate SRT/VTT files; review line by line, export or burn in |
-| [`document-translation`](document-translation/) | Translate files, batches or Drive folders, formatting kept; review, proofread, back-translate and score them |
+| [`design-file-translation`](design-file-translation/) | Review, correct and score translations sent from the Figma, Canva, Adobe and Word plugins |
+| [`translate-video`](translate-video/) | Dub a video with voices from the voice library, make subtitles, translate SRT/VTT files; review, export or burn in |
+| [`document-translation`](document-translation/) | Translate text, Office, PDF, spreadsheet and InDesign files, batches or Drive folders; review and score them |
 | [`dita-translation`](dita-translation/) | Follow, retry, score and download DITA map translations, one zip per language |
-| [`translation-memory`](translation-memory/) | Memories, glossaries, term bases and style guides; translate strings memory-first |
+| [`translation-memory`](translation-memory/) | Translation memories: translate strings memory-first, correct entries, share, link, VitraTM settings |
+| [`terminology`](terminology/) | Glossaries, term bases and style guides |
 | [`translation-quality`](translation-quality/) | Score a translation line by line and explain the worst lines |
-| [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images; manage markets |
+| [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images; review queue |
+| [`compliance-markets`](compliance-markets/) | Markets and their compliance rules; draft rules with AI |
 | [`text-to-speech`](text-to-speech/) | Turn text into speech in catalog or cloned voices |
 | [`voice-cloning`](voice-cloning/) | Clone a voice from samples, with consent |
 | [`lip-sync`](lip-sync/) | Make a video's lips match a new audio track, with consent |
-| [`hyperlocal-campaigns`](hyperlocal-campaigns/) | Personalized WhatsApp and Facebook campaigns to your contact network |
+| [`hyperlocal-campaigns`](hyperlocal-campaigns/) | Personalized WhatsApp and Facebook broadcasts: estimate, send or schedule, track delivery |
+| [`hyperlocal-contacts`](hyperlocal-contacts/) | Hyperlocal contacts, groups, WhatsApp and Facebook connections, localized contact details |
+| [`hyperlocal-templates`](hyperlocal-templates/) | Creative, WhatsApp and Facebook templates, overlays, localized images, products |
 | [`workflows`](workflows/) | Run, follow and build your organization's Cosmos workflows; relay approvals |
 | [`brand-kit`](brand-kit/) | Draft a brand kit from a website, images or brand book; edit kits by name |
 | [`projects`](projects/) | Projects, tasks, checklists and job assignments, by name |

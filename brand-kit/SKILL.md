@@ -2,13 +2,13 @@
 name: brand-kit
 description: >-
   Manages the organization's brand kits in Vitra Universe: the colors, fonts,
-  tone of voice, visual style and logo that Vitra's image tools apply to stay on
-  brand. Drafts a brand from its website, product images or a brand-book PDF,
-  saves it as a kit, and lists, shows, edits or deletes kits by name. Use it
-  when the user wants to set up or change their brand — "set up our brand kit
-  from acme.com", "pull our brand from this style guide", "change our primary
-  color to #0A7", "which brand kits do we have?". To make on-brand images, use
-  image-creator.
+  tone of voice, visual style and logo that Vitra's image tools apply to stay
+  on brand. Drafts a brand from its website, product images or a brand-book
+  PDF, saves it as a kit, and lists, shows, edits or deletes kits by name. Use
+  it when the user wants to set up or change their brand — "set up our brand
+  kit from acme.com", "pull our brand from this style guide", "change our
+  primary color to #0A7", "which brand kits do we have?". Not for making
+  on-brand images (image-creator) or wording rules (terminology).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
