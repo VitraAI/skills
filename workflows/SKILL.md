@@ -55,14 +55,14 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    `vitra.py upload`; languages as keys).
 3. **Run** ⏸ after confirming the workflow, inputs and likely cost with the user:
    ```bash
-   python3 scripts/vitra.py call run_flow '{"flow": "Product launch", "inputs": {"video": "…"}, "name": "Launch – Sept"}'
+   python3 scripts/vitra.py call run_flow '{"flow": "Product launch", "inputs": {"video": "…"}, "name": "Launch – Sept", "confirm": true}'
    ```
 4. **Follow**: `get_flow_run` after `check_again_in_seconds`; relay progress by step name.
 5. **Approval step** ⏸: show what waits, ask the user, then relay THEIR decision with
    `decide_flow_step` (`confirm: true`; rejecting cancels the run).
 
 **Runs**: `list_flow_runs`, `manage_flow_run` (rename, move to a work folder, `retry` a
-failed run: paid again, remove step owners), `cancel_flow_run` (confirm).
+failed run: paid again, so ask first and pass `confirm: true`; remove step owners), `cancel_flow_run` (confirm).
 **Build or change a workflow**: `design_workflow` (plain words → proposed graph; relay its
 questions), `list_workflow_steps`, `validate_workflow`, then `create_workflow`, or
 `get_workflow` + `update_workflow` (replaces the graph: confirm).

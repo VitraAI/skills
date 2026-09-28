@@ -51,14 +51,14 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 
 ## Workflow
 
-1. **The image.** A local file: `vitra.py upload <path>` and pass its `key` as `asset_key`.
+1. **The image.** A file in the Drive: pass its name as `file` (`asset_id` if names repeat). A local file: `vitra.py upload <path>`, then pass the returned `asset_id`.
    In the Drive only: `find_assets`, `get_download_url`, `vitra.py download`, then upload.
 2. **Languages and memory.** Target language keys from `list_languages`.
    `list_translation_memories` for the first target: several → ask which (by name).
 3. **Price, ask, start.** Quick mode renders every language straight away; `review: true`
    only analyses, so the user can check the text before rendering.
    ```bash
-   python3 scripts/vitra.py call translate_image '{"asset_key": "…", "target_languages": ["french_france"], "estimate_only": true}'
+   python3 scripts/vitra.py call translate_image '{"file": "summer-poster.png", "target_languages": ["french_france"], "estimate_only": true}'
    ```
    Then the same with `"confirm": true`.
 4. **Wait** per language: `get_image_translation` until `completed` (show `image_url`) or

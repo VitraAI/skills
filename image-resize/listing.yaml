@@ -37,8 +37,6 @@ mcp-toolset: image
 mcp-tools:
   - name: find_assets
     title: Find files in the Drive
-  - name: get_download_url
-    title: Get a download link
   - name: adapt_image_sizes
     title: Adapt an image to other sizes
   - name: get_adapted_sizes
