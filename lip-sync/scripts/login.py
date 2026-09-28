@@ -30,6 +30,7 @@ sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 import argparse
 import base64
 import hashlib
+import html
 import json
 import os
 import secrets
@@ -83,6 +84,14 @@ def start() -> int:
             f"Use an organization API key instead ({_common.ENV_VAR}).",
             error_code="SIGNIN_UNAVAILABLE",
         )
+
+    # The sign-in and token endpoints must belong to the Vitra server this
+    # machine is set up for: a tampered answer can't send the code elsewhere.
+    for key in ("authorization_endpoint", "token_endpoint"):
+        if not _same_site(meta.get(key), base):
+            _common.die(_common.EXIT_API_ERROR,
+                        "The server's sign-in details point somewhere else; not signing in.",
+                        error_code="SIGNIN_UNTRUSTED", retryable=False)
 
     verifier = secrets.token_urlsafe(64)
     plan = {
@@ -146,6 +155,20 @@ def start() -> int:
     })
 
 
+def _same_site(url: object, base: str) -> bool:
+    """https on the server's own host or a sibling under the same parent
+    domain (api.x.vitra.ai ↔ app.x.vitra.ai); http only for localhost."""
+    if not isinstance(url, str):
+        return False
+    u, b = urllib.parse.urlsplit(url), urllib.parse.urlsplit(base)
+    if b.hostname in ("localhost", "127.0.0.1"):
+        return u.scheme in ("http", "https") and bool(u.hostname)
+    if u.scheme != "https" or not u.hostname or not b.hostname:
+        return False
+    parent = b.hostname.split(".", 1)[1] if b.hostname.count(".") >= 2 else b.hostname
+    return u.hostname == b.hostname or u.hostname.endswith("." + parent)
+
+
 def _read_pending() -> dict:
     try:
         data = json.loads(_pending_file().read_text(encoding="utf-8"))
@@ -186,7 +209,7 @@ def serve() -> int:
             pass
 
         def _page(self, status: int, title: str, body: str) -> None:
-            page = _PAGE.format(title=title, body=body).encode()
+            page = _PAGE.format(title=html.escape(title), body=html.escape(body)).encode()
             self.send_response(status)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(page)))
@@ -325,18 +348,22 @@ def status() -> int:
 
 def logout() -> int:
     entry = _common.read_signins().get(_common.base_url())
-    if isinstance(entry, dict) and entry.get("refresh_token"):
-        # Best effort: revoke on the server so the token dies everywhere.
+    if isinstance(entry, dict):
+        # Best effort: revoke both tokens on the server so they die everywhere,
+        # not only on this machine.
         revoke = entry.get("token_endpoint", "").rsplit("/", 1)[0] + "/revoke"
-        body = urllib.parse.urlencode({"token": entry["refresh_token"],
-                                       "token_type_hint": "refresh_token",
-                                       "client_id": entry.get("client_id", "")}).encode()
-        try:
-            urllib.request.urlopen(urllib.request.Request(
-                revoke, data=body, method="POST",
-                headers={"Content-Type": "application/x-www-form-urlencoded"}), timeout=15).close()
-        except (urllib.error.URLError, OSError):
-            pass
+        for hint in ("refresh_token", "access_token"):
+            if not entry.get(hint):
+                continue
+            body = urllib.parse.urlencode({"token": entry[hint], "token_type_hint": hint,
+                                           "client_id": entry.get("client_id", "")}).encode()
+            try:
+                urllib.request.urlopen(urllib.request.Request(
+                    revoke, data=body, method="POST",
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}),
+                    timeout=15).close()
+            except (urllib.error.URLError, OSError):
+                pass
     _common.write_signin(None)
     _pending_file().unlink(missing_ok=True)
     return _out({"status": "signed_out", "next_action": None})

@@ -182,7 +182,7 @@ class LoginTest(unittest.TestCase):
         self.assertEqual(self.run_script("login.py", "--status")["status"], "api_key")
         del self.env["VITRA_UNIVERSE_API_KEY"]
         self.assertEqual(self.run_script("login.py", "--logout")["status"], "signed_out")
-        self.assertEqual(self.fake.revoked, ["r1"])
+        self.assertEqual(self.fake.revoked, ["r1", "uvo_first"])
         self.assertEqual(self.run_script("login.py", "--status")["status"], "not_signed_in")
 
 

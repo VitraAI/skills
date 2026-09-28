@@ -17,7 +17,7 @@ CHECK=0
 
 # What each skill vendors from _lib/. The dub skill keeps its own _common.py
 # (run manifest) and imports the shared one as _core (see RENAMES).
-BASE="_http.py _common.py _access.py _api.py login.py"
+BASE="_http.py _common.py _access.py _api.py login.py vitra.py"
 VIDEO="_tm.py _tv.py _jobs.py _progress.py _cards.py _cue.py list_languages.py list_tms.py list_providers.py"
 SUBTITLES="_subtitles.py inspect_subtitles.py edit_subtitles.py add_subtitle_language.py download_subtitles.py retry_subtitles.py"
 
@@ -25,7 +25,7 @@ SKILL_FILES=(
   "image-creator|${BASE}"
   "image-resize|${BASE} _drive.py _folders.py"
   "image-translation|${BASE} _tm.py _drive.py _folders.py list_tms.py list_providers.py"
-  "video-dubbing|_http.py _access.py _api.py login.py _drive.py _folders.py ${VIDEO} download_export.py edit_subtitles.py job_tools.py"
+  "video-dubbing|_http.py _access.py _api.py login.py vitra.py _drive.py _folders.py ${VIDEO} download_export.py edit_subtitles.py job_tools.py"
   "video-subtitles|${BASE} _folders.py ${VIDEO} ${SUBTITLES} start_subtitles.py burn_subtitles.py download_export.py job_tools.py"
   "subtitle-translation|${BASE} ${VIDEO} ${SUBTITLES} translate_subtitles.py"
   "document-translation|${BASE} _tm.py _state.py _aiqe.py _drive.py _folders.py list_tms.py list_providers.py"
