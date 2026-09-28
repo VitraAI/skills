@@ -49,7 +49,8 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 ## Workflow
 
 1. **Find**: `find_contacts` (name, code, place, language or group), `get_contact` for one
-   in full, `list_contact_places` for the valid states, zones and areas.
+   in full, `list_contact_places` for the valid states, zones and areas (all three unless
+   you pass `kind`; `states` narrows areas to those states).
    ```bash
    python3 scripts/vitra.py call find_contacts '{"search": "Sharma Stores"}'
    ```
@@ -62,7 +63,8 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    `add_contacts_to_group`, `remove_contacts_from_group`; `delete_contact_group` (confirm;
    its contacts stay).
 5. **Localize** names and addresses (paid): `estimate_contact_localization` for the
-   `scope`, tell the user the credits, then `localize_contacts` with `confirm: true`.
+   `scope` returns the fields and the credits (and whether the balance covers them); tell
+   the user, then `localize_contacts` with `confirm: true`.
    `preview_contact_localization` shows one contact's result; `set_contact_localization`
    saves values the user wrote.
 

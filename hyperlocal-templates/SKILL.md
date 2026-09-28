@@ -58,14 +58,18 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    `update_creative_template`, `delete_creative_template` (confirm).
 4. **Languages**: `list_template_localizations`, `create_template_localization`,
    `update_template_localization`, `delete_template_localization` (confirm). Translate the
-   template's image (paid: ask, then `confirm: true`):
+   template's image: price it first with `estimate_only: true` (only a template's first
+   image translation is charged; later languages reuse its job and cost nothing), tell the
+   user, then on their yes:
    ```bash
    python3 scripts/vitra.py call translate_template_image '{"template": "Diwali offer", "language": "tamil_india", "confirm": true}'
    ```
    then `get_image_translation` until done and `save_image_as_template` to use it.
 5. **Overlays** (the per-contact text and fields): `get_template_overlays`,
-   `edit_template_overlay`, `copy_template_overlay` to another language (overwrites it:
-   confirm), `preview_overlay_for_contact` to see one contact's values.
+   `edit_template_overlay` (a language with no overlay yet is created from its `add_text`
+   elements), `copy_template_overlay` from another language with `from_language`
+   (overwrites the target: confirm; copying the organization's default only works if one
+   is set up), `preview_overlay_for_contact` to see one contact's values.
 6. **WhatsApp templates**: `get_whatsapp_template`, `create_whatsapp_template`,
    `update_whatsapp_template`, `delete_whatsapp_template` (confirm). ⏸ Submitting to Meta
    only on an explicit yes, in the opt-in toolset:
