@@ -47,14 +47,13 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 
 ## Workflow
 
-1. **The image.** A local file: `vitra.py upload <path>` and pass its `key` as
-   `asset_key`. A file already in the Drive: `find_assets` by name, `get_download_url`,
-   `vitra.py download` it, then upload it the same way.
+1. **The image.** A file in the Drive (`find_assets` if unsure of the name): pass its name as `file` (`asset_id` if names
+   repeat). A local file: `vitra.py upload <path>`, then pass the returned `asset_id`.
 2. **Sizes.** Each is `{"width", "height", "label"}` (e.g. Story 1080x1920). Tier `PRO`
    (default: plans each size for approval) or `FLASH` (faster, cheaper): ask if unclear.
 3. **Price, ask, start.**
    ```bash
-   python3 scripts/vitra.py call adapt_image_sizes '{"asset_key": "…", "sizes": [{"width": 1080, "height": 1920, "label": "Story"}], "estimate_only": true}'
+   python3 scripts/vitra.py call adapt_image_sizes '{"file": "summer-banner.png", "sizes": [{"width": 1080, "height": 1920, "label": "Story"}], "estimate_only": true}'
    ```
    Then the same call with `"confirm": true`.
 4. **Wait**: `get_adapted_sizes` until every size is done or failed. Partial success is
