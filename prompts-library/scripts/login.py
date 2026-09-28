@@ -35,6 +35,7 @@ import json
 import os
 import secrets
 import subprocess
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -201,6 +202,7 @@ def serve() -> int:
                         "message": "The server asked for a sign-in address that isn't this machine."})
         return 1
     result: dict = {}
+    finish_lock = threading.Lock()
 
     class Handler(BaseHTTPRequestHandler):
         timeout = 5  # an idle connection (a browser preconnect) can't stall the helper
@@ -219,22 +221,29 @@ def serve() -> int:
         def do_GET(self):  # noqa: N802
             parts = urllib.parse.urlsplit(self.path)
             q = dict(urllib.parse.parse_qsl(parts.query))
-            if parts.path != redirect.path or q.get("state") != plan["state"] or result:
+            if parts.path != redirect.path or q.get("state") != plan["state"]:
                 # Not our sign-in's reply (another tab, a local port scan):
                 # ignore it and keep waiting for the real one.
                 self._page(400, "Not a Vitra sign-in", "This link isn't part of a sign-in in progress.")
                 return
-            if _read_pending().get("pid") != os.getpid():
-                result.update(status="superseded")
+            # Browsers may send the same callback twice at once. The code works
+            # only once, so the first request exchanges it and any other waits
+            # and shows that same outcome, never a false "invalid code".
+            with finish_lock:
+                if not result:
+                    if _read_pending().get("pid") != os.getpid():
+                        result.update(status="superseded")
+                    elif q.get("error"):
+                        result.update(status="failed",
+                                      message=q.get("error_description") or "Sign-in was cancelled.")
+                    else:
+                        result.update(_exchange(plan, q.get("code", ""), self.server.redirect_uri))
+                    if result.get("status") != "superseded":
+                        _write_pending(result)  # before the reply, so --status sees it at once
+            if result.get("status") == "superseded":
                 self._page(200, "Sign-in replaced",
                            "A newer sign-in was started on this machine; finish that one instead.")
                 return
-            if q.get("error"):
-                result.update(status="failed",
-                              message=q.get("error_description") or "Sign-in was cancelled.")
-            else:
-                result.update(_exchange(plan, q.get("code", ""), self.server.redirect_uri))
-            _write_pending(result)  # before the reply, so --status sees it at once
             ok = result.get("status") == "signed_in"
             self._page(200, "You're signed in" if ok else "Sign-in didn't finish",
                        "Go back to your agent; it can use Vitra now. You can close this tab."
