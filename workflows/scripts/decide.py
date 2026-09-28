@@ -10,7 +10,7 @@ Required: --confirm (the user decided this, in this conversation).
 
 Prints what run_flow.py prints, after the decision.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

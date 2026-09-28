@@ -15,7 +15,7 @@ returned instead (pass --again to make a fresh one).
 Prints JSON: { "status": "completed" | "partial" | "failed",
                "languages": [{"target_language", "image_url", "reused"?} | {"target_language", "error"}] }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

@@ -19,7 +19,7 @@ Prints JSON:
 Exit 0 either way — "there are errors" is a finding, not a failure. Read
 `status` to decide, not the exit code.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

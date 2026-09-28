@@ -18,7 +18,7 @@ Prints JSON:
   { "status": "completed",
     "outputs": [ { "label": "...", "dimension": "1080x1920", "image_url": "..." } ] }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

@@ -17,7 +17,7 @@ Routes: /v1/task, /v1/task-template/project/{id}, /v1/task-member/{add,remove}
 Prints JSON: { "status", "task" | "tasks", … }. Tasks, statuses and people are
 named; ids never leave this script.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

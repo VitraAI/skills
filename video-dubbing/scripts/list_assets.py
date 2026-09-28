@@ -15,7 +15,7 @@ Prints JSON:
   { "status": "ok", "assets": [{ upload_id, name, sha256, media_type, size_bytes,
       status, dubs: [{ job_id, status, source_language, target_languages }] }] }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

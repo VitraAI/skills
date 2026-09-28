@@ -9,7 +9,7 @@ target language can check the meaning survived.
 Prints JSON: { "status": "done", "lines": N, "items": [{"line", "source",
                "translation", "back"}], "more"? }
 
-Spends credits once per translation. Required env: VITRA_UNIVERSE_API_KEY.
+Spends credits once per translation. Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY.
 """
 
 from __future__ import annotations

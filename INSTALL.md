@@ -46,9 +46,10 @@ git clone --depth 1 https://github.com/VitraAI/skills.git
 cp -R skills/image-creator ~/.claude/skills/
 ```
 
-## Your API key
+## Signing in
 
-Every method needs `VITRA_UNIVERSE_API_KEY`; see [README](README.md#set-up-your-key).
+The first skill you use asks to sign you in through the browser; on a machine
+without one, set `VITRA_UNIVERSE_API_KEY`. See [README](README.md#sign-in).
 
 ## Updating
 

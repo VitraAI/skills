@@ -9,7 +9,7 @@ Edit it here only, then run the sync.
 Prints JSON: { "voices": [{"name", "provider", "voice_id", "gender",
                "cloned", "preview_url"}] } — offer a few, with their previews.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

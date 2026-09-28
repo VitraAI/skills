@@ -10,7 +10,7 @@ real people: only after the user saw the reach and cost and said yes.
 Prints JSON: { "status": "sending" | "scheduled" | "unscheduled" | "paused" |
                "resumed" | "stopped", "campaign" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

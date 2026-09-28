@@ -36,7 +36,7 @@ After split, merge, add or delete the lines are renumbered (`renumbered`).
 Prints JSON: { "status": "done", "operation", "lines": [N...], "renumbered",
                "revision_after", "follow_up", "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

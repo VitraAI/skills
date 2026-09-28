@@ -12,7 +12,7 @@ Prints JSON: { "status": "translated", "memory", "translations":
                {"<language>": [{"source", "text", "match", "status"}]} }
 `match` says where each came from: exact (the memory), fuzzy, mt (machine).
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

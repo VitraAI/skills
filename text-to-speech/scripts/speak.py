@@ -19,7 +19,7 @@ ones are kept, only failed ones are made again.
 Prints JSON: { "status": "done" | "partial" | "failed", "voice",
                "files": [{"clip", "path", "seconds"}], "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

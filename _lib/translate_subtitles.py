@@ -18,7 +18,7 @@ Prints JSON:
 
 Stops with a question (`error.ask`): TARGET_LANGUAGE_NEEDED.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

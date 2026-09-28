@@ -10,7 +10,7 @@ and words with other likely spellings list them under `alternatives`.
 
 Prints JSON: { "text", "alternatives": {"<word>": [..]} }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

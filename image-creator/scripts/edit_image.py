@@ -9,7 +9,7 @@ Synchronous, like generate: the API re-renders and returns the new image.
 Prints JSON: { "status": "completed", "image_url": "...", "creation_id": "...",
                "edited_from": "..." }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

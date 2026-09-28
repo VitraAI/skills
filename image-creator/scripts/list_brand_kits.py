@@ -5,7 +5,7 @@ Prints each kit by name with its colors, fonts and tone, and a `prompt:` line
 ready to append to generate_image.py --prompt so the render follows the kit.
 No ids: people pick a kit by its name.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

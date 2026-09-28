@@ -26,7 +26,7 @@ still reviewable per card). `--no-emotion-detection` turns it off.
 The caller reviews the speakers, picks a voice per speaker per target
 language, then runs resume_dub.py with --job-id and --voice-map.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

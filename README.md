@@ -70,9 +70,23 @@ Settings → Capabilities → Skills, or unzip it into `~/.claude/skills/`.
 
 More options and updating: [INSTALL.md](INSTALL.md).
 
-## Set up your key
+## Sign in
 
-The skills call Vitra with an organization API key.
+The first time a skill needs Vitra, the agent asks to sign you in. It runs
+`scripts/login.py`, which opens Vitra in your browser: sign in, pick the
+organization, done. That machine then acts in that organization with your own
+role, and stays signed in while you keep using it (30 days idle ends it). It is
+the same sign-in the Vitra MCP connector uses.
+
+```bash
+python3 <skill>/scripts/login.py            # sign in
+python3 <skill>/scripts/login.py --status   # who, in which organization
+python3 <skill>/scripts/login.py --logout   # sign this machine out
+```
+
+### No browser? Use an API key
+
+On a server, container or CI runner, use an organization API key instead:
 
 1. An organization owner or admin creates a key in Vitra under Settings → API
    keys. It starts with `uvk_`, works in that one organization, and can do
@@ -85,7 +99,7 @@ The skills call Vitra with an organization API key.
    ```
 
    Set it where the agent runs, not only in your terminal. Each skill also reads
-   a `.env` file in its own folder (copy `.env.sample`).
+   a `.env` file in its own folder. When a key is set it is used over a sign-in.
 
 ## How this repo is published
 

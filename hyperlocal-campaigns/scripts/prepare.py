@@ -9,7 +9,7 @@ after the user says yes).
 Prints JSON: { "status": "ready_to_send" | "generating", "campaign": "<id>",
                "title", "contacts", "creatives": {"made", "failed"}, "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

@@ -15,7 +15,7 @@ Records live in ~/.vitra/video-dubbing/runs/ (VITRA_DUB_STATE_DIR to
 override), readable only by this user. No API key and no signed links are
 ever written there.
 
-Required env for `validate`: VITRA_UNIVERSE_API_KEY. Stdlib only.
+`validate` needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

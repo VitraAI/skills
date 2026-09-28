@@ -11,7 +11,7 @@ Routes: GET .../document/logs, POST .../logs/{t}/retry, PUT .../rename,
         PATCH .../logs/{t}/folder, POST .../logs/{t}/save-to-assets
 
 Prints JSON. `translation` is for the next command only; show names.
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

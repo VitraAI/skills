@@ -17,7 +17,7 @@ Prints JSON:
 
 `prompt_fragment` is ready to append to a generate_image.py --prompt.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

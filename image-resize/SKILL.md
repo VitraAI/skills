@@ -11,11 +11,11 @@ description: >-
   or generating a new image (image-creator).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API only (no
-  direct storage uploads). Needs VITRA_UNIVERSE_API_KEY (a uvk_ key for one
-  Vitra organization).
+  direct storage uploads). Needs a Vitra sign-in (scripts/login.py opens the
+  browser) or VITRA_UNIVERSE_API_KEY (a uvk_ key), for one Vitra organization.
 metadata:
   skill-author: Vitra.ai
-  version: "2.1"
+  version: "1.0"
   display-name: Adaptive Resize
   category: Design
   tags: Image
@@ -104,7 +104,7 @@ Explain `message` plainly; `retryable: true` → run the same command again.
 
 | Exit | Meaning | Tell the user |
 |---|---|---|
-| 2 | API key not set | Show the setup lines the script printed |
+| 2 | Not signed in | Ask to sign in; on yes run `scripts/login.py`, then `login.py --status` once they finish |
 | 3 | Key rejected or not allowed | Their Vitra admin must allow uploads and adaptive resize for their role |
 | 4 | Bad `--size`, API error, or every size failed | `--size` is `WIDTHxHEIGHT`; otherwise the message |
 | 5 | Timed out | Still rendering: run again, or raise `--max-wait` for many sizes |

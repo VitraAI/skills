@@ -14,7 +14,7 @@ Prints JSON: { "status": "completed" | "waiting_for_you" | "failed" |
                "cancelled", "run": "<id>", "steps": [{"step", "name",
                "status", …}], "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

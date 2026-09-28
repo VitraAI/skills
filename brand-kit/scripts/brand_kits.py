@@ -19,7 +19,7 @@ Routes: GET/POST /v1/brand-kit, POST /v1/brand-kit/extract,
 Prints JSON: { "status", "kit" | "kits" | "draft", "next_action"? }. Kits are
 named, never numbered by id. `extract` spends credits.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

@@ -8,7 +8,7 @@ writing rules) — what translations through its memories follow. With
 Prints JSON: { "glossaries": [names], "style_guides": [names] }
           or { "style_guide": {name, …its rules} }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

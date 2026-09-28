@@ -9,8 +9,9 @@ description: >-
   "start the weekly localization flow", "approve the review step", "where is
   my workflow run?". Not for one-off jobs a specific skill does directly.
 compatibility: >-
-  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
-  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
+  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs a
+  Vitra sign-in (scripts/login.py opens the browser) or VITRA_UNIVERSE_API_KEY
+  (a uvk_ key), for one Vitra organization.
 metadata:
   skill-author: Vitra.ai
   version: "1.0"
@@ -91,7 +92,7 @@ name `list_flows.py` printed.
 
 | Exit | Meaning | Tell the user |
 |---|---|---|
-| 2 | API key not set | Show the setup lines the script printed |
+| 2 | Not signed in | Ask to sign in; on yes run `scripts/login.py`, then `login.py --status` once they finish |
 | 3 | Key rejected or not allowed | Their Vitra admin must allow Cosmos for their role |
 | 4 | API error, a question, or the run failed | Ask the question, or explain the message |
 | 5 | Still running | It continues on its own; check later with run_status.py |

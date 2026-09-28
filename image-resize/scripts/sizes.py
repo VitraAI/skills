@@ -20,7 +20,7 @@ regenerate-image, regenerate-plan, review, fix-issues, versions, versions/{id}/a
 save-to-drive, variants/export, assets/{asset}/rename, assets/{asset}/folder, assets.
 
 Prints JSON; sizes by label and dimension, issues by number; no ids.
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

@@ -26,7 +26,7 @@ yes.
 gives the next page): what patch_cards and card_ops take. `--subtitles <lang>`
 lists its subtitle lines the same way, for edit_subtitles.py.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

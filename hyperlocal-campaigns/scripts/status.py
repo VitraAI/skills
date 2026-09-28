@@ -5,7 +5,7 @@ Prints JSON: { "title", "status", "scheduled_for", "whatsapp": {"total",
                "sent", "delivered", "read", "failed", "pending"},
                "facebook": {"total", "posted", "failed", "pending"} }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

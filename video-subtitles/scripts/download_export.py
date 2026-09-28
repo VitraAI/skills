@@ -25,7 +25,7 @@ Prints JSON:
     "sha256": "...", "export_id": "...", "media_check": "full" | "basic",
     "media": { "duration_seconds", "video_codec", "audio_codec", ... } }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

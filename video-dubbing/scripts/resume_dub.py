@@ -27,7 +27,7 @@ If the run fails, the JSON says so and names `retry_dub.py` — a failed run can
 be resumed from the step that failed, without re-running or re-paying for the
 steps that already succeeded.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Required arg: --job-id.
 Stdlib only.
 """

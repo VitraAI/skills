@@ -17,7 +17,7 @@ Prints JSON:
 next page): what edit_subtitles needs. `suggestions` are the next steps worth
 offering, from the data.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations
