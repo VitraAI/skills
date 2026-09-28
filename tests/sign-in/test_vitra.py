@@ -95,5 +95,23 @@ class VitraTest(unittest.TestCase):
         self.assertEqual(self.run_cli("call", "x", "[1]")["error"]["code"], "BAD_ARGUMENTS")
 
 
+    def test_download_into_a_folder_that_does_not_exist_yet(self) -> None:
+        import http.server, ssl  # noqa: E401
+        out = self.run_cli("download", "http://example.com/a.png", "--to", "x/")
+        self.assertIn("https", out["error"]["message"])
+        self.assertNotIn("from Vitra", out["error"]["message"])  # not a promise it can't keep
+        sys.path.insert(0, str(SCRIPT.parent))
+        import vitra  # noqa: E402
+        link = "https://bucket.s3.amazonaws.com/org/7f3a/abc?response-content-disposition=" \
+               "attachment%3B%20filename%3D%22Hindi%20dub.mp4%22&X-Amz-Signature=x"
+        self.assertEqual(vitra._link_file_name(__import__("urllib.parse").parse.urlsplit(link)),
+                         "Hindi dub.mp4")
+        self.assertEqual(vitra._link_file_name(__import__("urllib.parse").parse.urlsplit(
+            "https://h/path/poster-fr.png?sig=1")), "poster-fr.png")
+        self.assertEqual(vitra._link_file_name(__import__("urllib.parse").parse.urlsplit(
+            "https://h/x?response-content-disposition=attachment%3Bfilename%3D..%2F..%2Fetc%2Fpasswd")),
+            "passwd")
+
+
 if __name__ == "__main__":
     unittest.main()

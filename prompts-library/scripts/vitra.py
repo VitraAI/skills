@@ -29,6 +29,7 @@ import argparse
 import json
 import mimetypes
 import os
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -206,15 +207,30 @@ def cmd_upload(a: argparse.Namespace) -> int:
                                 "asset_key) to the tool that needs the file."})
 
 
+def _link_file_name(url: urllib.parse.SplitResult) -> str:
+    """The file name a download link carries: the one a presigned link asks
+    the browser to save as, else the last part of its path. Never a path."""
+    query = urllib.parse.parse_qs(url.query)
+    for disposition in query.get("response-content-disposition", []):
+        m = re.search(r"filename\*?=(?:UTF-8'')?\"?([^\";]+)", disposition)
+        if m:
+            name = Path(urllib.parse.unquote(m.group(1))).name
+            if name:
+                return name
+    return Path(urllib.parse.unquote(url.path)).name or "download"
+
+
 def cmd_download(a: argparse.Namespace) -> int:
     url = urllib.parse.urlsplit(a.url)
-    if url.scheme != "https":
-        _common.die(_common.EXIT_DOWNLOAD, "Only https links from Vitra can be downloaded.",
+    if url.scheme != "https" or not url.hostname:
+        _common.die(_common.EXIT_DOWNLOAD,
+                    "Only https links can be downloaded; Vitra's download links always are.",
                     retryable=False)
     dest = Path(a.to).expanduser()
-    if dest.exists() and dest.is_dir():
-        name = Path(urllib.parse.unquote(url.path)).name or "download"
-        dest = dest / name
+    # `--to downloads/` names a folder even before it exists.
+    if a.to.endswith(("/", os.sep)) or dest.is_dir():
+        dest.mkdir(parents=True, exist_ok=True)
+        dest = dest / _link_file_name(url)
     if dest.exists() and not a.overwrite:
         _common.die(_common.EXIT_DOWNLOAD, f"{dest} already exists; pass --overwrite to replace it.",
                     retryable=False)
