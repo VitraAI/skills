@@ -51,8 +51,10 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 **New kit**:
 1. Source ⏸: a public website (`source: url`), up to 6 brand `images`, or a brand-book
    `pdf`. Images and the PDF go inline as base64: `describe draft_brand_kit`.
-2. Draft (tell the user it spends credits; get the go-ahead):
+2. Draft: a flat price per draft. Price it with `estimate_only: true`, tell the user,
+   then call again with `confirm: true` on their go-ahead:
    ```bash
+   python3 scripts/vitra.py call draft_brand_kit '{"source": "url", "url": "https://acme.com", "estimate_only": true}'
    python3 scripts/vitra.py call draft_brand_kit '{"source": "url", "url": "https://acme.com", "confirm": true}'
    ```
 3. Show the draft: colours, fonts, tone, styles. Nothing is saved yet.

@@ -52,8 +52,12 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    `find_assets`. Language key from `list_languages`.
 3. **Model**: `list_lip_sync_models` (and whether the organization can use each). Ask if
    there is a real choice.
-4. **Start** (tell the user the cost; get the go-ahead):
+4. **Start**: charged per second of the new audio, measured when it starts. Price it with
+   `estimate_only: true`: it gives the model's per-minute price, or the price for the
+   audio's length when you pass it (audio_seconds in the JSON). Tell the user, then
+   call again with `confirm: true` on their go-ahead.
    ```bash
+   python3 scripts/vitra.py call lip_sync '{"name": "Launch video ES", "language": "spanish_spain", "video_asset_id": "…", "audio_asset_id": "…", "model": "…", "audio_seconds": 42, "consent": true, "estimate_only": true}'
    python3 scripts/vitra.py call lip_sync '{"name": "Launch video ES", "language": "spanish_spain", "video_asset_id": "…", "audio_asset_id": "…", "model": "…", "consent": true, "confirm": true}'
    ```
 5. **Wait**: `get_lip_sync` until `completed`; give the video link, or `vitra.py download`.

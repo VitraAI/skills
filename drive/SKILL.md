@@ -52,7 +52,8 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 1. **Find**: `find_assets` by name. Look inside a folder: `browse_drive` (`view` is
    folder, favourites or trash). Storage used: `get_drive_storage`.
 2. **Upload** a local file: `vitra.py upload <path>` (it wraps `create_upload_url` +
-   `register_upload`) and keep the returned asset for the next skill. The user uploads it
+   `register_upload`; called directly, pass the file's `size_bytes` too) and keep the
+   returned asset for the next skill. The user uploads it
    themselves: `get_upload_link`, then `find_assets` once they say it's there.
 3. **Download**: `get_download_url` with the file name, then give the link or save it:
    ```bash
