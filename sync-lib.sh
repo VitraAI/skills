@@ -28,15 +28,19 @@ SKILL_FILES=(
   "video-dubbing|_http.py _access.py ${VIDEO} download_export.py edit_subtitles.py"
   "video-subtitles|${BASE} ${VIDEO} ${SUBTITLES} start_subtitles.py burn_subtitles.py download_export.py"
   "subtitle-translation|${BASE} ${VIDEO} ${SUBTITLES} translate_subtitles.py"
-  "document-translation|${BASE} _tm.py _state.py list_tms.py list_providers.py"
+  "document-translation|${BASE} _tm.py _state.py _aiqe.py list_tms.py list_providers.py"
   "text-to-speech|${BASE} _state.py list_voices.py list_languages.py"
   "voice-cloning|${BASE} _state.py list_languages.py"
   "lip-sync|${BASE} _state.py list_languages.py"
   "translation-memory|${BASE} _tm.py list_tms.py list_providers.py"
   "content-compliance|${BASE}"
-  "translation-quality|${BASE} _tm.py list_tms.py"
+  "translation-quality|${BASE} _tm.py _aiqe.py list_tms.py"
   "hyperlocal-campaigns|${BASE} _state.py"
   "workflows|${BASE} _state.py"
+  "dita-translation|${BASE} _tm.py _state.py _aiqe.py list_tms.py"
+  "brand-kit|${BASE}"
+  "projects|${BASE}"
+  "prompts-library|${BASE}"
 )
 RENAMES=("_common.py video-dubbing/scripts/_core.py")
 
