@@ -16,7 +16,7 @@ metadata:
   skill-author: Vitra.ai
   version: "1.0"
   display-name: Brand Kit
-  category: Creative
+  category: Design
   tags: Brand, Design
   source: vitra
   added: "2026-09-28"
