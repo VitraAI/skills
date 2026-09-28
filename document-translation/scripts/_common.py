@@ -298,7 +298,8 @@ def _missing() -> None:
     had = _SIGNIN_ENDED or credential() == "signin"
     die(
         EXIT_AUTH_MISSING,
-        ("Your Vitra sign-in has ended.\n" if had else "Not signed in to Vitra.\n")
+        (f"Your Vitra sign-in for {base_url()} has ended.\n" if had
+         else f"Not signed in to Vitra at {base_url()}.\n")
         + "\n"
         "Sign in (opens the browser, then pick an organization):\n"
         "  python3 scripts/login.py\n"
@@ -310,7 +311,9 @@ def _missing() -> None:
         f"set {ENV_VAR}=uvk_... where the agent runs, or in a .env beside SKILL.md.",
         ask=("You need to sign in to Vitra. Shall I open the sign-in page? "
              f"(New to Vitra? Sign up at {app}/auth/sign-up first.)"),
-        next_action="Run scripts/login.py once the user agrees, then run this command again.",
+        next_action=("Run scripts/login.py once the user agrees, then run this command again. "
+                     f"This machine talks to {base_url()} (VITRA_UNIVERSE_BASE_URL changes it)."),
+        server=base_url(),
         sign_in=f"{app}/auth/sign-in",
         sign_up=f"{app}/auth/sign-up",
     )
