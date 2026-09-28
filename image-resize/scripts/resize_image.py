@@ -31,7 +31,6 @@ sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 import argparse
 import uuid
 import json
-import mimetypes
 import os
 import re
 import tempfile
@@ -40,6 +39,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _api  # noqa: E402
 import _common  # noqa: E402
 import _http  # noqa: E402
 
@@ -155,18 +155,7 @@ def unwrap(payload: object) -> dict:
 
 
 def call(base: str, headers: dict, path: str, body: dict, label: str) -> dict:
-    try:
-        status, payload = _http.post_json(base + path, headers, body)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error on {label}: {e}")
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status))
-    if status not in (200, 201, 202):
-        die(
-            _common.EXIT_API_ERROR,
-            f"{label} failed ({status}): {_common.api_message(payload)}",
-        )
-    return unwrap(payload)
+    return unwrap(_api.call("POST", path, body, what=label))
 
 
 def upload(base: str, headers: dict, path: Path) -> str:
@@ -289,7 +278,7 @@ def main() -> int:
             },
             "create variants",
         )
-        sys.stderr.write(f"[resize] asset={asset_id} sizes={len(sizes)}\n")
+        sys.stderr.write(f"[resize] {len(sizes)} size(s) queued\n")
 
         deadline = time.monotonic() + args.max_wait
         last = None

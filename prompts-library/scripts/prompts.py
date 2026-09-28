@@ -33,8 +33,8 @@ from pathlib import Path
 from urllib.parse import quote, urlencode
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _api  # noqa: E402
 import _common  # noqa: E402
-import _http  # noqa: E402
 
 PROMPTS = "/v1/prompts-library"
 CATEGORIES = "/v1/prompt-categories"
@@ -43,18 +43,7 @@ die = _common.die
 
 
 def call(method: str, path: str, body: dict | None = None, what: str = "") -> object:
-    base, headers = _common.base_url(), _common.headers()
-    data = json.dumps(body).encode() if body is not None else None
-    try:
-        status, payload = _http.request_json(method, base + path, headers, data,
-                                             "application/json" if data else None)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}", retryable=True)
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status not in (200, 201):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
-    return payload
+    return _api.call(method, path, body, what=what)
 
 
 def page(payload: object) -> list[dict]:

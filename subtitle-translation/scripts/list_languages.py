@@ -19,7 +19,6 @@ import sys
 sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 
 import argparse
-import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))

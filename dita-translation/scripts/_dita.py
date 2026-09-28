@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from urllib.parse import quote, unquote, urlencode, urlparse
 
+import _api
 import _common
 import _http
 
@@ -21,25 +22,8 @@ die = _common.die
 
 
 def call(method: str, path: str, body: dict | None = None, what: str = "", timeout: float = 300) -> dict:
-    base, headers = _common.base_url(), _common.headers()
-    try:
-        if method == "GET":
-            status, payload = _http.get_json(base + DITA + path, headers=headers)
-        elif method == "PUT":
-            status, payload = _http.put_json(base + DITA + path, headers, body or {})
-        else:
-            status, payload = _http.post_json(base + DITA + path, headers, body or {}, timeout=timeout)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}", retryable=True)
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status == 402:
-        die(_common.EXIT_API_ERROR, f"not enough credits: {_common.api_message(payload)}",
-            error_code="INSUFFICIENT_CREDITS")
-    if status == 404:
-        die(_common.EXIT_API_ERROR, "that DITA map translation was not found in this organization.")
-    if status not in (200, 201, 202):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
+    payload = _api.call(method, DITA + path, None if method == "GET" else body or {}, what=what,
+                        timeout=timeout, not_found="that DITA map translation was not found in this organization.")
     return payload if isinstance(payload, dict) else {}
 
 

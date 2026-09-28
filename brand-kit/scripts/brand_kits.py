@@ -36,8 +36,8 @@ from pathlib import Path
 from urllib.parse import quote, urlencode
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _api  # noqa: E402
 import _common  # noqa: E402
-import _http  # noqa: E402
 
 KITS = "/v1/brand-kit"
 LOGO_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml"}
@@ -49,21 +49,7 @@ die = _common.die
 
 
 def call(method: str, path: str, body: dict | None = None, what: str = "", timeout: float = 60) -> object:
-    base, headers = _common.base_url(), _common.headers()
-    try:
-        data = json.dumps(body).encode() if body is not None else None
-        status, payload = _http.request_json(method, base + KITS + path, headers, data,
-                                             "application/json" if data else None, timeout=timeout)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}", retryable=True)
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status == 402:
-        die(_common.EXIT_API_ERROR, f"not enough credits: {_common.api_message(payload)}",
-            error_code="INSUFFICIENT_CREDITS")
-    if status not in (200, 201):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
-    return payload
+    return _api.call(method, KITS + path, body, what=what, timeout=timeout)
 
 
 def present(kit: dict, full: bool = False) -> dict:

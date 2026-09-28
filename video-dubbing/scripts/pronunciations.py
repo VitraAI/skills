@@ -34,29 +34,15 @@ from urllib.parse import quote, urlencode
 
 sys.path.insert(0, str(Path(__file__).parent))
 import _cards  # noqa: E402
+import _api  # noqa: E402
 import _common  # noqa: E402
-import _http  # noqa: E402
 
 PD = "/v1/pronunciation-dictionary"
 die = _common.die
 
 
 def call(method: str, path: str, body: dict | None = None, what: str = "") -> object:
-    base, headers = _common.base_url(), _common.headers()
-    try:
-        if method == "GET":
-            status, payload = _http.get_json(base + PD + path, headers=headers)
-        elif method == "DELETE":
-            status, payload = _http.request_json("DELETE", base + PD + path, headers)
-        else:
-            status, payload = _http.post_json(base + PD + path, headers, body or {})
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}", retryable=True)
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status not in (200, 201, 204):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
-    return payload
+    return _api.call(method, PD + path, body if method == "POST" else None, what=what)
 
 
 def rules(language: str | None, **scope) -> list[dict]:

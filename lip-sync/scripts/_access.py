@@ -103,3 +103,19 @@ def check(base: str, headers: dict, steps: list[dict]) -> dict:
     else:
         overall = "blocked"
     return {"status": overall, "role": role, "can": can, "cannot": cannot}
+
+
+def report(base: str, headers: dict, steps: list[dict]) -> int:
+    """What every skill's check_access.py does: check, explain, print one line.
+
+    `next_action` is `collect_inputs` unless a required step is blocked.
+    """
+    import json
+    import sys
+
+    result = check(base, headers, steps)
+    for c in result["cannot"]:
+        sys.stderr.write(f"[access] cannot: {c['step']} ({c['reason']})\n")
+    result["next_action"] = None if result["status"] == "blocked" else "collect_inputs"
+    print(json.dumps(result))
+    return 0

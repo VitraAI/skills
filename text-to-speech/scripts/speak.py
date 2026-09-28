@@ -34,6 +34,7 @@ from pathlib import Path
 from urllib.parse import quote, urlparse
 
 sys.path.insert(0, str(Path(__file__).parent))
+import _api  # noqa: E402
 import _common  # noqa: E402
 import _http  # noqa: E402
 import _state  # noqa: E402
@@ -60,19 +61,7 @@ def passages(text: str) -> list[str]:
 
 
 def call(method: str, base: str, headers: dict, path: str, body: dict, what: str) -> object:
-    try:
-        fn = _http.put_json if method == "PUT" else _http.post_json
-        status, payload = fn(base + path, headers, body)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}")
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status == 402:
-        die(_common.EXIT_API_ERROR, f"not enough credits: {_common.api_message(payload)}",
-            error_code="INSUFFICIENT_CREDITS")
-    if status not in (200, 201):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
-    return payload
+    return _api.call(method, path, body, what=what)
 
 
 def clip_state(base: str, headers: dict, clip: str) -> dict:

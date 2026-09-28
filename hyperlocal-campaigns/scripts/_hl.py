@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from urllib.parse import quote, urlencode
+from urllib.parse import quote
 
+import _api
 import _common
-import _http
 
 HL = "/v1/galaxy/hyperlocal"
 die = _common.die
@@ -15,29 +15,8 @@ def call(method: str, path: str, body: dict | None = None, query: dict | None = 
          quiet: bool = False) -> object:
     """One API call. `quiet`: return None on any failure instead of stopping
     (for optional reads, such as a channel the organization hasn't connected)."""
-    base, headers = _common.base_url(), _common.headers()
-    url = base + HL + path + (f"?{urlencode({k: v for k, v in (query or {}).items() if v})}" if query else "")
-    try:
-        if method == "GET":
-            status, payload = _http.get_json(url, headers=headers)
-        elif method == "PUT":
-            status, payload = _http.put_json(url, headers, body or {})
-        else:
-            status, payload = _http.post_json(url, headers, body or {})
-    except _http.NetworkError as e:
-        if quiet:
-            return None
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}", retryable=True)
-    if quiet and status not in (200, 201):
-        return None
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status == 402:
-        die(_common.EXIT_API_ERROR, f"not enough credits: {_common.api_message(payload)}",
-            error_code="INSUFFICIENT_CREDITS")
-    if status not in (200, 201):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
-    return payload
+    return _api.call(method, HL + path, None if method == "GET" else body or {},
+                     query={k: v for k, v in (query or {}).items() if v}, what=what, quiet=quiet)
 
 
 def rows(payload: object, *keys: str) -> list[dict]:

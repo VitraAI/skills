@@ -9,12 +9,11 @@ printed. People are named by their name; members are found by name or email.
 
 from __future__ import annotations
 
-import json
 import re
 from urllib.parse import quote, urlencode
 
+import _api
 import _common
-import _http
 
 GROUPS = ("NOT_STARTED", "ACTIVE", "DONE", "CLOSED")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -22,25 +21,10 @@ die = _common.die
 
 
 def call(method: str, path: str, body: dict | None = None, what: str = "", quiet_404: bool = False) -> object:
-    base, headers = _common.base_url(), _common.headers()
-    data = json.dumps(body).encode() if body is not None else None
-    try:
-        status, payload = _http.request_json(method, base + path, headers, data,
-                                             "application/json" if data else None)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error ({what}): {e}", retryable=True)
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, what))
-    if status == 404 and quiet_404:
-        return None
-    if status not in (200, 201):
-        die(_common.EXIT_API_ERROR, f"could not {what} ({status}): {_common.api_message(payload)}")
-    return payload
+    return _api.call(method, path, body, what=what, missing_ok=quiet_404)
 
 
-def rows(payload: object) -> list[dict]:
-    data = payload.get("data") if isinstance(payload, dict) else payload
-    return [r for r in data or [] if isinstance(r, dict)] if isinstance(data, list) else []
+rows = _api.rows
 
 
 def ask_choice(kind: str, name: str, choices: list[str]) -> None:

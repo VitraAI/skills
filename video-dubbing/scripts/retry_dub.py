@@ -121,7 +121,7 @@ def main() -> int:
 
     start_retry(base, headers, args.job_id)
     _common.update_manifest(args.job_id, stage="retrying")
-    sys.stderr.write(f"[retry] job={args.job_id} resumed from the failed step\n")
+    sys.stderr.write("[retry] resumed from the failed step\n")
 
     deadline = time.monotonic() + args.max_wait
     delays = _http.poll_delays(first=args.poll_interval)

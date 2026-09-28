@@ -249,7 +249,7 @@ def main() -> int:
         args.job_id, voice_map=voice_map, voice_mode=voice_mode, stage="generating"
     )
     submit_validation(base, headers, args.job_id, task_id, speakers)
-    sys.stderr.write(f"[resume] job={args.job_id} approved, {len(speakers)} speaker(s)\n")
+    sys.stderr.write(f"[resume] approved, {len(speakers)} speaker(s)\n")
 
     poll_status(base, headers, args.job_id, args.poll_interval, args.max_wait)
     sys.stderr.write("[resume] run completed — ready for review\n")

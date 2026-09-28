@@ -27,7 +27,7 @@ import os
 import tempfile
 import time
 from pathlib import Path
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlparse
 
 sys.path.insert(0, str(Path(__file__).parent))
 import _common  # noqa: E402
@@ -138,87 +138,6 @@ def unwrap(payload: object) -> dict:
         return body
     inner = body.get("data")
     return inner if isinstance(inner, dict) else body
-
-
-def find_or_create_tm(
-    base: str,
-    headers: dict,
-    source_language: str,
-    target_language: str,
-    provider: str = "vitratm",
-    context: str | None = None,
-    engine: str | None = None,
-) -> str | None:
-    """Reuse the TM for this language pair, or make one.
-
-    Named deterministically from the pair, so every later image translation of
-    the same pair lands in the SAME memory — which is the whole point: wording
-    approved once gets reused instead of re-translated fresh each run.
-
-    Returns None rather than dying on failure: a missing TM degrades the result
-    slightly, but it should never sink an otherwise-fine translation.
-    """
-    name = f"image · {source_language} → {target_language}"
-
-    try:
-        status, payload = _http.get_json(
-            f"{base}{TM_PATH}?{urlencode({'search': name})}", headers=headers
-        )
-        if status == 200:
-            rows = payload if isinstance(payload, list) else (payload or {})
-            if isinstance(rows, dict):
-                rows = rows.get("rows") or rows.get("data") or rows.get("items") or []
-            for row in rows:
-                if isinstance(row, dict) and row.get("name") == name and row.get("id"):
-                    sys.stderr.write(f"[tm] reusing “{name}”\n")
-                    return row["id"]
-    except _http.NetworkError:
-        pass  # fall through to create
-
-    body = {
-        "name": name,
-        "sourceLanguage": source_language,
-        "targetLanguages": [target_language],
-        "tmMode": "create",
-        "provider": provider,
-    }
-    if provider == "vitratm":
-        # The server requires a VitraTM memory's context (who it is for): it is
-        # sent to the model with every translation made through the memory.
-        body["context"] = context or ""
-        if engine:
-            body["engine"] = engine
-    try:
-        status, payload = _http.post_json(base + TM_PATH, headers, body)
-    except _http.NetworkError as e:
-        sys.stderr.write(f"[tm] could not create ({e}); continuing without one\n")
-        return None
-
-    if status == 409:
-        # Raced with another run — the TM now exists; look it up again.
-        try:
-            _, again = _http.get_json(
-                f"{base}{TM_PATH}?{urlencode({'search': name})}", headers=headers
-            )
-            rows = again if isinstance(again, list) else (again or {})
-            if isinstance(rows, dict):
-                rows = rows.get("rows") or rows.get("data") or []
-            for row in rows:
-                if isinstance(row, dict) and row.get("name") == name and row.get("id"):
-                    return row["id"]
-        except _http.NetworkError:
-            pass
-        return None
-
-    tm_id = (payload or {}).get("id") if isinstance(payload, dict) else None
-    if status not in (200, 201) or not tm_id:
-        sys.stderr.write(
-            f"[tm] could not create the memory ({status}: "
-            f"{_common.api_message(payload)}); continuing without one\n"
-        )
-        return None
-    sys.stderr.write(f"[tm] created “{name}”\n")
-    return tm_id
 
 
 def analyze(
@@ -398,18 +317,21 @@ def main() -> int:
     headers = _common.headers()
 
     # The caller's choice always wins. --create-tm only fills the gap, and
-    # never fails the run: find_or_create_tm returns None if it cannot.
+    # never fails the run: without a memory it translates anyway.
     tm_id = args.tm_id or (
         _tm.resolve_by_name(base, headers, args.tm_name) if args.tm_name else None
     )
     memory = args.tm_name if tm_id else None
     if not tm_id and args.create_tm:
-        tm_id = find_or_create_tm(
-            base, headers, args.source_language, args.target_language, args.tm_provider,
+        name = f"image · {args.source_language} → {args.target_language}"
+        tm_id, reason = _tm.find_or_create(
+            base, headers, name, args.source_language, [args.target_language], args.tm_provider,
             context=args.tm_context, engine=args.tm_engine,
         )
         if tm_id:
-            memory = f"image · {args.source_language} → {args.target_language}"
+            memory = name
+        else:  # a missing memory degrades the result slightly; it never sinks the run
+            sys.stderr.write(f"[tm] could not create the memory ({reason}); continuing without one\n")
 
     path, is_temp = resolve_source(args.file, args.url)
     try:
@@ -421,7 +343,7 @@ def main() -> int:
             args.target_language,
             tm_id,
         )
-        sys.stderr.write(f"[analyze] jobId={job_id}\n")
+        sys.stderr.write("[analyze] started\n")
 
         poll(
             base,
@@ -434,7 +356,7 @@ def main() -> int:
         )
 
         version_id = start_translation(base, headers, job_id, args.target_language)
-        sys.stderr.write(f"[translate] versionId={version_id}\n")
+        sys.stderr.write("[translate] started\n")
 
         row = poll(
             base,

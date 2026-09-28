@@ -19,6 +19,9 @@ Stdlib only.
 
 from __future__ import annotations
 
+import sys
+from urllib.parse import urlencode
+
 import _common
 import _http
 
@@ -208,6 +211,42 @@ def create_tm(
     if status not in (200, 201) or not tm_id:
         return None, f"{status}: {_common.api_message(payload)}"
     return str(tm_id), None
+
+
+def find_or_create(
+    base: str,
+    headers: dict,
+    name: str,
+    source_language: str,
+    target_languages: list[str],
+    provider: str = "vitratm",
+    context: str | None = None,
+    engine: str | None = None,
+) -> tuple[str | None, str | None]:
+    """The memory called exactly `name`, created if it doesn't exist yet.
+
+    Returns (id, None) or (None, reason); the caller decides whether a missing
+    memory is fatal. A create that races another run (409) finds the winner.
+    """
+    def named() -> str | None:
+        try:
+            status, payload = _http.get_json(f"{base}{TM_PATH}?{urlencode({'search': name})}", headers=headers)
+        except _http.NetworkError:
+            return None
+        hits = [t for t in rows_of(payload) if isinstance(t, dict) and t.get("name") == name and t.get("id")]
+        return str(hits[0]["id"]) if status == 200 and hits else None
+
+    found = named()
+    if found:
+        sys.stderr.write(f"[tm] reusing “{name}”\n")
+        return found, None
+    tm_id, reason = create_tm(base, headers, name, source_language, target_languages, context, engine, provider)
+    if not tm_id and reason and reason.startswith("409"):
+        tm_id = named()
+        reason = None if tm_id else reason
+    if tm_id:
+        sys.stderr.write(f"[tm] created “{name}”\n")
+    return tm_id, reason
 
 
 def resolve(base: str, headers: dict, name: str) -> dict:

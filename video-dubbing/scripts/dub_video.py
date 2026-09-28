@@ -149,55 +149,6 @@ def tm_name_for(source_language: str, target_languages: list[str]) -> str:
     return f"dub · {source_language} → {', '.join(sorted(target_languages))}"
 
 
-def find_or_create_tm(
-    base: str,
-    headers: dict,
-    name: str,
-    source_language: str,
-    target_languages: list[str],
-    provider: str = "vitratm",
-) -> str:
-    try:
-        status, payload = _http.get_json(
-            f"{base}{TM_PATH}?{urlencode({'search': name})}", headers=headers
-        )
-        if status == 200:
-            rows = payload if isinstance(payload, list) else payload.get("data", [])
-            for row in rows:
-                if row.get("name") == name and row.get("id"):
-                    sys.stderr.write(f"[tm] reusing {row['id']}\n")
-                    return row["id"]
-    except _http.NetworkError:
-        pass
-
-    body = {
-        "name": name,
-        "sourceLanguage": source_language,
-        "targetLanguages": target_languages,
-        "tmMode": "create",
-        "provider": provider,
-    }
-    try:
-        status, payload = _http.post_json(base + TM_PATH, headers, body)
-    except _http.NetworkError as e:
-        die(_common.EXIT_API_ERROR, f"network error creating TM: {e}")
-    if status in (401, 403):
-        die(_common.EXIT_AUTH_REJECTED, _common.auth_error(status, "create a translation memory"))
-    if status == 409:
-        s2, p2 = _http.get_json(
-            f"{base}{TM_PATH}?{urlencode({'search': name})}", headers=headers
-        )
-        rows = p2 if isinstance(p2, list) else (p2 or {}).get("data", [])
-        for row in rows:
-            if row.get("name") == name and row.get("id"):
-                return row["id"]
-        die(_common.EXIT_API_ERROR, "TM name conflict but could not resolve the existing TM")
-    if status not in (200, 201) or not (payload or {}).get("id"):
-        die(_common.EXIT_API_ERROR, f"TM create failed ({status}): {_common.api_message(payload)}")
-    sys.stderr.write(f"[tm] created {payload['id']}\n")
-    return payload["id"]
-
-
 def publish(
     base: str,
     headers: dict,
@@ -465,10 +416,10 @@ def main() -> int:
         file_sha256 = _common.sha256_file(path)
         upload_id = find_existing_upload(base, headers, file_sha256)
         if upload_id:
-            sys.stderr.write(f"[upload] reusing earlier upload {upload_id}\n")
+            sys.stderr.write("[upload] reusing the earlier upload\n")
         else:
             upload_id = upload(base, headers, path)
-            sys.stderr.write(f"[upload] uploadId={upload_id}\n")
+            sys.stderr.write("[upload] uploaded\n")
         script_id, script_sha = _tv.upload(base, headers, script) if script else (None, None)
 
         # A TM the caller chose always wins (see SKILL.md: list, then ask).
@@ -478,10 +429,10 @@ def main() -> int:
         # different provider the caller picked is still created here.
         tm_id = chosen_tm
         if not tm_id and args.tm_provider != DEFAULT_TM_PROVIDER:
-            tm_id = find_or_create_tm(
-                base, headers, tm_name_for(source_language, targets),
-                source_language, targets, args.tm_provider
-            )
+            tm_id, reason = _tm.find_or_create(base, headers, tm_name_for(source_language, targets),
+                                               source_language, targets, args.tm_provider)
+            if not tm_id:
+                die(_common.EXIT_API_ERROR, f"could not create the translation memory: {reason}")
         # Same file + same languages + same memory = the same dub. A retried
         # publish (timeout, crash, re-run) gets the first run back instead of
         # starting — and paying for — a second one.
@@ -501,19 +452,19 @@ def main() -> int:
                 None, "failed", "cancelled",
             ):
                 job_id = known["job_id"]
-                sys.stderr.write(f"[reuse] continuing run {job_id} from the manifest\n")
+                sys.stderr.write("[reuse] continuing the run started earlier on this machine\n")
             # A run found by upload can't tell whether it used this script, so
             # with a script only the manifest (keyed by it) may reconnect.
             if not job_id and not script:
                 job_id = find_existing_run(base, headers, upload_id, source_language, targets)
                 if job_id:
-                    sys.stderr.write(f"[reuse] found existing run {job_id} for this file\n")
+                    sys.stderr.write("[reuse] found the run already started for this file\n")
         if not job_id:
             job_id = publish(
                 base, headers, upload_id, run_name, source_language, targets, tm_id,
                 publish_key, emotion_detection, script_id,
             )
-            sys.stderr.write(f"[publish] jobId={job_id}\n")
+            sys.stderr.write("[publish] dub started\n")
 
         checkpoint = _common.update_manifest(
             job_id,

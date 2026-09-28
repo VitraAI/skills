@@ -26,7 +26,6 @@ import sys
 
 sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 
-import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -53,13 +52,7 @@ STEPS = [
 
 
 def main() -> int:
-    result = _access.check(_common.base_url(), _common.headers(), STEPS)
-    blocked = result["status"] == "blocked"
-    for c in result["cannot"]:
-        sys.stderr.write(f"[access] cannot: {c['step']} ({c['reason']})\n")
-    result["next_action"] = None if blocked else "collect_inputs"
-    print(json.dumps(result))
-    return _common.EXIT_OK
+    return _access.report(_common.base_url(), _common.headers(), STEPS)
 
 
 if __name__ == "__main__":
