@@ -222,6 +222,26 @@ class LoginTest(unittest.TestCase):
             self.assertIn(b"signed in", res.read())
         self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
 
+    def test_a_doubled_callback_still_says_signed_in(self) -> None:
+        started = self.run_script("login.py")
+        with urllib.request.urlopen(started["sign_in_url"], timeout=30) as res:
+            first = res.geturl()
+        pages: list[bytes] = []
+
+        def hit() -> None:
+            with urllib.request.urlopen(first, timeout=30) as res:
+                pages.append(res.read())
+
+        # The first visit already signed in; two more copies of the same
+        # callback must show the same outcome, not "invalid code".
+        threads = [threading.Thread(target=hit) for _ in range(2)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertTrue(all(b"signed in" in p for p in pages), pages)
+        self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
+
     def test_only_listens_on_this_machine(self) -> None:
         self.fake.redirect = "http://0.0.0.0/callback"
         out = self.run_script("login.py")
