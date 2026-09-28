@@ -18,13 +18,13 @@ compatibility: >-
   optional (fuller download checks).
 metadata:
   skill-author: Vitra.ai
-  version: "3.1"
+  version: "3.2"
   display-name: Video Dubbing
   category: Video
   tags: Video, Translation, Popular
   source: vitra
   added: "2026-09-09"
-  updated: "2026-09-26"
+  updated: "2026-09-28"
 ---
 
 # Video Dubbing
@@ -132,7 +132,8 @@ python3 scripts/patch_cards.py --job-id <job> --language <lang> --revision <rev>
 ```
 
 Show every `before → after` it reports. Splitting, merging or re-assigning a
-line: [editing](references/editing.md).
+line, fixing how a word is pronounced, or typing a line in another script from
+Latin letters: [editing](references/editing.md).
 
 ### 5. Review each language ⏸
 

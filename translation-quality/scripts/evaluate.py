@@ -29,13 +29,12 @@ sys.dont_write_bytecode = True  # don't litter __pycache__/ in the skill folder
 import argparse
 import csv
 import json
-import time
 from pathlib import Path
-from urllib.parse import quote
 
 sys.path.insert(0, str(Path(__file__).parent))
 import _common  # noqa: E402
 import _http  # noqa: E402
+import _aiqe  # noqa: E402
 import _tm  # noqa: E402
 
 AIQE = "/v1/aiqe/reports"
@@ -110,47 +109,11 @@ def main() -> int:
     if status not in (200, 201) or not rid:
         die(_common.EXIT_API_ERROR, f"the report did not start ({status}): {_common.api_message(payload)}")
 
-    deadline = time.monotonic() + args.max_wait
-    delays = _http.poll_delays(first=5)
-    # Statuses: queued, running, then succeeded / partial (some lines failed)
-    # / failed / cancelled.
-    while str(report.get("status") or "").lower() not in ("succeeded", "partial", "failed", "cancelled"):
-        if time.monotonic() >= deadline:
-            die(_common.EXIT_TIMEOUT, "the report is still running; it continues on its own.")
-        p = report.get("progress") or {}
-        sys.stderr.write(f"[quality] {p.get('done', 0)}/{p.get('total', len(pairs))} lines\n")
-        time.sleep(next(delays))
-        status, payload = _http.get_json(f"{base}{AIQE}/{quote(str(rid))}", headers=headers)
-        report = (payload.get("data") if isinstance(payload, dict) and isinstance(payload.get("data"), dict)
-                  else payload) if status == 200 else report
-    if str(report.get("status")).lower() not in ("succeeded", "partial"):
-        die(_common.EXIT_API_ERROR, f"the report {report.get('status')}: {report.get('error') or ''}".strip(),
-            retryable=True)
-
-    status, payload = _http.get_json(f"{base}{AIQE}/{quote(str(rid))}/segments", headers=headers)
-    segments = _tm.rows_of(payload) or ((payload or {}).get("segments") if isinstance(payload, dict) else []) or []
-    bad = sorted((s for s in segments if isinstance(s, dict) and s.get("errors")),
-                 key=lambda s: s.get("score") if isinstance(s.get("score"), (int, float)) else 101)
-    card = report.get("scorecard") or {}
-    print(json.dumps({
-        "status": "scored",
-        "score": card.get("score"),
-        "band": card.get("band"),
-        "passed": card.get("passed"),
-        **({"note": "some lines could not be scored"} if str(report.get("status")).lower() == "partial" else {}),
-        "lines": len(pairs),
-        "lines_with_errors": len(bad),
-        "worst": [{"line": int(s.get("key") or s.get("index", 0)) if str(s.get("key") or "").isdigit()
-                   else s.get("index"),
-                   "source": s.get("sourceText"), "translation": s.get("targetText"), "score": s.get("score"),
-                   "errors": [{"severity": e.get("severity"), "category": e.get("category"),
-                               "why": e.get("explanation"), "suggestion": e.get("suggestion")}
-                              for e in s.get("errors") or [] if isinstance(e, dict)],
-                   **({"better": s["correctedTarget"]} if s.get("correctedTarget") else {})}
-                  for s in bad[:max(0, args.show)]],
-        "memory": tm.get("name"),
-        "next_action": None,
-    }, ensure_ascii=False))
+    report = _aiqe.wait(base, headers, report, args.max_wait)
+    count, worst = _aiqe.worst_lines(base, headers, str(rid), args.show)
+    print(json.dumps({"status": "scored", **_aiqe.summary(report), "lines": len(pairs),
+                      "lines_with_errors": count if count else _aiqe.summary(report)["lines_with_errors"] or 0,
+                      "worst": worst, "memory": tm.get("name"), "next_action": None}, ensure_ascii=False))
     return _common.EXIT_OK
 
 

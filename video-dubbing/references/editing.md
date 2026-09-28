@@ -79,3 +79,33 @@ may shorten a translation to fit its time slot. Relay every change it reports,
 and call out `approved_text_changed` (text the user had approved). Timing or
 content errors it can't fix stay in `remaining_errors` for `patch_cards` or
 `card_ops`.
+
+## Pronunciation: `pronunciations.py`
+
+When a voice says a word wrong (a brand, an acronym, a name), set how it
+should sound, for the whole organization or just one line:
+
+```bash
+python3 scripts/pronunciations.py list --language hindi_india
+python3 scripts/pronunciations.py add --word SQL --say sequel --language hindi_india
+python3 scripts/pronunciations.py add --word Acme --say "ˈæk.mi" --phoneme --language english_united_states
+python3 scripts/pronunciations.py add --word Priya --say Pree-ya --language english_united_states --job-id <job> --line 12
+python3 scripts/pronunciations.py remove --word SQL --language hindi_india
+```
+
+A rule changes new speech only: re-voice the lines that use the word
+(`regenerate_cards.py --lines …`) for it to be heard. An organization rule
+applies to every future dub in that language: confirm before adding one.
+
+## Typing another script: `transliterate.py`
+
+When the user types a correction in Latin letters for a language written in
+another script ("namaste dosto" for Hindi), convert it before saving:
+
+```bash
+python3 scripts/transliterate.py --language hindi_india --text "namaste dosto"
+```
+
+Show `text` (and any `alternatives`) and let the user confirm, then save it
+with `patch_cards.py`.
+

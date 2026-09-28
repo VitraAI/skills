@@ -17,7 +17,9 @@ translated or charged twice).
 
 Prints JSON:
   { "status": "translated" | "partial" | "failed", "memory",
-    "results": [{"language", "path" | "text", "status"}], "next_action" }
+    "results": [{"language", "path" | "text", "status", "translation"}], "next_action" }
+`translation` identifies each result for proofread.py, back_translate.py and
+quality_report.py (keep it; don't show it).
 
 Stops with a question (`error.ask`) when the memory is the user's choice:
 TM_CHOICE_NEEDED (with `choices`), TM_NEEDED.
@@ -232,7 +234,8 @@ def main() -> int:
         stem = path.stem if path else "translation"
         suffix = path.suffix if path else ""
         out = out_dir / f"{stem}.{re.sub(r'[^A-Za-z0-9_-]+', '_', target)}{suffix}"
-        results.append({"language": target, "status": "translated", **fetch_result(base, headers, job, fmt, out)})
+        results.append({"language": target, "status": "translated", "translation": job,
+                         **fetch_result(base, headers, job, fmt, out)})
 
     status = "translated" if not failed else ("partial" if failed < len(jobs) else "failed")
     print(json.dumps({"status": status, "memory": tm.get("name"), "results": results,

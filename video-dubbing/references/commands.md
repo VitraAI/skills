@@ -42,6 +42,13 @@ stdout (progress goes to stderr). On failure the line is
 | `edit_subtitles` | `--job-id`, `--language`, `--edits` \| `--split N --at-word W` \| `--merge N,M` \| `--delete N`, `--revision` | `changes`, `renumbered`, `revision_after` |
 | `regenerate_cards` | `--job-id`, `--language`, `--missing` \| `--stale` \| `--lines 3,7` | `lines`: per line `has_audio`, `audio_changed`, `verified` |
 
+## Pronunciation and scripts
+
+| Script | Options | Returns |
+|---|---|---|
+| `pronunciations` | `list` \| `add` \| `remove`, `--word`, `--say`, `--language`, `--phoneme`, `--job-id --line` | `rules`, or `added` / `removed` with `next_action: regenerate_cards` |
+| `transliterate` | `--text`, `--language` | `text` in the language's script, `alternatives` per word |
+
 ## Delivery
 
 | Script | Options | Returns |
