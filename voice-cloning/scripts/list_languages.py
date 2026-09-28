@@ -8,7 +8,7 @@ one of the words (e.g. `hindi_india  Hindi (India)`). Use the key (left) for
 the --source-language / --target-language / --language options. There are
 over a thousand, so search: with no words it prints only how to.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

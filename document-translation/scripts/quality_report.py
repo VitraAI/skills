@@ -13,7 +13,7 @@ Prints JSON: { "status": "scored", "score", "band", "passed",
   or, with --apply-fixes: { "status": "fixed", "applied", "unchanged",
                "skipped", "path"? }
 
-Spends credits per source word. Required env: VITRA_UNIVERSE_API_KEY.
+Spends credits per source word. Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY.
 """
 
 from __future__ import annotations

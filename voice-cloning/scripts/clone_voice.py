@@ -9,7 +9,7 @@ with text-to-speech, or voice a speaker in a dub.
 Prints JSON: { "status": "ready" | "failed" | "processing", "voice": {"name",
                "provider", "voice_id", "preview_url"}, "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

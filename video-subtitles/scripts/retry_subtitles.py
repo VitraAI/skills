@@ -12,7 +12,7 @@ Finished steps are kept (nothing is uploaded or transcribed again).
 Prints JSON: { "status": "review_ready" | "failed", "job_id", "progress",
                "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

@@ -104,12 +104,15 @@ class MissingKeyTest(SkillCase):
     def test_a_missing_key_says_how_to_get_one(self) -> None:
         import os, subprocess
         env = {k: v for k, v in os.environ.items() if k != "VITRA_UNIVERSE_API_KEY"}
+        env["VITRA_HOME"] = str(self.dir)  # no sign-in on this "machine"
         p = subprocess.run([sys.executable, str(Path(__file__).resolve().parents[2] / "projects" / "scripts" /
                             "projects.py"), "list"], capture_output=True, text=True, env=env, cwd=self.dir)
         out = json.loads(p.stdout.strip().splitlines()[-1])
         self.assertEqual((p.returncode, out["error"]["code"]), (2, "AUTH_MISSING"))
         self.assertTrue(out["error"]["sign_up"].endswith("/auth/sign-up"))
-        self.assertIn("Settings → API keys", out["error"]["ask"])
+        self.assertIn("sign in", out["error"]["ask"])
+        self.assertIn("login.py", out["error"]["next_action"])
+        self.assertIn("Settings -> API keys", out["error"]["message"])  # the no-browser way
         self.assertEqual(self.fake.calls, [])  # stops before any network call
 
 

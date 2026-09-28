@@ -15,7 +15,7 @@ Prints JSON: { "status": "translated" | "partial" | "failed", "memory", "words",
                "languages": [{"language", "translation", "topics", "path"?,
                               "failed": [{"file", "why"}]?}], "next_action"? }
 
-Spends credits per word per language. Required env: VITRA_UNIVERSE_API_KEY.
+Spends credits per word per language. Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY.
 """
 
 from __future__ import annotations

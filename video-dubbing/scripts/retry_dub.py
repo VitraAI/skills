@@ -21,7 +21,7 @@ The server refuses a retry (409) when the run is not failed, never started,
 or another run of the same dub (another language, an export) is in progress.
 Those are reported as-is; none of them is fixed by retrying again.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Required arg: --job-id.
 Stdlib only.
 """

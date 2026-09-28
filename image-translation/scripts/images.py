@@ -12,7 +12,7 @@ Routes: GET .../image-translator/jobs/list, POST .../{job}/retry,
 Prints JSON: { "status", "images": [{"name", "languages", "image_url", "memory", "job_id"}] | … }.
 `job_id` is for the next command only; show the name and languages.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

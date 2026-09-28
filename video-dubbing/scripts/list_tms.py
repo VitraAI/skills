@@ -17,7 +17,7 @@ wrongly hide it. `--source-language` therefore only constrains single-source
 providers such as Phrase. Languages may be given as a name ("Spanish"), a key
 ("spanish_spain") or a code ("es-ES"); all three match each other.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

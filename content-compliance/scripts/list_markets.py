@@ -5,7 +5,7 @@
 
 Prints JSON: { "markets": [{"name", "rules"}] } — pass names to check_content.py.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

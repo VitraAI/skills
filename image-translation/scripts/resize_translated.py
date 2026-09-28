@@ -14,7 +14,7 @@ Prints JSON:
   { "status": "completed", "image_url": "...", "aspect_ratio": "9:16",
     "job_id": "...", "version_number": 2 }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

@@ -22,7 +22,7 @@ Prints JSON:
 
 A subtitle FILE to translate is the subtitle-translation skill's job.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

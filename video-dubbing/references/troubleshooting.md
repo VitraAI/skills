@@ -8,7 +8,7 @@ in plain terms — **do not paste ids, UUIDs, or raw stderr to the caller.**
 | Exit | Meaning                     | What to tell the caller                                             |
 | ---- | -------------------------- | ------------------------------------------------------------------ |
 | 0    | Success                     | —                                                                  |
-| 2    | API key not set             | "The Vitra API key isn't configured." Show `export VITRA_UNIVERSE_API_KEY=<uvk_...>`. |
+| 2    | Not signed in               | Ask to sign in; on yes run `scripts/login.py`, then `login.py --status` once they finish. No browser there? `VITRA_UNIVERSE_API_KEY=<uvk_...>`. |
 | 3    | Auth rejected (401 / 403)   | The key is wrong or expired, or its creator lacks translate-video / translation-memory permission in the org the key is bound to. |
 | 4    | Other API error             | Say what failed in plain words (e.g. "that language isn't supported", "the organization is out of credits"). The specific reason is in stderr — summarise, don't paste. |
 | 5    | Waiting timed out            | "This is taking longer than expected." It is still running — re-run the same command to keep waiting. |
@@ -25,7 +25,7 @@ Every failure also prints one line on stdout:
 
 | `error.code` | Meaning | What to do |
 |---|---|---|
-| `AUTH_MISSING` / `AUTH_REJECTED` | key not set / not accepted or lacking permission | see exit 2 / 3 |
+| `AUTH_MISSING` / `AUTH_REJECTED` | not signed in / not accepted or lacking permission | see exit 2 / 3 |
 | `REVISION_CONFLICT` | the transcript changed since it was read | re-run `inspect_process`, redo the edit — never force |
 | `VOICE_DECISION_NEEDED` | `add_language`: a speaker has no voice to reuse (`error.speakers`) | ask the caller, pass `--voice-map` |
 | `EXPORT_FAILED` | the render failed on the server (`retryable: true`) | run `export_dub` again |

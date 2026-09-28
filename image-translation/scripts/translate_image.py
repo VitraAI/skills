@@ -11,7 +11,7 @@ Mirrors what the webapp does:
 
 Prints JSON: { "status": "completed", "image_url": "...", "job_id": "..." }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

@@ -54,7 +54,7 @@ Prints JSON:
     "audio_cleared": [...], "audio_stale": [...], "affected_languages": [...],
     "next_action": ... }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

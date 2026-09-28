@@ -32,7 +32,7 @@ Prints JSON:
   { "status": "exported", "language": "...", "subtitles": "<lang>"|null,
     "export_id": "...", "media_url": "...", "next_action": "download_export" }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

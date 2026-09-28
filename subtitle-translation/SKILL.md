@@ -11,8 +11,9 @@ description: >-
   subtitles from a video (video-subtitles), dubbing (video-dubbing), or
   documents (document-translation).
 compatibility: >-
-  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
-  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
+  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs a
+  Vitra sign-in (scripts/login.py opens the browser) or VITRA_UNIVERSE_API_KEY
+  (a uvk_ key), for one Vitra organization.
 metadata:
   skill-author: Vitra.ai
   version: "1.0"
@@ -96,7 +97,7 @@ failed job: `python3 scripts/retry_subtitles.py --job-id <job>`.
 
 | Exit | Meaning | Tell the user |
 |---|---|---|
-| 2 | API key not set | Show the setup lines the script printed |
+| 2 | Not signed in | Ask to sign in; on yes run `scripts/login.py`, then `login.py --status` once they finish |
 | 3 | Key rejected or not allowed | Their Vitra admin must allow translate-video for their role |
 | 4 | API error, or a question (`error.ask`) | Ask the question, or explain the message |
 | 5 | Timed out | Still translating: run the same command again |

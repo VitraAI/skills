@@ -9,11 +9,12 @@ description: >-
   from scratch (video-dubbing, which can lip-sync its own export) or making the
   audio (text-to-speech).
 compatibility: >-
-  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
-  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
+  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs a
+  Vitra sign-in (scripts/login.py opens the browser) or VITRA_UNIVERSE_API_KEY
+  (a uvk_ key), for one Vitra organization.
 metadata:
   skill-author: Vitra.ai
-  version: "1.1"
+  version: "1.0"
   display-name: Lip Sync
   category: Video
   tags: Video, Voice
@@ -83,7 +84,7 @@ Explain `message` plainly; `retryable: true` → run the same command again.
 
 | Exit | Meaning | Tell the user |
 |---|---|---|
-| 2 | API key not set | Show the setup lines the script printed |
+| 2 | Not signed in | Ask to sign in; on yes run `scripts/login.py`, then `login.py --status` once they finish |
 | 3 | Key rejected or not allowed | Their Vitra admin must allow the Video Playground for their role |
 | 4 | API error, or the render failed | Explain the message; a failed render can simply be run again |
 | 5 | Timed out | Still rendering: run the same command again |

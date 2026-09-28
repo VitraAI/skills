@@ -18,7 +18,7 @@ Routes under /v1/galaxy/translate-video/process-log: {job}/cancel, cancel-export
 {job}/excel-data, {export}/save-to-drive, {job}/folder.
 
 Prints JSON. Lines are numbered as in the other scripts; no ids.
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

@@ -17,7 +17,7 @@ Routes: /v1/prompts-library (+ /{id}, /{id}/versions, /{id}/favorite),
 Prints JSON: { "status", "prompt" | "prompts" | "versions", … }. Prompts and
 categories are named; ids never leave this script.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

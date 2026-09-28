@@ -15,7 +15,7 @@ Prints one line per AVAILABLE provider:  <provider>  <label>  [methods]
 Unavailable providers go to stderr with the reason, so an agent never offers a
 choice the caller cannot make.
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

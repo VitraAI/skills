@@ -14,12 +14,13 @@ description: >-
   for subtitles without a voice-over (video-subtitles), audio-only files, text
   in images, or documents.
 compatibility: >-
-  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
-  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization). ffmpeg is
-  optional (fuller download checks).
+  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs a
+  Vitra sign-in (scripts/login.py opens the browser) or VITRA_UNIVERSE_API_KEY
+  (a uvk_ key), for one Vitra organization. ffmpeg is optional (fuller download
+  checks).
 metadata:
   skill-author: Vitra.ai
-  version: "3.3"
+  version: "1.0"
   display-name: Video Dubbing
   category: Video
   tags: Video, Translation, Popular

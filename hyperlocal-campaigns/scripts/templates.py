@@ -6,7 +6,7 @@ must be approved by Meta before they can send.
 Prints JSON: { "creative": [names], "whatsapp": [{"name", "status"}],
                "facebook": [{"name", "status"}] }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

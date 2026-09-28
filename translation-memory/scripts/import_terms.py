@@ -8,7 +8,7 @@ TSV file, so they're reused from now on.
 Prints JSON: { "status": "imported" | "failed", "memory", "imported", "failed",
                "warnings" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

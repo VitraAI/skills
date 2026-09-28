@@ -6,7 +6,7 @@ Prints JSON:
     "can": [steps], "cannot": [{ step, missing, reason, optional }],
     "next_action": "collect_inputs" | null }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

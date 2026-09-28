@@ -24,7 +24,7 @@ quality_report.py (keep it; don't show it).
 Stops with a question (`error.ask`) when the memory is the user's choice:
 TM_CHOICE_NEEDED (with `choices`), TM_NEEDED.
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

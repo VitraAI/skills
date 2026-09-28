@@ -6,7 +6,7 @@
 
 Routes: GET/DELETE /v1/galaxy/playground/voice-clone[/{id}], POST .../{id}/retry
 
-Prints JSON. Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Prints JSON. Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

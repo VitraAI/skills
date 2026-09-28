@@ -10,11 +10,12 @@ description: >-
   this in my cloned voice". Not for dubbing an existing video (video-dubbing)
   or creating a new voice from samples (voice-cloning).
 compatibility: >-
-  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs
-  VITRA_UNIVERSE_API_KEY (a uvk_ key for one Vitra organization).
+  Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Needs a
+  Vitra sign-in (scripts/login.py opens the browser) or VITRA_UNIVERSE_API_KEY
+  (a uvk_ key), for one Vitra organization.
 metadata:
   skill-author: Vitra.ai
-  version: "1.2"
+  version: "1.0"
   display-name: Text to Speech
   category: Audio
   tags: Audio, Voice, Popular
@@ -101,7 +102,7 @@ Explain `message` plainly; `retryable: true` → run the same command again.
 
 | Exit | Meaning | Tell the user |
 |---|---|---|
-| 2 | API key not set | Show the setup lines the script printed |
+| 2 | Not signed in | Ask to sign in; on yes run `scripts/login.py`, then `login.py --status` once they finish |
 | 3 | Key rejected or not allowed | Their Vitra admin must allow the Video Playground for their role |
 | 4 | API error | Explain the message |
 | 5 | Timed out | Still generating: run the same command again |

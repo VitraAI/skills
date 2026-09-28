@@ -30,7 +30,7 @@ Prints JSON:
     "changes": [{line, field, before, after}], "approved_text_changed": [...],
     "remaining_errors": [...], "remaining_warnings": [...], "next_action": ... }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

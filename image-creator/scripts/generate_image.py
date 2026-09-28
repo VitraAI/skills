@@ -8,7 +8,7 @@ Synchronous: the API renders and returns the finished image in one call.
 
 Prints JSON: { "status": "completed", "image_url": "...", "creation_id": "..." }
 
-Required env: VITRA_UNIVERSE_API_KEY (the key carries its organization).
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY (the key carries its organization).
 Stdlib only.
 """
 

@@ -18,7 +18,7 @@ in: use download_subtitles.py.
 Prints JSON: { "status": "exported", "language", "export_id", "media_url",
                "next_action": "download_export" }
 
-Charged per render. Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Charged per render. Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

@@ -22,7 +22,7 @@ Prints JSON:
   { "status": "review_ready" | "partial" | "failed", "job_id",
     "added": [lang], "failed": [{"language", "error"}], "next_action" }
 
-Charged per language. Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Charged per language. Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

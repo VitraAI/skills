@@ -8,7 +8,7 @@ Re-running the same command reconnects to the render it started.
 
 Prints JSON: { "status": "done" | "failed", "path", "seconds", "next_action" }
 
-Required env: VITRA_UNIVERSE_API_KEY. Stdlib only.
+Needs a Vitra sign-in (login.py) or VITRA_UNIVERSE_API_KEY. Stdlib only.
 """
 
 from __future__ import annotations

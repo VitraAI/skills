@@ -4,7 +4,12 @@ Single source: `sync-lib.sh` copies this file into each skill's
 `scripts/_common.py` (the dub skill's `scripts/_core.py`). Edit it here only,
 then run the sync.
 
-The API key is the only secret; everything else is fixed here.
+Two ways in, both acting in ONE organization with the member's own role:
+  * sign in with the browser (`scripts/login.py`) — the token lands in
+    ~/.vitra/universe-signin.json and refreshes itself;
+  * an organization API key (`VITRA_UNIVERSE_API_KEY`), for machines with no
+    browser. A key, when set, wins.
+Everything else is fixed here.
 """
 
 from __future__ import annotations
@@ -88,43 +93,161 @@ APP_URL_VAR = "VITRA_UNIVERSE_APP_URL"
 DEFAULT_APP_URL = "https://universe.vitra.ai"
 
 
-def api_key() -> str:
-    key = os.environ.get(ENV_VAR) or _from_env_file(ENV_VAR)
-    if key:
-        return key
+def _configured_key() -> str | None:
+    return os.environ.get(ENV_VAR) or _from_env_file(ENV_VAR)
+
+
+# ── Browser sign-in (see login.py) ───────────────────────────────────────────
+# The token is the same org-pinned OAuth token an MCP connector holds: an hour
+# long, renewed here with the 30-day refresh token. Stored per server, so a
+# staging sign-in never shadows production.
+HOME_VAR = "VITRA_HOME"
+
+
+def signin_file() -> Path:
+    home = os.environ.get(HOME_VAR) or str(Path.home() / ".vitra")
+    return Path(home) / "universe-signin.json"
+
+
+def read_signins() -> dict:
+    import json
+
+    try:
+        data = json.loads(signin_file().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def write_signin(entry: dict | None, base: str | None = None) -> None:
+    """Save (or with None, forget) this server's sign-in. Owner-only file."""
+    import json
+
+    base = base or base_url()
+    data = read_signins()
+    if entry is None:
+        data.pop(base, None)
+    else:
+        data[base] = entry
+    path = signin_file()
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    tmp = path.with_suffix(".tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
+    os.replace(tmp, path)
+
+
+def _refresh(entry: dict) -> dict | None:
+    """Swap the refresh token for a new pair. None when the sign-in is over."""
+    import json
+    import time
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    body = urllib.parse.urlencode({
+        "grant_type": "refresh_token",
+        "refresh_token": entry.get("refresh_token", ""),
+        "client_id": entry.get("client_id", ""),
+    }).encode()
+    req = urllib.request.Request(
+        entry.get("token_endpoint", ""), data=body, method="POST",
+        headers={"Content-Type": "application/x-www-form-urlencoded",
+                 "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as res:
+            tok = json.loads(res.read().decode("utf-8"))
+    except (urllib.error.URLError, OSError, ValueError):
+        return None
+    if not tok.get("access_token"):
+        return None
+    return {
+        **entry,
+        "access_token": tok["access_token"],
+        "refresh_token": tok.get("refresh_token") or entry.get("refresh_token"),
+        "expires_at": int(time.time()) + int(tok.get("expires_in") or 3600),
+    }
+
+
+def signed_in_token() -> str | None:
+    """This server's sign-in token, renewed when due. None if not signed in."""
+    import time
+
+    base = base_url()
+    entry = read_signins().get(base)
+    if not isinstance(entry, dict) or not entry.get("access_token"):
+        return None
+    if int(entry.get("expires_at") or 0) - 60 > time.time():
+        return entry["access_token"]
+    fresh = _refresh(entry)
+    if fresh is None:
+        # Another script may have renewed it a moment ago (refresh tokens are
+        # single-use): take theirs before calling the sign-in over.
+        again = read_signins().get(base) or {}
+        if again.get("refresh_token") != entry.get("refresh_token") and \
+                int(again.get("expires_at") or 0) - 60 > time.time():
+            return again.get("access_token")
+        return None
+    write_signin(fresh, base)
+    return fresh["access_token"]
+
+
+def credential() -> str:
+    """Which credential this run uses: "api_key", "signin" or "none"."""
+    if _configured_key():
+        return "api_key"
+    entry = read_signins().get(base_url())
+    return "signin" if isinstance(entry, dict) and entry.get("access_token") else "none"
+
+
+def _missing() -> None:
     app = (os.environ.get(APP_URL_VAR) or DEFAULT_APP_URL).rstrip("/")
+    had = credential() == "signin"
     die(
         EXIT_AUTH_MISSING,
-        f"Missing {ENV_VAR}: this skill needs a Vitra API key (starts uvk_).\n"
+        ("Your Vitra sign-in has ended.\n" if had else "Not signed in to Vitra.\n")
+        + "\n"
+        "Sign in (opens the browser, then pick an organization):\n"
+        "  python3 scripts/login.py\n"
         "\n"
-        "Get one:\n"
-        f"  1. Sign in to Vitra: {app}/auth/sign-in (new to Vitra? sign up: {app}/auth/sign-up)\n"
-        "  2. Open Settings -> API keys and create a key. Owners and admins can create keys;\n"
-        "     anyone else asks one of them. A key works in one organization, with its\n"
-        "     creator's role.\n"
+        f"New to Vitra? Sign up first: {app}/auth/sign-up\n"
         "\n"
-        "Then give it to the agent, in ONE of these ways:\n"
-        f"  * export {ENV_VAR}=uvk_...   (e.g. in ~/.zshrc, then restart the agent)\n"
-        f"  * put {ENV_VAR}=uvk_... in a .env beside this skill's SKILL.md\n"
-        "Exporting in a terminal does not reach a desktop or hosted agent: set it where\n"
-        "the agent runs.",
-        ask=(f"This needs a Vitra API key. Do you have one? If not, sign in at {app}/auth/sign-in "
-             f"(or sign up at {app}/auth/sign-up), open Settings → API keys and create one "
-             "(owners and admins can; otherwise ask one of them). Then set it as "
-             f"{ENV_VAR} and restart the agent; don't paste the key into the chat."),
+        f"No browser on this machine? Use an organization API key instead: create one\n"
+        f"in Settings -> API keys ({app}/auth/sign-in; owners and admins can), then\n"
+        f"set {ENV_VAR}=uvk_... where the agent runs, or in a .env beside SKILL.md.",
+        ask=("You need to sign in to Vitra. Shall I open the sign-in page? "
+             f"(New to Vitra? Sign up at {app}/auth/sign-up first.)"),
+        next_action="Run scripts/login.py once the user agrees, then run this command again.",
         sign_in=f"{app}/auth/sign-in",
         sign_up=f"{app}/auth/sign-up",
     )
+
+
+def api_key() -> str:
+    """The configured API key, or the sign-in instructions when there is none."""
+    key = _configured_key()
+    if key:
+        return key
+    _missing()
     return ""  # unreachable: die() exits
 
 
 def headers() -> dict[str, str]:
     """Auth headers for every request.
 
-    The key is bound to one organization at creation, so the server resolves
-    the org from the key itself — no `organizationId` header to send.
+    A key and a sign-in are each bound to one organization, so the server
+    resolves the org from the credential — no `organizationId` header to send.
     """
-    return {"x-api-key": api_key(), "X-Client-Source": "agent"}
+    key = _configured_key()
+    if key:
+        return {"x-api-key": key, "X-Client-Source": "agent"}
+    token = signed_in_token()
+    if token:
+        return {"Authorization": f"Bearer {token}", "X-Client-Source": "agent"}
+    _missing()
+    return {}  # unreachable: die() exits
 
 
 # Error codes for the JSON a failing script prints, by exit code. `retryable`
@@ -216,26 +339,32 @@ def api_message(payload: object, fallback: str = "the server rejected the reques
 def auth_error(status: int, what: str = "do this") -> str:
     """Actionable text for a 401/403. They are different problems.
 
-    401 = the key itself is not accepted (wrong, revoked, expired).
-    403 = the key is valid but its member lacks the permission.
+    401 = the credential itself is not accepted (wrong, revoked, expired).
+    403 = the credential is valid but its member lacks the permission.
 
     Rate limiting is NOT a 403: it arrives as 429 with `Retry-After`, and
     `_http.request_json` waits it out and retries, so it rarely surfaces here.
     """
+    signin = credential() == "signin"
     if status == 401:
+        if signin:
+            return (
+                "Your Vitra sign-in was not accepted — it may have ended, or you "
+                "left that organization. Sign in again: python3 scripts/login.py"
+            )
         return (
             "Your API key was not accepted. It may be mistyped, revoked, or "
             "expired — ask your Vitra org administrator for a new one."
         )
     if status == 429:
         return (
-            "Your API key is sending requests faster than it is allowed to, "
-            "even after waiting. Pause for a minute and run the command again "
-            "— any job already started keeps running meanwhile."
+            "Vitra is getting requests faster than it allows, even after waiting. "
+            "Pause for a minute and run the command again — any job already "
+            "started keeps running meanwhile."
         )
+    who = "Your role" if signin else "Your API key is valid but the member who created it"
     return (
-        f"Your API key is valid but not allowed to {what}. The member who "
-        "created it lacks that permission in this organization — ask your "
+        f"{who} is not allowed to {what} in this organization — ask your "
         "Vitra org administrator."
     )
 
