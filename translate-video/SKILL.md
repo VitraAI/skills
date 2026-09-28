@@ -62,12 +62,20 @@ A Drive file: `find_assets` by name. A local file: `vitra.py upload <path>`; a v
 for `start_dub`. Languages as keys from `list_languages` (no auto-detect: ask the source).
 Memory: `list_translation_memories`; several → ask which by name.
 
+**Length**: pass the video's `duration_seconds` to `start_dub` and `start_subtitles`
+(`vitra.py upload` reports it for MP4, MOV, M4A and M4V). It prices a dub
+(`estimate_only`), and Vitra uses it when it can't read the file's length. A Drive file,
+or a start refused with "couldn't read this video's length": ask the user how long
+the video is and call again with `duration_seconds`.
+
 ## Dub
 
-1. `start_dub` (paid per minute per language: ask) →
-   `get_dub` until `awaiting_voices`.
+1. `start_dub` (paid per minute per language): price it with `estimate_only: true`
+   (all the languages wanted, with `duration_seconds`), ask, then start it in ONE
+   language with `confirm: true` → `get_dub` until `awaiting_voices`. The other
+   languages come later with `add_dub_language`.
    ```bash
-   python3 scripts/vitra.py call start_dub '{"file_name": "webinar.mp4", "source_language": "english_united_states", "target_languages": ["hindi_india"], "confirm": true}'
+   python3 scripts/vitra.py call start_dub '{"file_name": "webinar.mp4", "source_language": "english_united_states", "target_languages": ["hindi_india"], "duration_seconds": 312.5, "confirm": true}'
    ```
 2. **Voices** ⏸ per speaker: a voice from the Vitra voice library is the default
    (`list_voices`, `find_voices_by_accent`; offer previews; the organization's cloned

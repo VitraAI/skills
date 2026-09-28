@@ -8,6 +8,7 @@ the rules and the wording; nothing about Vitra lives here.
   vitra.py call TOOL [ARGS_JSON] [--intent TEXT] [--toolsets a,b]
                                          run TOOL with a JSON object of arguments
   vitra.py upload PATH                   put a local file in Vitra; prints its asset
+                                         (and duration_seconds for MP4/MOV/M4A/M4V)
   vitra.py download URL --to PATH        save a link a tool returned to a local file
 
 Every command prints ONE JSON object on stdout. On failure:
@@ -170,6 +171,74 @@ def _call_tool(name: str, args: dict) -> dict:
     return out if isinstance(out, dict) else {}
 
 
+_TIMED = {".mp4", ".mov", ".m4a", ".m4v"}
+
+
+def _box_header(fh, end: int) -> tuple[bytes, int, int] | None:
+    """(type, payload start, box end) of the MP4 box at the file position,
+    or None when there is no whole header before `end`."""
+    start = fh.tell()
+    head = fh.read(8)
+    if len(head) < 8:
+        return None
+    size, kind = int.from_bytes(head[:4], "big"), head[4:]
+    if size == 1:  # 64-bit size follows
+        big = fh.read(8)
+        if len(big) < 8:
+            return None
+        size = int.from_bytes(big, "big")
+    elif size == 0:  # runs to the end of its parent
+        size = end - start
+    body = fh.tell()
+    if size < body - start or start + size > end:
+        return None
+    return kind, body, start + size
+
+
+def _media_seconds(path: Path) -> float | None:
+    """The length an MP4 / MOV / M4A / M4V file declares (moov -> mvhd), read
+    from box headers only (a few hundred bytes), or None when it can't be."""
+    if path.suffix.lower() not in _TIMED:
+        return None
+    try:
+        with path.open("rb") as fh:
+            end = path.stat().st_size
+            for _ in range(2):  # the file, then moov
+                for _ in range(1000):
+                    box = _box_header(fh, end)
+                    if box is None:
+                        return None
+                    kind, body, box_end = box
+                    if kind in (b"moov", b"mvhd"):
+                        break
+                    fh.seek(box_end)
+                else:
+                    return None
+                if kind == b"mvhd":
+                    break
+                end = box_end  # search inside moov
+            if kind != b"mvhd":
+                return None
+            data = fh.read(min(box_end - body, 32))
+            if len(data) < 20:
+                return None
+            if data[0] == 1:  # version 1: 64-bit times
+                if len(data) < 32:
+                    return None
+                scale = int.from_bytes(data[20:24], "big")
+                length = int.from_bytes(data[24:32], "big")
+                unknown = 0xFFFFFFFFFFFFFFFF
+            else:
+                scale = int.from_bytes(data[12:16], "big")
+                length = int.from_bytes(data[16:20], "big")
+                unknown = 0xFFFFFFFF
+    except OSError:
+        return None
+    if not scale or not length or length == unknown:
+        return None
+    return round(length / scale, 3)
+
+
 def cmd_upload(a: argparse.Namespace) -> int:
     path = Path(a.path).expanduser()
     if not path.is_file():
@@ -201,8 +270,11 @@ def cmd_upload(a: argparse.Namespace) -> int:
                                            "content_type": ctype})
     # `key` is the storage key: the tools that take an `asset_key` (image
     # translation, image resize) need it rather than the asset_id.
+    seconds = _media_seconds(path)
     return _out({"status": "ok", "file": path.name, "bytes": size, "asset": asset,
                  "key": key,
+                 # The video's length, for the tools that take duration_seconds.
+                 **({"duration_seconds": seconds} if seconds else {}),
                  "next_action": "Pass asset.asset_id (or key, where a tool asks for "
                                 "asset_key) to the tool that needs the file."})
 

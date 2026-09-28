@@ -51,7 +51,7 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 2. **Markets** ⏸: `create_qc_market` (name, description, threshold: `describe` explains
    the scale), `update_qc_market`, `delete_qc_market` (confirm).
 3. **Rules** ⏸: show the wording, then `add_qc_rule` (title, description, severity,
-   `content_types`), `update_qc_rule`, `delete_qc_rule` (confirm).
+   `content_types`: all four when left out), `update_qc_rule`, `delete_qc_rule` (confirm).
    ```bash
    python3 scripts/vitra.py call add_qc_rule '{"market": "UAE", "title": "No alcohol", "description": "…", "severity": "high"}'
    ```

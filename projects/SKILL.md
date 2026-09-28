@@ -55,7 +55,8 @@ python3 scripts/vitra.py call list_tasks '{"due_today": true, "mine": true}'
 ```
 
 **Projects**: `list_projects`, `get_project` (also the status and priority names its
-tasks take), `create_project` (confirm name and dates first; optional `task_template`),
+tasks take), `create_project` (confirm name and dates first; optional `task_template`; priority
+defaults to Medium),
 `update_project` (rename, move status, dates, languages), `delete_project` (confirm),
 `set_project_people` (assign, watch; `remove` needs confirm).
 

@@ -112,6 +112,37 @@ class VitraTest(unittest.TestCase):
             "https://h/x?response-content-disposition=attachment%3Bfilename%3D..%2F..%2Fetc%2Fpasswd")),
             "passwd")
 
+    def test_upload_reads_the_length_an_mp4_declares(self) -> None:
+        sys.path.insert(0, str(SCRIPT.parent))
+        import vitra  # noqa: E402
+
+        def box(kind: bytes, body: bytes) -> bytes:
+            return (8 + len(body)).to_bytes(4, "big") + kind + body
+
+        def mvhd(version: int, scale: int, length: int) -> bytes:
+            if version == 1:
+                times = bytes(16) + scale.to_bytes(4, "big") + length.to_bytes(8, "big")
+            else:
+                times = bytes(8) + scale.to_bytes(4, "big") + length.to_bytes(4, "big")
+            return box(b"mvhd", bytes([version, 0, 0, 0]) + times + bytes(80))
+
+        ftyp = box(b"ftyp", b"isom" + bytes(4) + b"isommp41")
+        # A media box with a 64-bit size before moov, as a camera writes it.
+        mdat = (1).to_bytes(4, "big") + b"mdat" + (16 + 64).to_bytes(8, "big") + bytes(64)
+        cases = {
+            "a.mp4": (ftyp + box(b"moov", mvhd(0, 1000, 56040)), 56.04),
+            "b.MOV": (ftyp + mdat + box(b"moov", box(b"udta", b"") + mvhd(1, 600, 1800)), 3.0),
+            "c.m4a": (ftyp + box(b"moov", mvhd(0, 44100, 0xFFFFFFFF)), None),  # unknown
+            "d.mp4": (ftyp + box(b"moov", b"\x00\x00"), None),  # truncated
+            "e.mp4": (b"not an mp4 at all", None),
+            "f.webm": (ftyp + box(b"moov", mvhd(0, 1000, 5000)), None),  # not read
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, (data, want) in cases.items():
+                path = Path(tmp) / name
+                path.write_bytes(data)
+                self.assertEqual(vitra._media_seconds(path), want, name)
+
 
 if __name__ == "__main__":
     unittest.main()
