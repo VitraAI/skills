@@ -1,6 +1,6 @@
 # translation-memory
 
-Translation Memory: an agent skill for Vitra Universe. Manages the organization's translation memories, glossaries, term bases and style guides in Vitra Universe — the approved wording every Vitra translation reuses: translates short texts memory-first, looks up how a phrase was translated, corrects, verifies or deletes entries, creates and shares memories, links glossaries, term bases and style guides, and edits their entries, terms and rules.
+Translation Memory: an agent skill for Vitra Universe. Manages the organization's translation memories in Vitra Universe — the approved translations every Vitra job reuses: translates short texts memory-first, looks up how a phrase was translated, corrects, verifies or deletes entries, creates, edits and deletes memories, shares them with child organizations, links glossaries, term bases and a style guide to a memory, and changes the organization's VitraTM settings.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

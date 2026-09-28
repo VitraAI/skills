@@ -2,17 +2,18 @@
 name: translate-video
 description: >-
   Dubs and subtitles videos and translates subtitle files with Vitra Translate
-  Video: dubs a video into other languages (library voices by default, a
-  speaker's cloned voice only with consent), makes subtitles from a video,
-  translates SRT, VTT, ASS or SSA files, lets the user review and edit lines,
-  speakers, emotions and pronunciations, fixes issues, scores quality, then
-  exports the dubbed video, burns subtitles in or downloads subtitle files. Use
-  it whenever the user wants a video dubbed, voice-translated, captioned or
-  localized, or a subtitle file translated — "dub this video into Hindi", "add a
-  French voiceover", "subtitle this clip", "translate this SRT into Spanish and
-  German", "burn the captions in", "fix line 12 of the dub" — even if they don't
-  say "dub". A "dubbing project" is a dub, not a board project. Not for
-  audio-only text-to-speech, text in images, or documents.
+  Video: dubs a video into other languages (voices from the Vitra voice
+  library by default, a speaker's cloned voice only with consent), makes
+  subtitles from a video, translates SRT, VTT, ASS or SSA files, lets the user
+  review and edit lines, speakers, emotions and pronunciations, fixes issues,
+  scores quality, then exports the dubbed video, burns subtitles in or
+  downloads subtitle files. Use it whenever the user wants a video dubbed,
+  voice-translated, captioned or localized, or a subtitle file translated —
+  "dub this video into Hindi", "add a French voiceover", "subtitle this clip",
+  "translate this SRT into Spanish and German", "burn the captions in", "fix
+  line 12 of the dub" — even if they don't say "dub". A "dubbing project" is a
+  dub, not a board project. Not for audio-only speech (text-to-speech), text
+  in images (image-translation) or documents (document-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -68,8 +69,9 @@ Memory: `list_translation_memories`; several → ask which by name.
    ```bash
    python3 scripts/vitra.py call start_dub '{"file_name": "webinar.mp4", "source_language": "english_united_states", "target_languages": ["hindi_india"], "confirm": true}'
    ```
-2. **Voices** ⏸ per speaker: a library voice is the default (`list_voices`,
-   `find_voices_by_accent`; offer previews). Cloning the speaker's own voice only when the
+2. **Voices** ⏸ per speaker: a voice from the Vitra voice library is the default
+   (`list_voices`, `find_voices_by_accent`; offer previews; the organization's cloned
+   voices are in it too, see voice-cloning). Cloning the speaker's own voice only when the
    user confirms that person agreed: `"voice": "clone"` with `consent: true`. Then
    `set_speaker_voices` → `get_dub` until `review_ready`.
 3. **Review the source first** with `get_dub_lines`, then `add_dub_language` for other

@@ -2,14 +2,14 @@
 name: projects
 description: >-
   Tracks the organization's work in Vitra Universe: projects with status, due
-  dates, progress and people; tasks with checklists, assignees and watchers; the
-  organization's project board and task templates; and who is assigned to each
-  language of a dub, document, image or Playground job — all by name. Use it
-  when the user asks about or organizes their work — "what's due today?", "set
-  up a project to track the Hindi launch", "move the glossary task to In
-  Progress", "assign it to Priya", "tick off the first checklist item", "put Sam
-  on the German dub". It only tracks work and never produces it: "start a
-  dubbing project" means start a dub (translate-video), a campaign is
+  dates, progress and people; tasks with checklists, assignees and watchers;
+  the organization's project board and task templates; and who is assigned to
+  each language of a dub, document, image or Playground job — all by name. Use
+  it when the user asks about or organizes their work — "what's due today?",
+  "set up a project to track the Hindi launch", "move the glossary task to In
+  Progress", "assign it to Priya", "tick off the first checklist item", "put
+  Sam on the German dub". Not for producing the work: "start a dubbing
+  project" means start a dub (translate-video), a campaign is
   hyperlocal-campaigns, and translating files is document-translation.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

@@ -1,6 +1,6 @@
 # content-compliance
 
-Content Compliance: an agent skill for Vitra Universe. Checks content against each market's rules before it goes out, with the Vitra Universe API: text, images, audio and video are scored per market (approved, review or blocked) with the rules they break, plus unsafe-content detection; a flagged image can be regenerated to meet a market's rules; reviewers' verdicts are relayed; markets and their rules are created, edited or drafted with AI.
+Content Compliance: an agent skill for Vitra Universe. Checks content against each market's rules before it goes out, with the Vitra Universe API: text, images, audio and video are scored per market (approved, review or blocked) with the rules they break and the frames or media that break them, plus unsafe-content detection; a flagged image can be regenerated to meet a market's rules; past checks are listed or deleted; and reviewers' own verdicts on the review queue are relayed.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

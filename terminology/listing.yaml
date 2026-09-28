@@ -1,0 +1,101 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Tell every translation how to word things: glossaries for fixed and
+  do-not-translate terms, term bases for preferred and forbidden terminology,
+  and style guides for tone and writing rules — typed in or extracted from
+  your existing guide.
+when-to-use: >-
+  Reach for it when a wording decision should hold everywhere — a brand name,
+  a product term, formal or informal address — rather than being fixed job by
+  job.
+features:
+  - title: Glossaries
+    description: Fixed wordings and do-not-translate terms.
+  - title: Term bases
+    description: Concepts with preferred and forbidden terms per language.
+  - title: Style guides
+    description: Ordered writing rules, bulk-edited or copied between languages.
+  - title: Extract rules
+    description: Turn an existing style guide's files into rules.
+use-cases:
+  - title: Brand protection
+    description: Keep product names untranslated in every language.
+  - title: Tone of voice
+    description: Formal address in German, informal in Spanish.
+mcp-toolset: memory
+mcp-tools:
+  - name: list_glossaries
+    title: List glossaries, term bases and style guides
+  - name: get_glossary
+    title: Read a glossary
+  - name: create_glossary
+    title: Create a glossary
+  - name: update_glossary
+    title: Rename or re-describe a glossary
+  - name: delete_glossary
+    title: Delete a glossary
+  - name: add_glossary_entry
+    title: Add a glossary entry
+  - name: update_glossary_entry
+    title: Edit a glossary entry
+  - name: delete_glossary_entries
+    title: Delete glossary entries
+  - name: get_term_base
+    title: Read a term base
+  - name: create_term_base
+    title: Create a term base
+  - name: update_term_base
+    title: Rename or re-describe a term base
+  - name: delete_term_base
+    title: Delete a term base
+  - name: add_term_base_concept
+    title: Add a concept to a term base
+  - name: add_term_base_term
+    title: Add a term to a concept
+  - name: update_term_base_concept
+    title: Edit a concept's details
+  - name: update_term_base_term
+    title: Edit a term
+  - name: delete_term_base_entry
+    title: Delete a term or concept
+  - name: get_style_guide
+    title: Read a style guide
+  - name: create_style_guide
+    title: Create a style guide
+  - name: update_style_guide
+    title: Rename or re-describe a style guide
+  - name: delete_style_guide
+    title: Delete a style guide
+  - name: add_style_guide_rules
+    title: Add style guide rules
+  - name: update_style_guide_rule
+    title: Edit a style guide rule
+  - name: bulk_edit_style_guide_rules
+    title: Change or delete many style guide rules
+  - name: reorder_style_guide_rules
+    title: Reorder style guide rules
+  - name: copy_style_guide_language
+    title: Apply one language's rules to another
+  - name: set_style_guide_file_languages
+    title: Change a style guide file's languages
+  - name: remove_style_guide_file
+    title: Remove a style guide file
+  - name: extract_style_guide_rules
+    title: Extract style guide rules from its files
+  - name: link_memory_resources
+    title: Link glossaries, term bases or a style guide to a memory
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: translation-memory
+    why: Link the glossaries and style guide to a memory.
+  - name: translation-quality
+    why: Score how well a translation follows them.
+  - name: document-translation
+    why: Translate files with the rules applied.

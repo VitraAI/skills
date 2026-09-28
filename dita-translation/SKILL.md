@@ -1,14 +1,16 @@
 ---
 name: dita-translation
 description: >-
-  Follows, fixes and delivers DITA map translations (technical documentation: a
-  .zip of .ditamap and .dita topics, with SVG images) in Vitra Universe: shows
-  progress per language, previews any file, retries failed topics, downloads one
-  translated zip per language, builds a QC report of PDFs, scores a language
-  with a quality report and writes its fixes back. Use it when the user has DITA
-  or DITA-OT content in Vitra — "is the Japanese DITA map done?", "retry the
-  failed topics", "download the German docs zip", "score the French manual". Not
-  for single Word or XML files (document-translation), subtitles or images.
+  Follows, fixes and delivers DITA map translations (technical documentation:
+  a .zip of .ditamap and .dita topics, with SVG images) in Vitra Universe:
+  shows progress per language, previews any file, retries failed topics,
+  downloads one translated zip per language, builds a QC report of PDFs,
+  scores a language with a quality report and writes its fixes back. Use it
+  when the user has DITA or DITA-OT content in Vitra — "is the Japanese DITA
+  map done?", "retry the failed topics", "download the German docs zip",
+  "score the French manual". Not for single Word or XML files
+  (document-translation), subtitles (translate-video) or images
+  (image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in

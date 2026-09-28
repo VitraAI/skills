@@ -9,7 +9,7 @@
     {
       "name": "vitra",
       "source": "./",
-      "description": "Every Vitra skill in one install: translate documents, DITA maps, subtitles and images; dub videos, generate speech, clone voices and lip-sync; manage translation memories, brand kits, projects, tasks and prompts; score quality and check compliance, with your Vitra organization's account.",
+      "description": "Every Vitra skill in one install: translate documents, DITA maps, subtitles and images; dub videos, generate speech, clone voices and lip-sync; finish Figma, Canva, Adobe and Word plugin translations; manage translation memories, terminology, brand kits, projects, tasks, prompts, knowledge and the Drive; run WhatsApp and Facebook campaigns; score quality and check compliance, with your Vitra organization's account.",
       "version": "1.0.0"
     }
   ]

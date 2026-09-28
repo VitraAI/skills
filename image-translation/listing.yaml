@@ -102,3 +102,5 @@ related-skills:
     why: Exact pixel sizes for the translated image, or any other.
   - name: image-creator
     why: Create a new image instead of translating one.
+  - name: hyperlocal-templates
+    why: Use a translated creative as a campaign template.

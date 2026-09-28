@@ -1,6 +1,6 @@
 # vitra
 
-Vitra: an agent skill for Vitra Universe. General access to the user's Vitra Universe organization: finds, uploads, downloads, browses, moves, renames and trashes files in the Drive; manages work folders and the jobs filed in them; searches and edits the organization's saved knowledge (facts, guidelines, notes); shows the credit balance and prices work before it starts; follows translations sent from the Figma, Canva, Adobe and Word plugins; and finds any other Vitra tool.
+Vitra: an agent skill for Vitra Universe. The starting point for the user's Vitra Universe organization: signs this machine in or out and shows who is signed in where, shows the credit balance, prices work in credits before it starts, lists the languages, voices, translation memories and brand kits the other skills take, and finds the right Vitra tool or step-by-step guide for anything else.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

@@ -93,3 +93,7 @@ related-skills:
     why: Translate subtitle files (SRT, VTT) instead of documents.
   - name: image-translation
     why: Translate text that is inside images, keeping their design.
+  - name: drive
+    why: Find the files to translate, or upload them first.
+  - name: terminology
+    why: Set the glossary terms and style rules every translation follows.

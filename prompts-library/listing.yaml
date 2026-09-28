@@ -58,4 +58,6 @@ mcp-tools:
     title: List languages
   - name: quote_cost
     title: Price work in credits
-related-skills: []
+related-skills:
+  - name: org-knowledge
+    why: Keep the facts and guidelines your prompts rely on.

@@ -1,0 +1,75 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Your Vitra Drive from any agent: find files by name, upload and download
+  them, organize folders, trash and restore, and keep work folders that group
+  the jobs of one client or campaign.
+when-to-use: >-
+  Reach for it whenever a task starts or ends with a file in Vitra — finding
+  what to translate, uploading a source, or handing back a download link.
+features:
+  - title: Find by name
+    description: "\"Last week's banner\" instead of a path or id."
+  - title: Upload and download
+    description: Local files in, download links out.
+  - title: Organize
+    description: Create, rename, move, favourite, trash and restore.
+  - title: Work folders
+    description: Group jobs for one engagement and see what is filed in each.
+use-cases:
+  - title: Reuse earlier work
+    description: Find last month's source files instead of uploading them again.
+  - title: Tidy up
+    description: Move a campaign's files into one folder and trash the drafts.
+mcp-toolset: drive
+mcp-tools:
+  - name: find_assets
+    title: Find files in the Drive
+  - name: browse_drive
+    title: Browse the Drive
+  - name: get_drive_storage
+    title: Drive storage used
+  - name: create_upload_url
+    title: Create an upload URL
+  - name: register_upload
+    title: Register an uploaded file
+  - name: get_upload_link
+    title: Get a link to upload a file
+  - name: get_download_url
+    title: Get a download link
+  - name: create_drive_folder
+    title: Create a Drive folder
+  - name: rename_drive_item
+    title: Rename a Drive file or folder
+  - name: move_drive_items
+    title: Move Drive files or folders
+  - name: set_drive_favourite
+    title: Add or remove a Drive favourite
+  - name: trash_drive_items
+    title: Move Drive items to the trash
+  - name: restore_drive_items
+    title: Restore Drive items from the trash
+  - name: list_work_folders
+    title: List work folders
+  - name: create_work_folder
+    title: Create a work folder
+  - name: update_work_folder
+    title: Rename or edit a work folder
+  - name: list_work_folder_jobs
+    title: List a work folder's jobs
+  - name: delete_work_folder
+    title: Delete a work folder
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: document-translation
+    why: Translate the files you found.
+  - name: image-translation
+    why: Localize images already in the Drive.
+  - name: translate-video
+    why: Dub or subtitle videos already in the Drive.

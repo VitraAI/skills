@@ -4,36 +4,28 @@
 # the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Know before you publish: check copy, images, audio and video against the rules
-  of every market you sell in, see exactly which rules a piece breaks and why,
-  catch unsafe content, and regenerate a flagged image so it passes.
+  Know before you publish: check text, images, audio and video against each
+  market's rules and get a clear approved, review or blocked verdict with the
+  reasons — then fix a flagged image automatically and relay reviewers' calls.
 when-to-use: >-
-  Reach for it before a campaign goes live in a new market, when a creative is
-  reused across regions, or when a reviewer asks "is this OK there?".
+  Reach for it before a creative, video or copy goes live in a market with its
+  own rules, or when the review queue needs a reviewer's verdict recorded.
 features:
-  - title: Per-market verdicts
-    description: APPROVED, REVIEW or BLOCKED for each market, with a score.
-  - title: Rules explained
-    description: The rules content breaks, worst first, each with the reason.
   - title: Every format
-    description: Text, images, audio and video, including what's said in a video.
-  - title: Fix flagged images
-    description: Regenerate an image so it meets a market's rules, keeping what you ask to keep.
-  - title: Markets and rules
-    description: Create markets, edit their rules, or draft new rules with AI.
+    description: Text, images, audio and video, checked per market.
+  - title: Clear verdicts
+    description: Approved, review or blocked, with the rules each concern breaks.
+  - title: Frame-level detail
+    description: The media and video frames behind each concern.
+  - title: Automatic image fixes
+    description: Regenerate a flagged image to meet the market's rules.
   - title: Review queue
-    description: Relay a reviewer's approve or reject on flagged items.
-  - title: Markets and rules
-    description: Create markets, edit their rules, or draft new rules with AI.
-  - title: Review queue
-    description: Relay a reviewer's approve or reject on flagged items.
+    description: Record a reviewer's approve or reject.
 use-cases:
-  - title: Global campaigns
-    description: Clear one creative for many markets at once.
-  - title: Brand safety
-    description: Catch unsafe or sensitive content before it ships.
-  - title: Regional adaptation
-    description: Turn a blocked image into one that passes.
+  - title: Global ad launch
+    description: Check one creative for every market before it ships.
+  - title: Video QA
+    description: Find the frames that break a market's rules.
 mcp-toolset: quality
 mcp-tools:
   - name: list_qc_regions
@@ -62,28 +54,14 @@ mcp-tools:
     title: List items waiting for review
   - name: adjudicate_decision
     title: Record a reviewer's verdict
-  - name: create_qc_market
-    title: Create a market for content checks
-  - name: update_qc_market
-    title: Edit a market
-  - name: delete_qc_market
-    title: Delete a market
-  - name: list_qc_rules
-    title: List a market's rules
-  - name: add_qc_rule
-    title: Add a rule to a market
-  - name: update_qc_rule
-    title: Edit a rule
-  - name: delete_qc_rule
-    title: Delete a rule
-  - name: generate_qc_rules
-    title: Draft rules for a market with AI
   - name: list_languages
     title: List languages
   - name: quote_cost
     title: Price work in credits
 related-skills:
+  - name: compliance-markets
+    why: Add the markets and rules content is checked against.
   - name: hyperlocal-campaigns
-    why: Clear a campaign's creative for each market before it is sent.
+    why: Send the approved creative to your network.
   - name: image-creator
-    why: Make a new creative when one is flagged.
+    why: Make a new version of a blocked image.

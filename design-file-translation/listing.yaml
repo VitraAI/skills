@@ -1,0 +1,67 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Review and finish the translations your designers send from Figma, Canva,
+  Adobe and Word: read them line by line, correct and approve lines, keep the
+  translation memory in step, and run AI proofreading, QC and quality scores.
+when-to-use: >-
+  Reach for it after someone translated a design in a Vitra plugin and the
+  result needs checking, correcting or scoring before it ships.
+features:
+  - title: Every plugin job
+    description: Figma, Canva, Adobe and Word translations in one list.
+  - title: Line-by-line review
+    description: Correct, verify and approve lines by number.
+  - title: Memory in step
+    description: Save corrections to the translation memory, or pull it in.
+  - title: AI checks
+    description: Proofreading, back-translation, QC and transcreation.
+  - title: Quality scores
+    description: An MQM score per language, with fixes written back.
+use-cases:
+  - title: Design review
+    description: Check the German Figma file before handoff.
+  - title: Headline options
+    description: Get creative alternatives for one line of a banner.
+mcp-toolset: documents
+mcp-tools:
+  - name: list_design_jobs
+    title: List design-tool translation jobs
+  - name: get_design_job
+    title: Get a design-tool job
+  - name: get_design_job_lines
+    title: Read a design job line by line
+  - name: edit_design_job_lines
+    title: Correct, verify or sync a design job
+  - name: proofread_design_job
+    title: AI-proofread a design job
+  - name: back_translate_design_job
+    title: Back-translate a design job
+  - name: qc_design_job
+    title: AI quality-check a design job
+  - name: transcreate_design_line
+    title: Get creative alternatives for a design line
+  - name: run_design_job_quality_report
+    title: Score a design job translation
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_design_job_quality_fixes
+    title: Apply a quality report's fixes to a design job
+  - name: manage_design_job
+    title: Rename or file a design-tool job
+  - name: delete_design_job
+    title: Delete a design-tool job
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: translation-memory
+    why: Correct the memory the plugin jobs reuse.
+  - name: terminology
+    why: Fix recurring wording with glossary terms and style rules.
+  - name: translation-quality
+    why: Score other translations the same way.

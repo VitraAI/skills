@@ -1,0 +1,109 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Build the creative your Hyperlocal campaigns send: templates tied to your
+  products, localized per language with translated images and per-contact
+  overlays, plus the WhatsApp and Facebook message templates that carry them.
+when-to-use: >-
+  Reach for it when preparing a campaign's creative — a new offer, a new
+  language, a new product — before a broadcast is sent.
+features:
+  - title: Creative templates
+    description: Product images or videos with per-contact overlays.
+  - title: Every language
+    description: Localized templates with the image text translated.
+  - title: Overlays
+    description: Edit, copy and preview the fields each contact sees.
+  - title: Message templates
+    description: WhatsApp templates through Meta approval, and Facebook posts.
+  - title: Product catalog
+    description: Products and models the templates belong to.
+use-cases:
+  - title: Regional offers
+    description: One offer template in Hindi, Tamil and Marathi.
+  - title: New product line
+    description: Add the models and a launch template before the broadcast.
+mcp-toolset: hyperlocal
+mcp-tools:
+  - name: list_creative_templates
+    title: List Hyperlocal creative templates
+  - name: get_creative_template
+    title: Get a creative template
+  - name: list_products
+    title: List products or product models
+  - name: create_hyperlocal_upload_url
+    title: Create a Hyperlocal upload URL
+  - name: register_hyperlocal_upload
+    title: Register a Hyperlocal upload
+  - name: create_creative_template
+    title: Create a creative template
+  - name: update_creative_template
+    title: Edit a creative template
+  - name: delete_creative_template
+    title: Delete a creative template
+  - name: list_template_localizations
+    title: List a template's localizations
+  - name: create_template_localization
+    title: Localize a template into a language
+  - name: update_template_localization
+    title: Edit a template localization
+  - name: delete_template_localization
+    title: Delete a template localization
+  - name: translate_template_image
+    title: Translate a template's image
+  - name: get_image_translation
+    title: Check an image translation
+  - name: save_image_as_template
+    title: Send a translated image back to Hyperlocal
+  - name: get_template_overlays
+    title: Get a template's overlays
+  - name: edit_template_overlay
+    title: Edit a template's overlay
+  - name: copy_template_overlay
+    title: Copy an overlay to a language
+  - name: preview_overlay_for_contact
+    title: Preview overlay values for a contact
+  - name: get_whatsapp_template
+    title: Get a WhatsApp template
+  - name: create_whatsapp_template
+    title: Create a WhatsApp template
+  - name: update_whatsapp_template
+    title: Edit a WhatsApp template
+  - name: delete_whatsapp_template
+    title: Delete a WhatsApp template
+  - name: submit_whatsapp_template
+    title: Submit a WhatsApp template to Meta
+  - name: refresh_whatsapp_template_status
+    title: Refresh a WhatsApp template's approval status
+  - name: create_facebook_template
+    title: Create a Facebook post template
+  - name: update_facebook_template
+    title: Edit a Facebook post template
+  - name: delete_facebook_template
+    title: Delete a Facebook post template
+  - name: create_product
+    title: Add a product
+  - name: update_product
+    title: Edit a product
+  - name: delete_product
+    title: Delete a product
+  - name: create_product_model
+    title: Add a product model
+  - name: update_product_model
+    title: Edit a product model
+  - name: delete_product_model
+    title: Delete a product model
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: hyperlocal-campaigns
+    why: Send the finished template to your network.
+  - name: image-creator
+    why: Design a new base creative first.
+  - name: image-translation
+    why: Localize a creative with full line-by-line review.

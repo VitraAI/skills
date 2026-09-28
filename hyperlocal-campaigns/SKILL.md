@@ -1,17 +1,18 @@
 ---
 name: hyperlocal-campaigns
 description: >-
-  Runs Vitra Hyperlocal campaigns through the Vitra Universe API: manages
-  contacts, groups, products and creative, WhatsApp and Facebook templates,
-  localizes contacts and templates, picks an audience (by group, state, zone or
-  area), estimates reach and credits, prepares a personalized creative for every
-  contact, then — only on the user's explicit yes — sends it over WhatsApp or
-  Facebook now or on a schedule, and reports delivery. Use it whenever the user
-  wants to message their contact network — "send the Diwali offer to all
-  retailers in Maharashtra", "schedule a WhatsApp campaign for tomorrow 10am",
-  "how did last week's broadcast do?", "pause the campaign", "add these
-  retailers to the Pune group". A campaign is not a board project (projects).
-  Not for translating content (document-translation, image-translation).
+  Runs Vitra Hyperlocal broadcasts through the Vitra Universe API: picks an
+  audience of retailers or partners (by group, state, zone or area), estimates
+  reach and credits, prepares a personalized creative for every contact, then
+  — only on the user's explicit yes — sends it over WhatsApp or Facebook now
+  or on a schedule; pauses, resumes or stops a broadcast, retries failed
+  sends, deletes old ones and reports delivery (sent, delivered, read) and
+  Facebook insights. Use it whenever the user wants to message their contact
+  network — "send the Diwali offer to all retailers in Maharashtra", "schedule
+  a WhatsApp campaign for tomorrow 10am", "how did last week's broadcast do?",
+  "pause the campaign", "resend the failed ones". Not for managing contacts
+  and groups (hyperlocal-contacts), building templates or products
+  (hyperlocal-templates), or board projects (projects).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -29,7 +30,7 @@ metadata:
 ---
 # Hyperlocal Campaigns
 
-Personalized campaigns to the organization's retailers and partners. Preparing creatives and every message sent spend credits; sending reaches real people and can't be undone.
+Personalized broadcasts to the organization's retailers and partners. Preparing creatives and every message sent spend credits; sending reaches real people and can't be undone.
 
 ## How to call Vitra
 
@@ -49,48 +50,30 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 
 ## Workflow
 
-1. **Audience**: `find_contacts`, `list_contact_groups`, `list_contact_places` (valid
-   states, zones, areas). Confirm the audience with the user by group and place names.
+1. **Audience**: `list_contact_groups` and `list_contact_places` (valid states, zones,
+   areas); `find_contacts` for single contacts. Confirm the audience by group and place
+   names. Contacts and groups are changed with the hyperlocal-contacts skill.
 2. **Creative**: `list_creative_templates` (also the WhatsApp and Facebook templates). A
-   WhatsApp template must be approved by Meta before it can be sent.
+   WhatsApp template must be approved by Meta before it can be sent; templates are built
+   with the hyperlocal-templates skill.
 3. **Estimate** and show reach and credits:
    ```bash
    python3 scripts/vitra.py call estimate_broadcast '{"template": "Diwali offer", "channels": ["whatsapp"], "states": ["Maharashtra"], "select_all": true}'
    ```
 4. **Prepare** (paid, sends nothing) after the user's yes: `create_broadcast` with the same
    audience, the message template and `confirm: true`. Follow with `get_broadcast` until
-   the creatives are ready.
+   the creatives are ready; `regenerate_broadcast_creative` redoes one contact's (paid).
 5. **Send** ⏸ only on an explicit yes to "send to N contacts for X credits now / at …".
-   Sending tools are in the opt-in `hyperlocal_send` toolset:
    ```bash
    python3 scripts/vitra.py call send_broadcast '{"broadcast": "Diwali Maharashtra", "confirm": true}' --toolsets hyperlocal,hyperlocal_send
    ```
-   Or `schedule_broadcast` (date, time, timezone). `control_broadcast` pauses, resumes,
-   stops or unschedules; `retry_broadcast_send` resends one failed message.
-6. **Report**: `get_broadcast` (delivery per channel), `list_broadcast_contacts`,
+   Or `schedule_broadcast` (date, time, timezone).
+6. **Control** ⏸: `control_broadcast` pauses, resumes, stops or unschedules (resume needs
+   the same explicit yes as sending); `retry_broadcast_send` resends one failed message.
+7. **Report**: `get_broadcast` (delivery per channel), `list_broadcast_contacts`,
    `get_broadcast_contact`, `refresh_broadcast_analytics` (Facebook insights).
 
-**Contacts**: `get_contact`, `create_contact`, `update_contact`, `delete_contact`,
-`set_contact_whatsapp`, `get_contact_facebook`, `disconnect_contact_facebook`; localize
-names and addresses with `estimate_contact_localization` → `localize_contacts` (paid),
-`preview_contact_localization`, `set_contact_localization`.
-**Groups**: `create_contact_group`, `update_contact_group`, `delete_contact_group`,
-`add_contacts_to_group`, `remove_contacts_from_group`.
-**Products**: `list_products`, `create_product`, `update_product`, `delete_product`,
-`create_product_model`, `update_product_model`, `delete_product_model`.
-**Creative templates**: `get_creative_template`, `create_creative_template`,
-`update_creative_template`, `delete_creative_template`; per language
-`list_template_localizations`, `create_template_localization`,
-`update_template_localization`, `delete_template_localization`, `translate_template_image`
-(paid; follow with `get_image_translation`, then `save_image_as_template`); overlays
-`get_template_overlays`, `edit_template_overlay`, `copy_template_overlay`,
-`preview_overlay_for_contact`. Template images: `create_hyperlocal_upload_url` →
-`register_hyperlocal_upload`.
-**Message templates**: `get_whatsapp_template`, `create_whatsapp_template`,
-`update_whatsapp_template`, `delete_whatsapp_template`, `submit_whatsapp_template` (to
-Meta: `hyperlocal_send` toolset, explicit yes), `refresh_whatsapp_template_status`;
-`create_facebook_template`, `update_facebook_template`, `delete_facebook_template`.
-**Broadcasts**: `list_broadcasts`, `delete_broadcast`, `regenerate_broadcast_creative`.
+**History**: `list_broadcasts`; `delete_broadcast` (confirm).
 
 ## Rules
 
