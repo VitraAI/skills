@@ -8,7 +8,7 @@ the rules and the wording; nothing about Vitra lives here.
   vitra.py call TOOL [ARGS_JSON] [--intent TEXT] [--toolsets a,b]
                                          run TOOL with a JSON object of arguments
   vitra.py upload PATH                   put a local file in Vitra; prints its asset
-                                         (and duration_seconds for MP4/MOV/M4A/M4V)
+                                         (and duration_seconds for MP4/MOV/M4A/M4V/MP3/WAV)
   vitra.py download URL --to PATH        save a link a tool returned to a local file
 
 Every command prints ONE JSON object on stdout. On failure:
@@ -275,6 +275,8 @@ def _call_tool(name: str, args: dict) -> dict:
 
 
 _TIMED = {".mp4", ".mov", ".m4a", ".m4v"}
+_WAV = {".wav", ".wave"}
+_MP3 = {".mp3"}
 
 
 def _box_header(fh, end: int) -> tuple[bytes, int, int] | None:
@@ -299,10 +301,105 @@ def _box_header(fh, end: int) -> tuple[bytes, int, int] | None:
 
 
 def _media_seconds(path: Path) -> float | None:
+    """The length of an audio or video file, read from its headers only, or
+    None when it can't be told."""
+    suffix = path.suffix.lower()
+    try:
+        if suffix in _TIMED:
+            return _mp4_seconds(path)
+        if suffix in _WAV:
+            return _wav_seconds(path)
+        if suffix in _MP3:
+            return _mp3_seconds(path)
+    except (OSError, ValueError):
+        return None
+    return None
+
+
+def _wav_seconds(path: Path) -> float | None:
+    """A WAV file's length: its data chunk size over the fmt byte rate."""
+    with path.open("rb") as fh:
+        head = fh.read(12)
+        if len(head) < 12 or head[:4] != b"RIFF" or head[8:12] != b"WAVE":
+            return None
+        rate = None
+        for _ in range(1000):
+            chunk = fh.read(8)
+            if len(chunk) < 8:
+                return None
+            kind, size = chunk[:4], int.from_bytes(chunk[4:8], "little")
+            if kind == b"fmt ":
+                fmt = fh.read(size)
+                if len(fmt) < 12:
+                    return None
+                rate = int.from_bytes(fmt[8:12], "little")  # bytes per second
+                if size % 2:
+                    fh.seek(1, 1)
+                continue
+            if kind == b"data":
+                if not rate:
+                    return None
+                if size in (0, 0xFFFFFFFF):  # streamed: size unknown, use the file
+                    size = path.stat().st_size - fh.tell()
+                return round(size / rate, 3) if size > 0 else None
+            fh.seek(size + (size % 2), 1)
+    return None
+
+
+_MP3_BITRATES = {  # kbps by (MPEG-1?, layer III) index
+    True: [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320],
+    False: [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160],
+}
+_MP3_RATES = {3: [44100, 48000, 32000], 2: [22050, 24000, 16000], 0: [11025, 12000, 8000]}
+
+
+def _mp3_seconds(path: Path) -> float | None:
+    """An MP3's length: the Xing/Info or VBRI frame count when the file has one
+    (variable bit rate), else the first frame's bit rate over the audio size."""
+    size = path.stat().st_size
+    with path.open("rb") as fh:
+        head = fh.read(10)
+        start = 0
+        if head[:3] == b"ID3" and len(head) == 10:  # skip the ID3v2 tag
+            start = 10 + ((head[6] & 0x7F) << 21 | (head[7] & 0x7F) << 14
+                          | (head[8] & 0x7F) << 7 | (head[9] & 0x7F))
+        fh.seek(start)
+        buf = fh.read(65536)
+    for i in range(len(buf) - 4):
+        if buf[i] != 0xFF or (buf[i + 1] & 0xE0) != 0xE0:
+            continue
+        version = (buf[i + 1] >> 3) & 3  # 3 = MPEG-1, 2 = MPEG-2, 0 = MPEG-2.5
+        layer = (buf[i + 1] >> 1) & 3  # 1 = layer III
+        bitrate_ix, rate_ix = buf[i + 2] >> 4, (buf[i + 2] >> 2) & 3
+        if version == 1 or layer != 1 or bitrate_ix in (0, 15) or rate_ix == 3:
+            continue
+        mpeg1 = version == 3
+        rate = _MP3_RATES[version][rate_ix]
+        per_frame = 1152 if mpeg1 else 576
+        mono = (buf[i + 3] >> 6) == 3
+        side = (17 if mono else 32) if mpeg1 else (9 if mono else 17)
+        xing = buf[i + 4 + side:i + 4 + side + 12]
+        if xing[:4] in (b"Xing", b"Info") and int.from_bytes(xing[4:8], "big") & 1:
+            frames = int.from_bytes(xing[8:12], "big")
+            return round(frames * per_frame / rate, 3) if frames else None
+        vbri = buf[i + 36:i + 36 + 18]
+        if vbri[:4] == b"VBRI":
+            frames = int.from_bytes(vbri[14:18], "big")
+            return round(frames * per_frame / rate, 3) if frames else None
+        kbps = _MP3_BITRATES[mpeg1][bitrate_ix]
+        audio = size - start - i
+        if size >= 128:
+            with path.open("rb") as fh:
+                fh.seek(size - 128)
+                if fh.read(3) == b"TAG":  # ID3v1 tag at the end
+                    audio -= 128
+        return round(audio * 8 / (kbps * 1000), 3) if audio > 0 else None
+    return None
+
+
+def _mp4_seconds(path: Path) -> float | None:
     """The length an MP4 / MOV / M4A / M4V file declares (moov -> mvhd), read
     from box headers only (a few hundred bytes), or None when it can't be."""
-    if path.suffix.lower() not in _TIMED:
-        return None
     try:
         with path.open("rb") as fh:
             end = path.stat().st_size
@@ -376,7 +473,7 @@ def cmd_upload(a: argparse.Namespace) -> int:
     seconds = _media_seconds(path)
     return _out({"status": "ok", "file": path.name, "bytes": size, "asset": asset,
                  "key": key,
-                 # The video's length, for the tools that take duration_seconds.
+                 # The audio or video length, for the tools that take duration_seconds.
                  **({"duration_seconds": seconds} if seconds else {}),
                  "next_action": "Pass asset.asset_id (or key, where a tool asks for "
                                 "asset_key) to the tool that needs the file."})

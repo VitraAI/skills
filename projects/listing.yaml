@@ -24,8 +24,6 @@ features:
     description: Deletes always ask first; ambiguous names come back as a question.
   - title: Job assignments
     description: Put people on each language of a dub, document or image job.
-  - title: Job assignments
-    description: Put people on each language of a dub, document or image job.
 use-cases:
   - title: Daily stand-up
     description: What's due, what's overdue, who's on it.

@@ -67,6 +67,8 @@ mcp-tools:
     title: Create an Image Creator collection
   - name: update_image_collection
     title: Add, remove or rename in a collection
+  - name: delete_image_collection
+    title: Delete an Image Creator collection
   - name: list_languages
     title: List languages
   - name: quote_cost
