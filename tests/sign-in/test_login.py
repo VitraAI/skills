@@ -242,6 +242,26 @@ class LoginTest(unittest.TestCase):
         self.assertTrue(all(b"signed in" in p for p in pages), pages)
         self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
 
+    def test_finish_from_a_pasted_address_when_the_browser_cannot_reach_us(self) -> None:
+        started = self.run_script("login.py")
+        self.assertIn("--finish", started["next_action"])
+
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *a, **k):
+                return None
+        opener = urllib.request.build_opener(NoRedirect)
+        try:
+            opener.open(started["sign_in_url"], timeout=30)
+            self.fail("expected the sign-in redirect")
+        except urllib.error.HTTPError as e:  # 302 → the callback address
+            address = e.headers["Location"]
+        bad = self.run_script("login.py", "--finish", address.replace("state=", "state=x"))
+        self.assertEqual(bad["error"]["code"], "SIGNIN_MISMATCH")
+        done = self.run_script("login.py", "--finish", address)
+        self.assertEqual(done["status"], "signed_in")
+        again = self.run_script("login.py", "--finish", address)  # the plan is used up
+        self.assertEqual(again["error"]["code"], "NO_SIGNIN_STARTED")
+
     def test_only_listens_on_this_machine(self) -> None:
         self.fake.redirect = "http://0.0.0.0/callback"
         out = self.run_script("login.py")

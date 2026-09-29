@@ -118,6 +118,9 @@ def start() -> int:
         popen["start_new_session"] = True
     child = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--serve"], **popen)
     assert child.stdin is not None
+    # Kept owner-only so `--finish` can complete the sign-in when the browser
+    # can't reach this machine's helper (an agent sandbox, a remote shell).
+    _common.write_private(_plan_file(), {**plan, "created_at": int(time.time())})
     child.stdin.write(json.dumps(plan).encode())
     child.stdin.close()
 
@@ -151,9 +154,46 @@ def start() -> int:
             ("A Vitra sign-in tab opened. " if opened else
              "Give the user this sign-in link to open: sign_in_url. ")
             + "Ask them to sign in and pick an organization there, then run "
-              "login.py --status. The link works for 10 minutes, on this machine only."
+              "login.py --status. The link works for 10 minutes. If the browser then "
+              "shows \"site can't be reached\" (this agent runs in a sandbox), ask the "
+              "user to copy the full address from the browser's address bar and run "
+              "login.py --finish '<that address>'."
         ),
     })
+
+
+def _plan_file() -> Path:
+    return _common.signin_file().with_name("universe-signin.plan.json")
+
+
+def finish(address: str) -> int:
+    """Complete a sign-in from the callback address the browser couldn't open."""
+    try:
+        plan = json.loads(_plan_file().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        _common.die(_common.EXIT_AUTH_MISSING, "No sign-in in progress here: run login.py first.",
+                    error_code="NO_SIGNIN_STARTED", retryable=False)
+        return 1
+    if time.time() - int(plan.get("created_at") or 0) > WAIT_SECONDS:
+        _plan_file().unlink(missing_ok=True)
+        _common.die(_common.EXIT_AUTH_MISSING, "That sign-in expired: run login.py again.",
+                    error_code="SIGNIN_EXPIRED", retryable=False)
+    url = urllib.parse.urlsplit(address.strip())
+    q = dict(urllib.parse.parse_qsl(url.query))
+    if url.hostname not in LOOPBACK or q.get("state") != plan.get("state") or not q.get("code"):
+        _common.die(_common.EXIT_AUTH_MISSING,
+                    "That isn't the address from this sign-in. Copy the whole address bar "
+                    "of the \"site can't be reached\" page and try again.",
+                    error_code="SIGNIN_MISMATCH", retryable=False)
+    redirect_uri = f"{url.scheme}://{url.hostname}:{url.port}{url.path}" if url.port \
+        else f"{url.scheme}://{url.hostname}{url.path}"
+    result = _exchange(plan, q["code"], redirect_uri)
+    _plan_file().unlink(missing_ok=True)
+    if result.get("status") != "signed_in":
+        _common.die(_common.EXIT_AUTH_MISSING, result.get("message", "Sign-in didn't finish."),
+                    error_code="SIGNIN_FAILED", retryable=False)
+    _write_pending(result)
+    return status()
 
 
 def _same_site(url: object, base: str) -> bool:
@@ -238,6 +278,7 @@ def serve() -> int:
                                       message=q.get("error_description") or "Sign-in was cancelled.")
                     else:
                         result.update(_exchange(plan, q.get("code", ""), self.server.redirect_uri))
+                        _plan_file().unlink(missing_ok=True)
                     if result.get("status") != "superseded":
                         _write_pending(result)  # before the reply, so --status sees it at once
             if result.get("status") == "superseded":
@@ -389,9 +430,13 @@ def main() -> int:
     g.add_argument("--status", action="store_true", help="who is signed in, where")
     g.add_argument("--logout", action="store_true", help="forget this machine's sign-in")
     g.add_argument("--serve", action="store_true", help=argparse.SUPPRESS)
+    g.add_argument("--finish", metavar="ADDRESS",
+                   help="finish with the browser's address when it couldn't reach this machine")
     a = p.parse_args()
     if a.serve:
         return serve()
+    if a.finish:
+        return finish(a.finish)
     if a.status:
         return status()
     if a.logout:
