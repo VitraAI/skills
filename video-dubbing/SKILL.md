@@ -87,14 +87,16 @@ the video is and call again with `duration_seconds`.
 4. **Edit** ⏸ with the `revision` you read, showing before → after: `edit_dub_lines`
    (then `regenerate_dub_audio`, paid), `rewrite_dub_line` (suggestion only),
    `restructure_dub_lines` (split, merge, add, delete), `edit_dub_speakers` (a cloned
-   voice needs `consent`), `set_dub_emotion`, pronunciations `list_pronunciations`,
+   voice needs `consent`), `set_dub_emotion` (`"none"` takes an emotion off), pronunciations `list_pronunciations`,
    `set_pronunciation`, `remove_pronunciation`; `transliterate` (sent to Google: nothing
    confidential).
 5. **Issues**: `list_dub_issues`; `fix_dub_issues` (may shorten lines: say so). Errors
    block export: never try to bypass.
 6. **Export** one language at a time: `export_dub` (optional burned-in `subtitles`;
    `lip_sync` is paid and needs `confirm` and `consent`) → `get_dub_export` for the link →
-   optionally `save_dub_export_to_drive`.
+   optionally `save_dub_export_to_drive` once (saving the same export again returns the
+   copy already saved; the user can't trash saved videos from the Drive). A source that is
+   not 16:9, 9:16 or 1:1 (e.g. 4:5) is exported with bars: say so before exporting.
 
 ## Also
 
@@ -102,7 +104,8 @@ Quality: `run_dub_quality_report` → `get_quality_report` → `apply_dub_qualit
 (confirm; then regenerate audio). Memory: `sync_dub_memory` (confirm). Settings:
 `get_dub_settings`, `update_dub_settings`, `dub_background_audio`. Spreadsheet of every
 line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `retry_dub` (after
-`failed`), `stop_dub_work`, `remove_dub_language`, `delete_dub_job` (confirm).
+`failed`), `stop_dub_work` (a finished job answers nothing_running),
+`remove_dub_language`, `delete_dub_job` (confirm).
 
 ## Rules
 

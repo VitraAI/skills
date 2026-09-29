@@ -62,7 +62,9 @@ background: mention it once; nothing to do.
    gave (show before → after); `delete_contact` (confirm).
 3. **Channels**: `set_contact_whatsapp` sets or removes a WhatsApp number;
    `get_contact_facebook` shows whether their Facebook Page is connected (optionally with
-   an invite link to pass on); `disconnect_contact_facebook` (confirm).
+   an invite link to pass on; if it comes with an invite_link_warning, don't send the link:
+   tell the user the Facebook connection needs fixing in Vitra);
+   `disconnect_contact_facebook` (confirm; `disconnected: false` means no Page was connected).
 4. **Groups**: `list_contact_groups`, `create_contact_group`, `update_contact_group`,
    `add_contacts_to_group`, `remove_contacts_from_group`; `delete_contact_group` (confirm;
    its contacts stay).
@@ -70,13 +72,13 @@ background: mention it once; nothing to do.
    `scope` returns the fields and the credits (and whether the balance covers them); tell
    the user, then `localize_contacts` with `confirm: true`.
    `preview_contact_localization` shows one contact's result; `set_contact_localization`
-   saves values the user wrote.
+   saves values the user wrote (only the fields given change; the others are kept).
 
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are BCP-47 codes** here (e.g. `"hi-IN"`, `"ta-IN"`), as `describe` shows,
+  never display names or `list_languages` keys.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

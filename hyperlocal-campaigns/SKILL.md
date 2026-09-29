@@ -64,6 +64,8 @@ background: mention it once; nothing to do.
    ```bash
    python3 scripts/vitra.py call estimate_broadcast '{"template": "Diwali offer", "channels": ["whatsapp"], "states": ["Maharashtra"], "select_all": true}'
    ```
+   Groups, states, zones or areas without `contact_ids` reach everyone matching them. If
+   `contacts` is 0, say so and check the audience before going on.
 4. **Prepare** (paid, sends nothing) after the user's yes: `create_broadcast` with the same
    audience, the message template and `confirm: true`. Follow with `get_broadcast` until
    the creatives are ready; `regenerate_broadcast_creative` redoes one contact's (paid).
