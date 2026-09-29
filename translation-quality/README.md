@@ -1,6 +1,6 @@
 # translation-quality
 
-Translation Quality: an agent skill for Vitra Universe. Scores a translation line by line with the Vitra Universe API — accuracy, fluency, terminology and style (MQM) — against the organization's translation memory and terminology, and returns an overall score, a verdict and the worst lines with explained errors and suggested fixes; re-runs, cancels, lists and exports reports as PDF.
+Translation Quality: an agent skill for Vitra Universe. Reads and exports the translation quality reports Vitra Universe makes — accuracy, fluency, terminology and style (MQM), scored line by line against the organization's translation memory and terminology: the overall score, a verdict and the worst lines with explained errors and suggested fixes, and the report as a PDF. A report is run by the skill of the job it scores (documents, dubs, images, DITA maps, design jobs).
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

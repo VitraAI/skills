@@ -45,7 +45,7 @@ mcp-tools:
   - name: list_playground_jobs
     title: List speech sessions, voice clones or lip-syncs
   - name: rename_playground_job
-    title: Rename a Playground job
+    title: Rename a speech session
   - name: manage_playground_job
     title: Retry or save a Playground job
   - name: delete_playground_job

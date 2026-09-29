@@ -66,7 +66,7 @@ background: mention it once; nothing to do.
    ```
 5. **Wait**: `get_lip_sync` until `completed`; give the video link, or `vitra.py download`.
 
-Jobs: `list_playground_jobs` with `kind: lip_sync`, `rename_playground_job`,
+Jobs: `list_playground_jobs` with `kind: lip_sync`,
 `manage_playground_job` (`retry`: paid; `save_to_drive`), `delete_playground_job` (confirm).
 
 ## Rules
