@@ -18,6 +18,12 @@ import os
 import sys
 from pathlib import Path
 
+for _stream in (sys.stdout, sys.stderr):
+    try:  # Windows consoles default to a legacy code page
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 # Vitra Universe server. Production unless overridden, so a real user needs
 # nothing but an API key.
 #
@@ -447,8 +453,11 @@ def auth_error(status: int, what: str = "do this") -> str:
                 "left that organization. Sign in again: python3 scripts/login.py"
             )
         return (
-            "Your API key was not accepted. It may be mistyped, revoked, or "
-            "expired — ask your Vitra org administrator for a new one."
+            f"Your API key ({ENV_VAR}) was not accepted by {base_url()}. It may be "
+            "mistyped, revoked, expired, or made on another Vitra environment: a key "
+            "works only where it was created. It overrides browser sign-in: unset it "
+            "to sign in with scripts/login.py instead, or ask your Vitra org "
+            "administrator for a new key for this server."
         )
     if status == 429:
         return (
