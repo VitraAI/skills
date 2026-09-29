@@ -66,7 +66,9 @@ background: mention it once; nothing to do.
    `vitra.py download <link> --to <path>`.
 
 Sessions: `list_playground_jobs` with `kind: speech`, `rename_playground_job`,
-`manage_playground_job` (`save_to_drive`), `delete_playground_job` (confirm).
+`manage_playground_job` (`save_to_drive`: unchanged clips are not copied twice; the
+default folder can't be trashed, so pass `folder` if the user will tidy up later),
+`delete_playground_job` (confirm).
 
 ## Rules
 

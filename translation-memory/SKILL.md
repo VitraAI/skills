@@ -57,7 +57,7 @@ background: mention it once; nothing to do.
 
 **Pick the memory** ⏸: `list_translation_memories` (optionally for a target language);
 several → ask which by name. `get_translation_memory` shows its languages, engine and
-linked resources.
+linked resources (glossaries, term bases, style guide).
 
 **Translate short texts** (UI strings, product copy): memory first, machine for the rest;
 new translations are stored as unverified entries.
