@@ -7,9 +7,9 @@ description: >-
   burn them into the video or download them as SRT, VTT and other formats. Use
   it whenever the user wants captions or subtitles for a video — "subtitle this
   clip", "add Spanish captions to this video", "burn the subtitles in", "give me
-  the SRT", "fix line 5 of the French subtitles". Not for a voice-over (video-
-  dubbing), translating a subtitle file the user already has (subtitle-
-  translation) or documents (document-translation).
+  the SRT", "fix line 5 of the French subtitles". Not for a voice-over
+  (video-dubbing), translating a subtitle file the user already has
+  (subtitle-translation) or documents (document-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
