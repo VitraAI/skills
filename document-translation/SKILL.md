@@ -10,7 +10,7 @@ description: >-
   "translate this contract into German", "translate everything in our Q3
   folder", "score the French version", "change line 12 of the Spanish file".
   Not for video or subtitles (video-dubbing, video-subtitles, subtitle-translation), text in images
-  (image-translation) or DITA maps (dita-translation).
+  (image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in

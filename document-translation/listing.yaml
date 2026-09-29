@@ -83,8 +83,6 @@ mcp-tools:
 related-skills:
   - name: translation-memory
     why: Look up, correct or import the approved wording every translation reuses.
-  - name: dita-translation
-    why: Translate a whole DITA map (zipped topics) instead of single files.
   - name: video-dubbing
     why: Translate subtitle files (SRT, VTT) instead of documents.
   - name: image-translation

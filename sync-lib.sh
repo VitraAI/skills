@@ -25,7 +25,6 @@ SKILL_FILES=(
   "compliance-markets|${BASE}"
   "content-compliance|${BASE}"
   "design-file-translation|${BASE}"
-  "dita-translation|${BASE}"
   "document-translation|${BASE}"
   "drive|${BASE}"
   "hyperlocal-campaigns|${BASE}"

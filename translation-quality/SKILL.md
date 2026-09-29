@@ -6,7 +6,7 @@ description: >-
   the organization's translation memory and terminology: the overall score, a
   verdict and the worst lines with explained errors and suggested fixes, and
   the report as a PDF. A report is run by the skill of the job it scores
-  (documents, dubs, images, DITA maps, design jobs). Use it whenever the user
+  (documents, dubs, images, design jobs). Use it whenever the user
   asks about a quality report or score — "what did the French report say?",
   "which lines failed?", "is this ready to publish?", "send me the report as a
   PDF". Not for translating (document-translation, translation-memory) or
@@ -61,11 +61,10 @@ background: mention it once; nothing to do.
    | Document | `run_document_quality_report` | `apply_document_quality_fixes` |
    | Dub | `run_dub_quality_report` | `apply_dub_quality_fixes` |
    | Image | `run_image_quality_report` | `apply_image_quality_fixes` |
-   | DITA map | `run_dita_map_quality_report` | `apply_dita_map_quality_fixes` |
    | Design job | `run_design_job_quality_report` | `apply_design_job_quality_fixes` |
 
    The job's own skill (document-translation, video-dubbing, image-translation,
-   dita-translation, design-file-translation) finds the job and explains its options.
+   design-file-translation) finds the job and explains its options.
 2. **Read**: `get_quality_report` with the `report_id` (or a `reference` with
    `source_language` and `target_language` for the latest one), again after
    `check_again_in_seconds` while it runs. `findings: 5` adds the 5 worst segments

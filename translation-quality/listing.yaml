@@ -9,7 +9,7 @@ about: >-
   accuracy, fluency, terminology, style — and a suggested better version, judged
   against your organization's own terminology.
 when-to-use: >-
-  Reach for it after scoring a document, dub, image, DITA map or design job, to
+  Reach for it after scoring a document, dub, image or design job, to
   decide whether it is ready to publish, check a vendor's work, or share the
   report as a PDF.
 features:
@@ -42,8 +42,6 @@ mcp-tools:
     title: Score a dub's translation
   - name: run_image_quality_report
     title: Quality-score a translated image
-  - name: run_dita_map_quality_report
-    title: Score a DITA map translation
   - name: run_design_job_quality_report
     title: Score a design job translation
 related-skills:

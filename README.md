@@ -20,7 +20,6 @@ plus the scripts it runs.
 | [`design-file-translation`](design-file-translation/) | Review, correct and score translations sent from the Figma, Canva, Adobe and Word plugins |
 | [`video-dubbing`](video-dubbing/) | Dub a video with voices from the voice library, make subtitles, translate SRT/VTT files; review, export or burn in |
 | [`document-translation`](document-translation/) | Translate text, Office, PDF, spreadsheet and InDesign files, batches or Drive folders; review and score them |
-| [`dita-translation`](dita-translation/) | Follow, retry, score and download DITA map translations, one zip per language |
 | [`translation-memory`](translation-memory/) | Translation memories: translate strings memory-first, correct entries, share, link, VitraTM settings |
 | [`terminology`](terminology/) | Glossaries, term bases and style guides |
 | [`translation-quality`](translation-quality/) | Score a translation line by line and explain the worst lines |
