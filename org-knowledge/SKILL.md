@@ -1,18 +1,18 @@
 ---
 name: org-knowledge
 description: >-
-  Searches and maintains the organization's knowledge in Vitra Universe
-  (Memory in the app): the facts, guidelines, audience notes and decisions the
-  team saves for people and agents to reuse. Finds entries by words or
-  category, reads one, saves new ones (private or shared with the
-  organization), edits them with version history, restores an earlier version,
-  favourites or deletes entries, and manages categories. Use it when the user
-  asks what the organization knows or wants something remembered — "what do we
-  know about our audience in Brazil?", "save this as our tone guideline",
-  "update the pricing note", "roll the launch brief back to yesterday's
-  version", "add a Legal category". Not for reusable prompts
-  (prompts-library), translation wording (translation-memory, terminology) or
-  brand colors and fonts (brand-kit).
+  Searches and maintains the organization's knowledge in Vitra Universe (Memory
+  in the app): the facts, guidelines, audience notes and decisions the team
+  saves for people and agents to reuse. Finds entries by words or category,
+  reads one, saves new ones (private or shared with the organization), edits
+  them with version history, restores an earlier version, favourites or deletes
+  entries, and manages categories. Use it when the user asks what the
+  organization knows or wants something remembered — "what do we know about our
+  audience in Brazil?", "save this as our tone guideline", "update the pricing
+  note", "roll the launch brief back to yesterday's version", "add a Legal
+  category". Not for reusable prompts (prompts-library), translation wording
+  (translation-memory, terminology) or brand colors and fonts (brand-kit). Works
+  on the user's live Vitra data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -53,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

@@ -5,15 +5,15 @@ description: >-
   approved translations every Vitra job reuses: translates short texts
   memory-first, looks up how a phrase was translated, corrects, verifies or
   deletes entries, creates, edits and deletes memories, shares them with child
-  organizations, links glossaries, term bases and a style guide to a memory,
-  and changes the organization's VitraTM settings. Use it whenever the user
-  talks about their memory or past translations — "how did we translate
-  'checkout' in German?", "correct that entry", "translate these app strings
-  with our memory", "set up a memory for Acme", "share the Acme memory with
-  our Spain office", "attach the legal glossary to our memory". Not for
-  editing glossaries, term bases or style guides (terminology), whole
-  documents (document-translation) or scoring a translation
-  (translation-quality).
+  organizations, links glossaries, term bases and a style guide to a memory, and
+  changes the organization's VitraTM settings. Use it whenever the user talks
+  about their memory or past translations — "how did we translate 'checkout' in
+  German?", "correct that entry", "translate these app strings with our memory",
+  "set up a memory for Acme", "share the Acme memory with our Spain office",
+  "attach the legal glossary to our memory". Not for editing glossaries, term
+  bases or style guides (terminology), whole documents (document-translation) or
+  scoring a translation (translation-quality). Works on the user's live Vitra
+  data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -54,6 +54,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

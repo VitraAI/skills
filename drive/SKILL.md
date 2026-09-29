@@ -3,15 +3,15 @@ name: drive
 description: >-
   Works with the organization's Drive in Vitra Universe: finds files by name,
   browses folders, favourites and the trash, uploads local files or gives the
-  user an upload link, gives download links, creates, renames and moves
-  folders and files, trashes and restores them, shows the storage used, and
-  keeps work folders that group the jobs of one engagement. Use it when the
-  user asks about their Vitra files or folders — "find last week's banner in
-  our Drive", "upload this PDF to Vitra", "give me a link to the German deck",
-  "move these into the Q4 folder", "trash the old drafts", "what's in the Acme
-  work folder?". Not for translating or editing the files themselves
-  (document-translation, image-translation, video-dubbing) or credits and
-  sign-in (vitra).
+  user an upload link, gives download links, creates, renames and moves folders
+  and files, trashes and restores them, shows the storage used, and keeps work
+  folders that group the jobs of one engagement. Use it when the user asks about
+  their Vitra files or folders — "find last week's banner in our Drive", "upload
+  this PDF to Vitra", "give me a link to the German deck", "move these into the
+  Q4 folder", "trash the old drafts", "what's in the Acme work folder?". Not for
+  translating or editing the files themselves (document-translation,
+  image-translation, video-dubbing) or credits and sign-in (vitra). Works on the
+  user's live Vitra data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -52,6 +52,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

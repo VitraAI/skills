@@ -2,15 +2,16 @@
 name: hyperlocal-contacts
 description: >-
   Manages the contact network behind Vitra Hyperlocal campaigns: finds, adds,
-  edits and deletes retailer and partner contacts, sets their WhatsApp
-  numbers, checks or disconnects their Facebook Page connection, organizes
-  them into contact groups, lists the states, zones and areas they sit in, and
-  localizes contact names and addresses into other languages. Use it when the
-  user works on who campaigns go to — "add these retailers to the Pune group",
-  "update Sharma Stores' WhatsApp number", "how many contacts do we have in
-  Gujarat?", "has Mehta Traders connected Facebook?", "put our contacts' names
-  in Hindi". Not for sending campaigns (hyperlocal-campaigns) or templates and
-  products (hyperlocal-templates).
+  edits and deletes retailer and partner contacts, sets their WhatsApp numbers,
+  checks or disconnects their Facebook Page connection, organizes them into
+  contact groups, lists the states, zones and areas they sit in, and localizes
+  contact names and addresses into other languages. Use it when the user works
+  on who campaigns go to — "add these retailers to the Pune group", "update
+  Sharma Stores' WhatsApp number", "how many contacts do we have in Gujarat?",
+  "has Mehta Traders connected Facebook?", "put our contacts' names in Hindi".
+  Not for sending campaigns (hyperlocal-campaigns) or templates and products
+  (hyperlocal-templates). Works on the user's live Vitra data: never look for it
+  in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -51,6 +52,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

@@ -2,15 +2,16 @@
 name: projects
 description: >-
   Tracks the organization's work in Vitra Universe: projects with status, due
-  dates, progress and people; tasks with checklists, assignees and watchers;
-  the organization's project board and task templates; and who is assigned to
-  each language of a dub, document, image or Playground job — all by name. Use
-  it when the user asks about or organizes their work — "what's due today?",
-  "set up a project to track the Hindi launch", "move the glossary task to In
-  Progress", "assign it to Priya", "tick off the first checklist item", "put
-  Sam on the German dub". Not for producing the work: "start a dubbing
-  project" means start a dub (video-dubbing), a campaign is
-  hyperlocal-campaigns, and translating files is document-translation.
+  dates, progress and people; tasks with checklists, assignees and watchers; the
+  organization's project board and task templates; and who is assigned to each
+  language of a dub, document, image or Playground job — all by name. Use it
+  when the user asks about or organizes their work — "what's due today?", "set
+  up a project to track the Hindi launch", "move the glossary task to In
+  Progress", "assign it to Priya", "tick off the first checklist item", "put Sam
+  on the German dub". Not for producing the work: "start a dubbing project"
+  means start a dub (video-dubbing), a campaign is hyperlocal-campaigns, and
+  translating files is document-translation. Works on the user's live Vitra
+  data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -51,6 +52,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

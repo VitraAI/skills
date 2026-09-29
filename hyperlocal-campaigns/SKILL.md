@@ -3,16 +3,17 @@ name: hyperlocal-campaigns
 description: >-
   Runs Vitra Hyperlocal broadcasts through the Vitra Universe API: picks an
   audience of retailers or partners (by group, state, zone or area), estimates
-  reach and credits, prepares a personalized creative for every contact, then
-  — only on the user's explicit yes — sends it over WhatsApp or Facebook now
-  or on a schedule; pauses, resumes or stops a broadcast, retries failed
-  sends, deletes old ones and reports delivery (sent, delivered, read) and
-  Facebook insights. Use it whenever the user wants to message their contact
-  network — "send the Diwali offer to all retailers in Maharashtra", "schedule
-  a WhatsApp campaign for tomorrow 10am", "how did last week's broadcast do?",
-  "pause the campaign", "resend the failed ones". Not for managing contacts
-  and groups (hyperlocal-contacts), building templates or products
-  (hyperlocal-templates), or board projects (projects).
+  reach and credits, prepares a personalized creative for every contact, then —
+  only on the user's explicit yes — sends it over WhatsApp or Facebook now or on
+  a schedule; pauses, resumes or stops a broadcast, retries failed sends,
+  deletes old ones and reports delivery (sent, delivered, read) and Facebook
+  insights. Use it whenever the user wants to message their contact network —
+  "send the Diwali offer to all retailers in Maharashtra", "schedule a WhatsApp
+  campaign for tomorrow 10am", "how did last week's broadcast do?", "pause the
+  campaign", "resend the failed ones". Not for managing contacts and groups
+  (hyperlocal-contacts), building templates or products (hyperlocal-templates),
+  or board projects (projects). Works on the user's live Vitra data: never look
+  for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -53,6 +54,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

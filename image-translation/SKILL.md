@@ -3,16 +3,17 @@ name: image-translation
 description: >-
   Translates the text inside an image — signage, packaging, ad creatives,
   screenshots, menus, infographics — with the Vitra Universe Image Translator
-  and re-renders it in the target languages with the layout kept; then
-  corrects lines, keeps brand names, edits or adds objects and logos,
-  re-renders at other aspect ratios, reads AI transcreation suggestions, runs
-  quality scores, and saves results to the Drive. Use it whenever the user wants an image, poster, banner or creative
-  localized or its text translated — "translate this poster into French",
-  "make a Spanish version of this ad", "localize these product images", "fix
-  the second line of the German one" — even if they only say "translate this".
-  Not for generating new images (image-creator), resizing an untranslated
-  image (image-resize), or documents (document-translation) and subtitles
-  (video-dubbing, video-subtitles).
+  and re-renders it in the target languages with the layout kept; then corrects
+  lines, keeps brand names, edits or adds objects and logos, re-renders at other
+  aspect ratios, reads AI transcreation suggestions, runs quality scores, and
+  saves results to the Drive. Use it whenever the user wants an image, poster,
+  banner or creative localized or its text translated — "translate this poster
+  into French", "make a Spanish version of this ad", "localize these product
+  images", "fix the second line of the German one" — even if they only say
+  "translate this". Not for generating new images (image-creator), resizing an
+  untranslated image (image-resize), or documents (document-translation) and
+  subtitles (video-dubbing, video-subtitles). Works on the user's live Vitra
+  data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -53,6 +54,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

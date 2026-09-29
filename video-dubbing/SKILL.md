@@ -11,7 +11,8 @@ description: >-
   Spanish version of this clip", "fix line 12 of the dub", "export the German
   dub" — even if they don't say "dub". A "dubbing project" is a dub, not a board
   project. Not for subtitles without a voice-over (video-subtitles), subtitle
-  files (subtitle-translation) or audio-only speech (text-to-speech).
+  files (subtitle-translation) or audio-only speech (text-to-speech). Works on
+  the user's live Vitra data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -52,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Start
 

@@ -2,13 +2,14 @@
 name: brand-kit
 description: >-
   Manages the organization's brand kits in Vitra Universe: the colors, fonts,
-  tone of voice, visual style and logo that Vitra's image tools apply to stay
-  on brand. Drafts a brand from its website, product images or a brand-book
-  PDF, saves it as a kit, and lists, shows, edits or deletes kits by name. Use
-  it when the user wants to set up or change their brand — "set up our brand
-  kit from acme.com", "pull our brand from this style guide", "change our
-  primary color to #0A7", "which brand kits do we have?". Not for making
-  on-brand images (image-creator) or wording rules (terminology).
+  tone of voice, visual style and logo that Vitra's image tools apply to stay on
+  brand. Drafts a brand from its website, product images or a brand-book PDF,
+  saves it as a kit, and lists, shows, edits or deletes kits by name. Use it
+  when the user wants to set up or change their brand — "set up our brand kit
+  from acme.com", "pull our brand from this style guide", "change our primary
+  color to #0A7", "which brand kits do we have?". Not for making on-brand images
+  (image-creator) or wording rules (terminology). Works on the user's live Vitra
+  data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -49,6 +50,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

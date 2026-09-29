@@ -2,16 +2,17 @@
 name: hyperlocal-templates
 description: >-
   Builds what Vitra Hyperlocal campaigns send: creative templates (a product
-  image or video with overlays filled in per contact), their localized
-  versions per language, translated template images, overlay text and fields,
-  WhatsApp message templates (submitted to Meta for approval only on the
-  user's yes) and Facebook post templates, plus the products and product
-  models templates belong to. Use it when the user prepares campaign creative
-  — "make a Diwali template from this banner", "add a Tamil version of the
-  offer template", "move the price overlay", "create a WhatsApp template for
-  the launch", "is our WhatsApp template approved yet?", "add the new 1.5-ton
-  AC model". Not for sending (hyperlocal-campaigns), contacts
-  (hyperlocal-contacts) or designing a new image (image-creator).
+  image or video with overlays filled in per contact), their localized versions
+  per language, translated template images, overlay text and fields, WhatsApp
+  message templates (submitted to Meta for approval only on the user's yes) and
+  Facebook post templates, plus the products and product models templates belong
+  to. Use it when the user prepares campaign creative — "make a Diwali template
+  from this banner", "add a Tamil version of the offer template", "move the
+  price overlay", "create a WhatsApp template for the launch", "is our WhatsApp
+  template approved yet?", "add the new 1.5-ton AC model". Not for sending
+  (hyperlocal-campaigns), contacts (hyperlocal-contacts) or designing a new
+  image (image-creator). Works on the user's live Vitra data: never look for it
+  in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -52,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

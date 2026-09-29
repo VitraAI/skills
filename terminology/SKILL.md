@@ -2,17 +2,17 @@
 name: terminology
 description: >-
   Manages the organization's terminology in Vitra Universe: glossaries (fixed
-  wordings and do-not-translate terms), term bases (concepts with preferred
-  and forbidden terms per language) and style guides (writing rules, typed in
-  or extracted from a guide's files), which every memory-based translation
-  follows. Lists, creates, edits and deletes them and their entries, terms and
-  rules, reorders and bulk-edits rules, and copies a style guide's rules to
-  another language. Use it when the user sets rules for wording — "always
-  translate X as Y", "never translate our brand name", "make 'cart' the
-  preferred German term", "don't use 'shopping basket'", "add a style rule:
-  use the formal Sie", "pull the rules out of our style guide". Not for
-  translation memories and past translations (translation-memory) or brand
-  colors and fonts (brand-kit).
+  wordings and do-not-translate terms), term bases (concepts with preferred and
+  forbidden terms per language) and style guides (writing rules, typed in or
+  extracted from a guide's files), which every memory-based translation follows.
+  Lists, creates, edits and deletes them and their entries, terms and rules,
+  reorders and bulk-edits rules, and copies a style guide's rules to another
+  language. Use it when the user sets rules for wording — "always translate X as
+  Y", "never translate our brand name", "make 'cart' the preferred German term",
+  "don't use 'shopping basket'", "add a style rule: use the formal Sie", "pull
+  the rules out of our style guide". Not for translation memories and past
+  translations (translation-memory) or brand colors and fonts (brand-kit). Works
+  on the user's live Vitra data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -53,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

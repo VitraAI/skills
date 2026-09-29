@@ -172,9 +172,11 @@ def start() -> int:
         "status": "waiting_for_browser",
         "browser_opened": opened,
         "sign_in_url": url,
+        "ask": (f"Please sign in to Vitra: open {url} , sign in and pick your "
+                "organization, then tell me when you're done."),
         "next_action": (
-            ("A Vitra sign-in tab opened. " if opened else
-             "Give the user this sign-in link to open: sign_in_url. ")
+            "Show the user sign_in_url as a clickable link (relay `ask`), even if a tab "
+            "opened: in a sandbox, a remote machine or another app it can't. "
             + "Ask them to sign in and pick an organization there, then run "
               "login.py --status. The link works for 10 minutes. If the browser then "
               "shows \"site can't be reached\" (this agent runs in a sandbox), ask the "
@@ -400,12 +402,16 @@ def status() -> int:
                      "next_action": None})
     if kind == "none":
         if pending.get("status") == "waiting":
-            return _out({"status": "waiting_for_browser", "sign_in_url": pending.get("url"),
-                         "next_action": "The user hasn't finished signing in yet. Ask them to, then check again."})
+            url = pending.get("url")
+            return _out({"status": "waiting_for_browser", "sign_in_url": url,
+                         "ask": (f"You haven't finished signing in to Vitra yet: open {url} , sign in "
+                                 "and pick your organization, then tell me when you're done."),
+                         "next_action": "Show the user sign_in_url as a clickable link again (relay `ask`), then check again."})
         if pending.get("status") in ("failed", "expired"):
             return _out({"status": "not_signed_in", "reason": pending.get("message"),
                          "next_action": "Run login.py again to start a new sign-in."})
-        return _out({"status": "not_signed_in", "next_action": "Run login.py to sign in."})
+        return _out({"status": "not_signed_in",
+                     "next_action": "Run login.py to sign in, then show the user the sign_in_url it prints."})
 
     token = _common.signed_in_token()
     if not token:

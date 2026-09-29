@@ -1,17 +1,18 @@
 ---
 name: design-file-translation
 description: >-
-  Follows and finishes translations sent to Vitra Universe from the
-  design-tool and office plugins (Figma, Canva, Adobe and Word): lists the
-  jobs with their languages and review status, reads a job line by line,
-  corrects, verifies or approves lines, syncs edits with the translation
-  memory, renames a job or files it in a work folder, suggests creative
-  alternatives for a line, scores a language with a quality report and writes
-  its fixes back. Use it when the user mentions a translation made in a design
-  plugin — "check the Figma translation", "what did the Canva job translate
-  the headline to?", "fix line 4 of the German Figma file", "give me other
-  options for the headline", "score the French version of the banner". Not for uploading files to translate (document-translation) or text
-  baked into flat images (image-translation).
+  Follows and finishes translations sent to Vitra Universe from the design-tool
+  and office plugins (Figma, Canva, Adobe and Word): lists the jobs with their
+  languages and review status, reads a job line by line, corrects, verifies or
+  approves lines, syncs edits with the translation memory, renames a job or
+  files it in a work folder, suggests creative alternatives for a line, scores a
+  language with a quality report and writes its fixes back. Use it when the user
+  mentions a translation made in a design plugin — "check the Figma
+  translation", "what did the Canva job translate the headline to?", "fix line 4
+  of the German Figma file", "give me other options for the headline", "score
+  the French version of the banner". Not for uploading files to translate
+  (document-translation) or text baked into flat images (image-translation).
+  Works on the user's live Vitra data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -52,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

@@ -2,15 +2,16 @@
 name: document-translation
 description: >-
   Translates documents and text with the Vitra Universe API, keeping the
-  original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML,
-  JSON, XML, XLIFF, InDesign (.idml) and plain text — one file, a batch, or a
-  whole Drive folder — through the organization's translation memory; then
-  reviews it line by line, scores it with a quality report and writes fixes
-  back. Use it whenever the user wants files or text translated or checked —
-  "translate this contract into German", "translate everything in our Q3
-  folder", "score the French version", "change line 12 of the Spanish file".
-  Not for video or subtitles (video-dubbing, video-subtitles, subtitle-translation), text in images
-  (image-translation).
+  original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML, JSON,
+  XML, XLIFF, InDesign (.idml) and plain text — one file, a batch, or a whole
+  Drive folder — through the organization's translation memory; then reviews it
+  line by line, scores it with a quality report and writes fixes back. Use it
+  whenever the user wants files or text translated or checked — "translate this
+  contract into German", "translate everything in our Q3 folder", "score the
+  French version", "change line 12 of the Spanish file". Not for video or
+  subtitles (video-dubbing, video-subtitles, subtitle-translation), text in
+  images (image-translation). Works on the user's live Vitra data: never look
+  for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -51,6 +52,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

@@ -1,16 +1,16 @@
 ---
 name: vitra
 description: >-
-  The starting point for the user's Vitra Universe organization: signs this
-  machine in or out and shows who is signed in where, shows the credit
-  balance, prices work in credits before it starts, lists the languages,
-  voices, translation memories and brand kits the other skills take, and finds
-  the right Vitra tool or step-by-step guide for anything else. Use it when
-  the user asks about their Vitra account or credits, or wants something Vitra
-  does that no other Vitra skill covers — "sign me in to Vitra", "which
-  organization am I in?", "how many credits do we have?", "what would dubbing
-  three videos cost?", "which languages does Vitra support?", "can Vitra do
-  X?". Not for files and folders (drive), saved knowledge (org-knowledge) or
+  The starting point for Vitra Universe. Use it first for any question about
+  Vitra or the user's Vitra organization that no other Vitra skill clearly
+  covers — what Vitra can do, sign-in, the credit balance, prices, the
+  languages, voices, translation memories and brand kits the other skills take —
+  and answer from the live organization, never from local files or code. Signs
+  this machine in or out, prices work in credits before it starts, and finds the
+  right Vitra tool or step-by-step guide for anything else — "what can Vitra
+  do?", "sign me in to Vitra", "how many credits do we have?", "what would
+  dubbing three videos cost?", "which languages does Vitra support?", "can Vitra
+  do X?". Not for files and folders (drive), saved knowledge (org-knowledge) or
   translations from the Figma, Canva, Adobe and Word plugins
   (design-file-translation).
 compatibility: >-
@@ -54,6 +54,24 @@ No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
 
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
+
+## "What can Vitra do?"
+
+Answer by what the user wants, in plain words, then ask what they'd like to start with:
+
+- **Translate** documents and text (document-translation), the text inside images (image-translation), subtitle files (subtitle-translation), and keep the team's approved wording (translation-memory, terminology).
+- **Video and voice**: dub a video into other languages (video-dubbing), add subtitles (video-subtitles), turn text into speech (text-to-speech), clone a voice with consent (voice-cloning).
+- **Images**: create and edit images on brand (image-creator, brand-kit), resize them for other platforms (image-resize).
+- **Check before publishing**: whether content is OK for a market (content-compliance, compliance-markets) and translation quality scores (translation-quality).
+- **Reach customers**: personalised WhatsApp and Facebook campaigns to a retailer network (hyperlocal-campaigns, hyperlocal-templates, hyperlocal-contacts).
+- **Organise work**: files (drive), projects and tasks (projects), automated workflows (workflows), saved knowledge and prompts (org-knowledge, prompts-library).
+
+Skill names are for you: tell the user the feature, not the skill.
+
 ## Sign in
 
 ```bash
@@ -62,7 +80,8 @@ python3 scripts/login.py --status   # who is signed in, in which organization
 python3 scripts/login.py --logout   # sign this machine out
 ```
 
-Sign in or out only when the user asks or agrees. A set `VITRA_UNIVERSE_API_KEY` is used
+Sign in or out only when the user asks or agrees. Always show the user the `sign_in_url`
+link login.py prints, even if a browser tab opened. A set `VITRA_UNIVERSE_API_KEY` is used
 over a sign-in and acts with its creator's role in one organization.
 
 ## Credits

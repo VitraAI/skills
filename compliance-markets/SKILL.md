@@ -5,11 +5,12 @@ description: >-
   against, and their rules: lists markets, creates a market, renames it or
   changes its threshold, deletes one, lists a market's rules, adds, edits or
   deletes rules with their severity and content types, and drafts a market's
-  rules with AI for the user to accept one by one. Use it when the user
-  defines what is allowed where — "add a market for Germany", "what rules do
-  we have for Saudi Arabia?", "add a rule: no alcohol in UAE ads", "make the
-  India threshold stricter", "draft rules for Indonesia". Not for checking
-  content against those rules (content-compliance).
+  rules with AI for the user to accept one by one. Use it when the user defines
+  what is allowed where — "add a market for Germany", "what rules do we have for
+  Saudi Arabia?", "add a rule: no alcohol in UAE ads", "make the India threshold
+  stricter", "draft rules for Indonesia". Not for checking content against those
+  rules (content-compliance). Works on the user's live Vitra data: never look
+  for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -50,6 +51,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

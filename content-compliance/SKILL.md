@@ -1,17 +1,18 @@
 ---
 name: content-compliance
 description: >-
-  Checks content against each market's rules before it goes out, with the
-  Vitra Universe API: text, images, audio and video are scored per market
-  (approved, review or blocked) with the rules they break and the frames or
-  media that break them, plus unsafe-content detection; a flagged image can be
-  regenerated to meet a market's rules; past checks are listed or deleted; and
-  reviewers' own verdicts on the review queue are relayed. Use it whenever the
-  user asks if content is okay for a market or audience — "is this ad OK for
-  Saudi Arabia?", "check this video for our India rules", "will this banner
-  pass in Germany?", "fix this image for the UAE", "what's waiting for
-  review?", "approve the Diwali banner". Not for setting up markets and rules
-  (compliance-markets) or translation quality (translation-quality).
+  Checks content against each market's rules before it goes out, with the Vitra
+  Universe API: text, images, audio and video are scored per market (approved,
+  review or blocked) with the rules they break and the frames or media that
+  break them, plus unsafe-content detection; a flagged image can be regenerated
+  to meet a market's rules; past checks are listed or deleted; and reviewers'
+  own verdicts on the review queue are relayed. Use it whenever the user asks if
+  content is okay for a market or audience — "is this ad OK for Saudi Arabia?",
+  "check this video for our India rules", "will this banner pass in Germany?",
+  "fix this image for the UAE", "what's waiting for review?", "approve the
+  Diwali banner". Not for setting up markets and rules (compliance-markets) or
+  translation quality (translation-quality). Works on the user's live Vitra
+  data: never look for it in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -52,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 

@@ -4,13 +4,14 @@ description: >-
   Reads and exports the translation quality reports Vitra Universe makes —
   accuracy, fluency, terminology and style (MQM), scored line by line against
   the organization's translation memory and terminology: the overall score, a
-  verdict and the worst lines with explained errors and suggested fixes, and
-  the report as a PDF. A report is run by the skill of the job it scores
-  (documents, dubs, images, design jobs). Use it whenever the user
-  asks about a quality report or score — "what did the French report say?",
-  "which lines failed?", "is this ready to publish?", "send me the report as a
-  PDF". Not for translating (document-translation, translation-memory) or
-  market compliance (content-compliance).
+  verdict and the worst lines with explained errors and suggested fixes, and the
+  report as a PDF. A report is run by the skill of the job it scores (documents,
+  dubs, images, design jobs). Use it whenever the user asks about a quality
+  report or score — "what did the French report say?", "which lines failed?",
+  "is this ready to publish?", "send me the report as a PDF". Not for
+  translating (document-translation, translation-memory) or market compliance
+  (content-compliance). Works on the user's live Vitra data: never look for it
+  in local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -52,6 +53,11 @@ address in its address bar and run `python3 scripts/login.py --finish '<address>
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.
+
+## Talking to the user
+
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 
