@@ -76,7 +76,8 @@ background: mention it once; nothing to do.
 5. **Review** ⏸: `get_image_text` shows numbered source → translation lines.
    `edit_image_text` changes lines, keeps lines in the original language (brand names),
    marks them verified or saves them to the memory; a re-render is paid.
-6. **Deliver**: `save_image_translation_to_drive`, or download the `image_url`.
+6. **Deliver**: `save_image_translation_to_drive` (every save is a new file, so the Drive
+   stamps the name: tell the user the `file_name` it returns), or download the `image_url`.
 
 **More edits** (all paid, estimate first): `edit_image_element` (remove, recolour, move
 an object), `compose_image_asset` (add or swap a logo or picture), `reanalyze_image`

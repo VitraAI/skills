@@ -64,8 +64,9 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call check_content '{"modality": "image", "markets": ["Saudi Arabia"], "asset_id": "…", "confirm": true}'
    ```
 4. **Verdict**: `get_content_check` until done. Explain each flagged concern in plain
-   words; `get_content_decision` has per-rule detail, `get_decision_media` the media links
-   and a video's flagged frames.
+   words; `get_content_decision` has per-rule detail (its AI summary may name
+   places loosely: name only the markets it lists under `markets`), `get_decision_media` the
+   media links and a video's flagged frames.
 5. **Fix a flagged image** (paid, flat per fix): `fix_flagged_image` with the check and
    the market, `estimate_only: true` first, ask, then `confirm: true` → `get_image_fix`. Earlier fixes: `list_image_fixes`.
 

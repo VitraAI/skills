@@ -74,9 +74,10 @@ user agreed, since it may render). When the brief is ready, `quick_create_render
 `rename_quick_create_chat`, `delete_quick_create_chat`.
 
 **History**: `list_image_creations` (newest first, with why a failed one failed);
-`retry_image_creation` (paid again); `delete_image_creation` (confirm; a Drive copy stays).
+`retry_image_creation` (paid again; only a failed image, a finished one has nothing to
+retry); `delete_image_creation` (confirm; a Drive copy stays).
 **Collections**: `list_image_collections`, `create_image_collection`,
-`update_image_collection` (add, remove, rename).
+`update_image_collection` (add, remove, rename; `images` is the count left in it).
 
 ## Rules
 
