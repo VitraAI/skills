@@ -87,8 +87,8 @@ the video is and call again with `duration_seconds`.
 4. **Edit** ⏸ with the `revision` you read, showing before → after: `edit_dub_lines`
    (then `regenerate_dub_audio`, paid), `rewrite_dub_line` (suggestion only),
    `restructure_dub_lines` (split, merge, add, delete), `edit_dub_speakers` (a cloned
-   voice needs `consent`), `set_dub_emotion` (`"none"` takes an emotion off), pronunciations `list_pronunciations`,
-   `set_pronunciation`, `remove_pronunciation`; `transliterate` (sent to Google: nothing
+   voice needs `consent`), `set_dub_emotion` (`"none"` takes an emotion off), per-line pronunciations
+   `list_pronunciations`, `set_pronunciation`, `remove_pronunciation` (job and line); `transliterate` (sent to Google: nothing
    confidential).
 5. **Issues**: `list_dub_issues`; `fix_dub_issues` (may shorten lines: say so). Errors
    block export: never try to bypass.
@@ -103,9 +103,10 @@ the video is and call again with `duration_seconds`.
 Quality: `run_dub_quality_report` → `get_quality_report` → `apply_dub_quality_fixes`
 (confirm; then regenerate audio). Memory: `sync_dub_memory` (confirm). Settings:
 `get_dub_settings`, `update_dub_settings`, `dub_background_audio`. Spreadsheet of every
-line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `retry_dub` (after
-`failed`), `stop_dub_work` (a finished job answers nothing_running),
-`remove_dub_language`, `delete_dub_job` (confirm).
+line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `stop_dub_work`
+(cancels a running job; a finished one answers nothing_running), `remove_dub_language`,
+`delete_dub_job` (confirm). A failed job can't be resumed: tell the user why; starting
+again is a new paid job.
 
 ## Rules
 

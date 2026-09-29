@@ -27,7 +27,7 @@ features:
   - title: Any format, or burned in
     description: SRT, VTT, DFXP, STL, TXT and more, or the video with subtitles rendered in.
   - title: Full control
-    description: Stop a job, file it, sync lines with your memory, or export every line as a spreadsheet.
+    description: Stop a job, file it or delete it by name.
 use-cases:
   - title: Accessible video
     description: Caption product and training videos in their own language.
@@ -69,10 +69,8 @@ mcp-tools:
     title: Find dubs and subtitle jobs
   - name: update_dub_job
     title: Rename or file a job
-  - name: retry_dub
-    title: Retry a failed dub or subtitle job
   - name: stop_dub_work
-    title: Cancel a running job or export
+    title: Cancel a running job
   - name: delete_dub_job
     title: Delete a job
   - name: quote_cost

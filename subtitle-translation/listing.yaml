@@ -58,8 +58,6 @@ mcp-tools:
     title: Find dubs and subtitle jobs
   - name: update_dub_job
     title: Rename or file a job
-  - name: retry_dub
-    title: Retry a failed dub or subtitle job
   - name: delete_dub_job
     title: Delete a job
   - name: quote_cost
