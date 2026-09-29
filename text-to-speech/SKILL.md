@@ -65,8 +65,9 @@ background: mention it once; nothing to do.
 4. **Wait**: `get_speech_job` until `completed`; give the audio link, or
    `vitra.py download <link> --to <path>`.
 
-Sessions: `list_playground_jobs` with `kind: speech`, `rename_playground_job` (by name),
-`manage_playground_job` (`save_to_drive`: unchanged clips are not copied twice; the
+Sessions: `list_playground_jobs` with `kind: speech`, `rename_playground_job` (by name; renames every clip),
+`manage_playground_job` (`save_to_drive`: unchanged clips are not copied twice,
+`save_again: true` only if the user wants another copy; the
 default folder can't be trashed, so pass `folder` if the user will tidy up later),
 `delete_playground_job` (confirm).
 

@@ -50,20 +50,22 @@ background: mention it once; nothing to do.
 
 ## Workflow
 
-**Which kits exist**: `list_brand_kits`; one in full: `get_brand_kit`.
+**Which kits exist**: `list_brand_kits`; one in full: `get_brand_kit`. Name a kit by its
+name; when two kits share one, ask which and pass its `brand_kit_id` instead.
 
 **New kit**:
 1. Source ⏸: a public website (`source: url`), up to 6 brand `images`, or a brand-book
    `pdf`. Images and the PDF go inline as base64: `describe draft_brand_kit`.
-2. Draft: a flat price per draft. Price it with `estimate_only: true`, tell the user,
+2. Draft: a flat price per draft. Get the website first (pricing a url draft needs it).
+   Price it with `estimate_only: true`, tell the user,
    then call again with `confirm: true` on their go-ahead:
    ```bash
    python3 scripts/vitra.py call draft_brand_kit '{"source": "url", "url": "https://acme.com", "estimate_only": true}'
    python3 scripts/vitra.py call draft_brand_kit '{"source": "url", "url": "https://acme.com", "confirm": true}'
    ```
 3. Show the draft: colours, fonts, tone, styles. Nothing is saved yet.
-4. Save what the user approves with `create_brand_kit` (a name, the source and at least
-   one colour).
+4. Save what the user approves with `create_brand_kit` (a name no other kit has, the
+   source and at least one colour).
 
 **Change a kit**: `update_brand_kit` (only the fields given change; `remove_logo: true`
 takes the logo off). **Delete**: `delete_brand_kit`, naming the kit, with confirm.

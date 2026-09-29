@@ -55,7 +55,8 @@ background: mention it once; nothing to do.
 
 1. **Find it**: `list_flows` (name, steps and the inputs a run needs). Ask which if
    several fit.
-2. **Inputs**: collect every input the workflow lists (languages as keys). A file input
+2. **Inputs**: collect every input the workflow lists; each input's `takes` says what it
+   needs (memories and markets by name, languages as `list_languages` keys). A file input
    takes the Drive file's name, or `{"file": "<name>", "asset_id": "<id>"}` when names
    repeat (from `find_assets` or `vitra.py upload`), or an https link; never a bare
    asset id. `run_flow` checks the inputs against the workflow before it starts.
@@ -64,16 +65,19 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call run_flow '{"flow": "Product launch", "inputs": {"video": "…"}, "name": "Launch – Sept", "confirm": true}'
    ```
 4. **Follow**: `get_flow_run` after `check_again_in_seconds`; relay progress by step name.
-5. **Approval step** ⏸: show what waits, ask the user, then relay THEIR decision with
+   A finished step's `result` holds the translated text, or the job id and the tool that
+   opens it.
+5. **Approval step** ⏸: show the step's title and instructions, ask the user, then relay THEIR decision with
    `decide_flow_step` (`confirm: true`; rejecting cancels the run).
 
 **Runs** (name a run as `run`, as `list_flow_runs` shows it; when names repeat the tool
 lists them, so ask the user which and pass its `run_id`): `list_flow_runs`,
-`manage_flow_run` (rename, move to a work folder, `retry` a failed run: paid again, so ask
-first and pass `confirm: true`), `cancel_flow_run` (confirm). A failed
+`manage_flow_run` (rename, move to a work folder, `retry` a failed or cancelled run only:
+paid again, so ask first and pass `confirm: true`), `cancel_flow_run` (confirm). A failed
 run can't be deleted from here; it stays in the history.
 **Build or change a workflow**: `design_workflow` (plain words → proposed graph; relay its
-questions), `list_workflow_steps`, `validate_workflow`, then `create_workflow`, or
+questions; for a saved workflow show the user the proposal before `update_workflow`),
+`list_workflow_steps`, `validate_workflow`, then `create_workflow` (names are unique), or
 `get_workflow` + `update_workflow` (replaces the graph: confirm); `delete_workflow` removes one for good (confirm).
 
 ## Rules

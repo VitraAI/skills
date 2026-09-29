@@ -58,11 +58,14 @@ background: mention it once; nothing to do.
 2. **Media**: a local image or video goes up in two steps: `create_hyperlocal_upload_url`,
    PUT the file to the returned URL with exactly the returned headers (e.g. `curl -X PUT
    -T <file>`), then `register_hyperlocal_upload`; its media link is the `creative_url`.
+   Anyone with that link can open the file, so never upload private material. The file
+   stays in the Drive after a template is deleted; trash it there (drive skill) to remove it.
 3. **Creative template** ⏸: `create_creative_template` (tied to a product),
    `update_creative_template`, `delete_creative_template` (confirm).
 4. **Languages**: `list_template_localizations`, `create_template_localization`,
    `update_template_localization`, `delete_template_localization` (confirm). Translate the
-   template's image: price it first with `estimate_only: true` (only a template's first
+   template's image (only image templates created with a `translation_memory_id`;
+   `get_creative_template` shows has_translation_memory): price it first with `estimate_only: true` (only a template's first
    image translation is charged; later languages reuse its job and cost nothing), tell the
    user, then on their yes:
    ```bash
@@ -83,7 +86,8 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call submit_whatsapp_template '{"template": "Launch offer", "confirm": true}' --toolsets hyperlocal,hyperlocal_send
    ```
    `refresh_whatsapp_template_status` checks Meta's approval.
-7. **Facebook post templates**: `create_facebook_template`, `update_facebook_template`,
+7. **Facebook post templates** (no approval needed): `get_facebook_template` reads one
+   back, `create_facebook_template`, `update_facebook_template`,
    `delete_facebook_template` (confirm).
 
 **Products**: `create_product`, `update_product`, `delete_product` (confirm);

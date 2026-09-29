@@ -65,9 +65,9 @@ background: mention it once; nothing to do.
    an invite link to pass on; if it comes with an invite_link_warning, don't send the link:
    tell the user the Facebook connection needs fixing in Vitra);
    `disconnect_contact_facebook` (confirm; `disconnected: false` means no Page was connected).
-4. **Groups**: `list_contact_groups`, `create_contact_group`, `update_contact_group`,
-   `add_contacts_to_group`, `remove_contacts_from_group`; `delete_contact_group` (confirm;
-   its contacts stay).
+4. **Groups**: `list_contact_groups` (member counts and descriptions), `create_contact_group`,
+   `update_contact_group`, `add_contacts_to_group`, `remove_contacts_from_group`;
+   `delete_contact_group` (confirm; its contacts stay).
 5. **Localize** names and addresses (paid): `estimate_contact_localization` for the
    `scope` returns the fields and the credits (and whether the balance covers them); tell
    the user, then `localize_contacts` with `confirm: true`.

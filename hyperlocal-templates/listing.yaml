@@ -78,6 +78,8 @@ mcp-tools:
     title: Submit a WhatsApp template to Meta
   - name: refresh_whatsapp_template_status
     title: Refresh a WhatsApp template's approval status
+  - name: get_facebook_template
+    title: Get a Facebook post template
   - name: create_facebook_template
     title: Create a Facebook post template
   - name: update_facebook_template

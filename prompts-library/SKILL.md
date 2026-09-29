@@ -53,7 +53,8 @@ background: mention it once; nothing to do.
 ## Workflow
 
 **Use a prompt**:
-1. `search_prompts` by keyword or category; several → ask which by title.
+1. `search_prompts` by keyword or category; several → ask which by title. Titles are
+   unique; when one matches several prompts, pass the chosen one's `prompt_id` instead.
 2. `get_prompt` with `values` for its variables; `missing` lists what to ask the user.
    ```bash
    python3 scripts/vitra.py call get_prompt '{"prompt": "Product description", "values": {"product": "Aurora lamp"}}'
@@ -63,8 +64,9 @@ background: mention it once; nothing to do.
 
 **Save or change**: `create_prompt` (private unless `shared: true`: confirm text and
 sharing), `update_prompt` (each edit is a new version), `list_prompt_versions`,
-`restore_prompt_version` (confirm), `favorite_prompt`, `delete_prompt` (confirm; it goes
-for everyone it was shared with).
+`restore_prompt_version` (confirm; it can change the title back: use the title it
+returns and relay its note), `favorite_prompt`, `delete_prompt` (confirm; it goes for
+everyone it was shared with).
 
 **Categories**: `list_prompt_categories`, `create_prompt_category`,
 `update_prompt_category`, `delete_prompt_category` (confirm).

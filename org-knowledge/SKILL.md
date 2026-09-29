@@ -56,6 +56,8 @@ background: mention it once; nothing to do.
 
 1. **Find**: `search_org_knowledge` with the user's words, in any order (optional `category`,
    `favorites_only`; `full_text` for the whole text), then `get_knowledge_entry` by title.
+   Titles are unique; when a title matches several entries, ask which and pass its
+   `entry_id` instead.
    Answer from what the entries say and name the entries you used.
    ```bash
    python3 scripts/vitra.py call search_org_knowledge '{"search": "Brazil audience"}'
@@ -63,7 +65,8 @@ background: mention it once; nothing to do.
 2. **Save** ⏸: `create_knowledge_entry` with a title, the content and a category. Entries
    are private unless `shared: true`: ask before sharing with the whole organization.
 3. **Edit** ⏸: show before → after, then `update_knowledge_entry`. Every save is a
-   version: `list_knowledge_versions`, then `restore_knowledge_version` (confirm).
+   version: `list_knowledge_versions`, then `restore_knowledge_version` (confirm; it can
+   change the title back: use the title it returns and relay its note).
 4. **Tidy**: `favorite_knowledge_entry`; `delete_knowledge_entry` (confirm).
 
 **Categories**: `list_knowledge_categories`, `create_knowledge_category`,

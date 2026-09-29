@@ -53,7 +53,7 @@ background: mention it once; nothing to do.
 
 ## Workflow
 
-1. **Find the job** ⏸: `list_design_jobs` (by name, `app` or `language`); several → ask
+1. **Find the job** ⏸: `list_design_jobs` (by name, `app` or `language` as a `list_languages` key); several → ask
    which by name. `get_design_job` shows its languages, status, memory and review counts.
 2. **Read**: `get_design_job_lines` (numbered; `filter` or `search` to narrow, `page` on).
 3. **Correct** ⏸: show before → after, then `edit_design_job_lines` with `set` (line and

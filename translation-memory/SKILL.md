@@ -59,10 +59,11 @@ background: mention it once; nothing to do.
 several → ask which by name. `get_translation_memory` shows its languages, engine and
 linked resources (glossaries, term bases, style guide).
 
-**Translate short texts** (UI strings, product copy): memory first, machine for the rest;
-new translations are stored as unverified entries.
+**Translate short texts** (UI strings, product copy): free, no credits. Memory first,
+machine for the rest; new translations are stored as unverified entries. Target
+languages are `list_languages` keys (or the codes the memory lists).
 ```bash
-python3 scripts/vitra.py call translate_with_memory '{"tm_id": "…", "texts": ["Checkout"], "target_languages": ["<as the memory lists it>"]}'
+python3 scripts/vitra.py call translate_with_memory '{"tm_id": "…", "texts": ["Checkout"], "target_languages": ["german_germany"]}'
 ```
 A large batch returns an operation id: `get_memory_translation`.
 
@@ -72,7 +73,8 @@ after, confirm); `set_memory_term_status` (unverified, verified, approved);
 
 **Memories** ⏸: `create_translation_memory` (confirm name and languages;
 `list_memory_providers` for VitraTM or Phrase), `update_translation_memory`,
-`delete_translation_memory` (confirm).
+`delete_translation_memory` (confirm; it leaves Vitra, but its provider may keep the
+entries: say so).
 
 **Link wording rules**: `link_memory_resources` attaches or detaches glossaries and term
 bases and sets the one style guide a memory follows (names from `list_glossaries`; their

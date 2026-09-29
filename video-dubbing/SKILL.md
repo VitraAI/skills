@@ -80,8 +80,10 @@ the video is and call again with `duration_seconds`.
 2. **Voices** ⏸ per speaker: a voice from the Vitra voice library is the default
    (`list_voices`, `find_voices_by_accent`; offer previews; the organization's cloned
    voices are in it too, see voice-cloning). Cloning the speaker's own voice only when the
-   user confirms that person agreed: `"voice": "clone"` with `consent: true`. Then
-   `set_speaker_voices` → `get_dub` until `review_ready`.
+   user confirms that person agreed: `"voice": "clone"` with `consent: true`. A voice
+   must speak the target language (others are refused); `"library"` picks a stock voice
+   matching the speaker's gender (the result names it). Then `set_speaker_voices` →
+   `get_dub` until `review_ready`.
 3. **Review the source first** with `get_dub_lines`, then `add_dub_language` for other
    languages (paid) with the `revision` reviewed.
 4. **Edit** ⏸ with the `revision` you read, showing before → after: `edit_dub_lines`
@@ -90,8 +92,9 @@ the video is and call again with `duration_seconds`.
    voice needs `consent`), `set_dub_emotion` (`"none"` takes an emotion off), per-line pronunciations
    `list_pronunciations`, `set_pronunciation`, `remove_pronunciation` (job and line); `transliterate` (sent to Google: nothing
    confidential).
-5. **Issues**: `list_dub_issues`; `fix_dub_issues` (may shorten lines: say so). Errors
-   block export: never try to bypass.
+5. **Issues**: `list_dub_issues`; `fix_dub_issues` (may shorten lines: say so; a status
+   of needs_audio names lines to redo with `regenerate_dub_audio`, clean means done).
+   Errors block export: never try to bypass.
 6. **Export** one language at a time: `export_dub` (optional burned-in `subtitles`;
    `lip_sync` is paid and needs `confirm` and `consent`) → `get_dub_export` for the link →
    optionally `save_dub_export_to_drive` once (saving the same export again returns the
@@ -102,7 +105,7 @@ the video is and call again with `duration_seconds`.
 
 Quality: `run_dub_quality_report` → `get_quality_report` → `apply_dub_quality_fixes`
 (confirm; then regenerate audio). Memory: `sync_dub_memory` (confirm). Settings:
-`get_dub_settings`, `update_dub_settings`, `dub_background_audio`. Spreadsheet of every
+`get_dub_settings` (with `language`: its background audio tracks), `update_dub_settings`, `dub_background_audio`. Spreadsheet of every
 line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `stop_dub_work`
 (cancels a running job; a finished one answers nothing_running), `remove_dub_language`,
 `delete_dub_job` (confirm). A failed job can't be resumed: tell the user why; starting

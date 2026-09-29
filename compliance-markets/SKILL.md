@@ -52,8 +52,9 @@ background: mention it once; nothing to do.
 ## Workflow
 
 1. **See**: `list_qc_regions` for the markets, `list_qc_rules` for one market's rules.
-2. **Markets** ⏸: `create_qc_market` (name, description, threshold: `describe` explains
-   the scale), `update_qc_market`, `delete_qc_market` (confirm).
+2. **Markets** ⏸: `create_qc_market` (a name no other market has; description, threshold:
+   `describe` explains the scale), `update_qc_market`, `delete_qc_market` (confirm).
+   When two markets or rules share a name, ask which and pass its `region_id` / `rule_id`.
 3. **Rules** ⏸: show the wording, then `add_qc_rule` (title, description, severity,
    `content_types`: all four when left out), `update_qc_rule`, `delete_qc_rule` (confirm).
    ```bash

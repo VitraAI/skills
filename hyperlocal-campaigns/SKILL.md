@@ -65,10 +65,14 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call estimate_broadcast '{"template": "Diwali offer", "channels": ["whatsapp"], "states": ["Maharashtra"], "select_all": true}'
    ```
    Groups, states, zones or areas without `contact_ids` reach everyone matching them. If
-   `contacts` is 0, say so and check the audience before going on.
+   `contacts` is 0 (next action change_audience), say so and check the audience before going on.
 4. **Prepare** (paid, sends nothing) after the user's yes: `create_broadcast` with the same
-   audience, the message template and `confirm: true`. Follow with `get_broadcast` until
-   the creatives are ready; `regenerate_broadcast_creative` redoes one contact's (paid).
+   audience, the message template and `confirm: true`. A WhatsApp template Meta hasn't
+   approved is refused; pass `prepare_before_approval: true` only if the user wants the
+   creatives paid for now anyway. Follow with `get_broadcast` until the creatives are
+   ready; `regenerate_broadcast_creative` redoes one contact's (paid).
+   Stalled (next action tell_user_generation_stalled): tell the user; don't regenerate or
+   delete it. Creatives that never render are refunded within about 6 hours.
 5. **Send** ⏸ only on an explicit yes to "send to N contacts for X credits now / at …".
    ```bash
    python3 scripts/vitra.py call send_broadcast '{"broadcast": "Diwali Maharashtra", "confirm": true}' --toolsets hyperlocal,hyperlocal_send

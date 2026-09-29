@@ -72,7 +72,8 @@ A fixed wording per language goes in `translations`; `describe add_glossary_entr
 **Style guides** (writing rules, applied in order): `get_style_guide`,
 `create_style_guide`, `update_style_guide`, `delete_style_guide` (confirm); rules
 `add_style_guide_rules`, `update_style_guide_rule`, `bulk_edit_style_guide_rules`,
-`reorder_style_guide_rules`, `copy_style_guide_language`. A guide's files:
+`reorder_style_guide_rules`, `copy_style_guide_language`. Adding rules reports each one:
+text equal to an existing rule adds its languages to that rule. A guide's files:
 `set_style_guide_file_languages`, `remove_style_guide_file` (confirm);
 `extract_style_guide_rules` rebuilds the rules from the files and replaces every rule:
 clear yes first (a guide with no files has nothing to extract; its rules stay).

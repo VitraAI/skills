@@ -71,7 +71,8 @@ python3 scripts/vitra.py call quote_cost '{}'          # the priceable rates
 python3 scripts/vitra.py call quote_cost '{"search": "compliance"}'  # rates for one product
 python3 scripts/vitra.py call quote_cost '{"items": [...]}'
 ```
-`describe quote_cost` for the item shape. Job tools with `estimate_only` return the same
+`describe quote_cost` for the item shape. Take each item's params from that rate's
+`params` in the listing; wrong params are refused. Job tools with `estimate_only` return the same
 quote. Out of credits: say what is `required` and `available`; an admin buys more in Vitra.
 
 ## Find any tool

@@ -55,16 +55,16 @@ background: mention it once; nothing to do.
 1. **What to translate.** A Drive file: `find_assets`. A local file: `vitra.py upload`.
    Plain text can go inline as `text`; a .txt file goes as its `asset_id` with `format: TEXT`.
 2. **Memory.** `list_translation_memories` for the target language; several → ask which by
-   name. The source language is the memory's; target languages are written as the memory
-   lists them.
+   name. The source language is the memory's; target languages are `list_languages` keys
+   (or the codes the memory lists), one of the memory's targets.
 3. **Start** (ask first: paid):
    - one file or text: `translate_document` (`format` from the file type; InDesign .idml
-     where `describe translate_document` lists IDML). Charged per source word, counted when
-     it starts: `estimate_only: true` prices pasted text exactly, but for a file only gives
-     the per-word rate. Tell the user that, then `confirm: true` on their yes.
+     where `describe translate_document` lists IDML). Charged per source word (the total
+     rounded up to a whole credit), counted when it starts: `estimate_only: true` prices
+     pasted text exactly, but for a file only gives the per-word rate. Tell the user that, then `confirm: true` on their yes.
      ```bash
-     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "<as the memory lists it>", "format": "DOCX", "asset_id": "…", "estimate_only": true}'
-     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "<as the memory lists it>", "format": "DOCX", "asset_id": "…", "confirm": true}'
+     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "french_france", "format": "DOCX", "asset_id": "…", "estimate_only": true}'
+     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "french_france", "format": "DOCX", "asset_id": "…", "confirm": true}'
      ```
    - 1–20 text-format files of one format (TEXT, JSON, XML, XLIFF, HTML, CSV):
      `translate_document_batch` (no price check: one charge per source word of each file)
@@ -72,12 +72,14 @@ background: mention it once; nothing to do.
      `estimate_only: true` first (shows files, skips and credits), then `confirm: true`.
 4. **Wait**: `get_document_translation` (or `get_document_batch` for a batch or folder)
    until `completed`. Text (pasted or a .txt) comes back there, cut at 20,000 characters
-   (read the rest with `get_document_lines`); another file: `save_document_to_drive`, then
-   `find_assets` + `get_download_url` for a link.
+   (read the rest with `get_document_lines`). A finished file is already saved in the
+   Drive's default folder: `find_assets` + `get_download_url` for a link;
+   `save_document_to_drive` only files it in another folder (`save_again` for a second copy).
 5. **Review** ⏸: `get_document_lines` (numbered, 50 per page) → `edit_document_lines` to
    correct lines, mark them verified or approved, or sync with the memory (pulling from the
    memory overwrites edits: confirm).
-6. **Score** (paid: ask first): `run_document_quality_report` → `get_quality_report` →
+6. **Score** (paid: ask first): `run_document_quality_report` (the translation's name
+   works) → `get_quality_report` →
    `apply_document_quality_fixes` (confirm).
 
 History: `list_document_translations`, `manage_document_translation` (rename, move to a

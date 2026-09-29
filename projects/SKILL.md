@@ -61,7 +61,7 @@ python3 scripts/vitra.py call list_tasks '{"due_today": true, "mine": true}'
 **Projects**: `list_projects`, `get_project` (also the status and priority names its
 tasks take), `create_project` (confirm name and dates first; optional `task_template`; priority
 defaults to Medium),
-`update_project` (rename, move status, dates, languages), `delete_project` (confirm),
+`update_project` (rename, move status, dates, languages as `list_languages` keys), `delete_project` (confirm),
 `set_project_people` (assign, watch; `remove` needs confirm).
 
 **Tasks**: `get_task`, `create_task`, `update_task` (move to another status by name),
@@ -69,13 +69,14 @@ defaults to Medium),
 Checklists: `add_checklist_items`, `update_checklist_items` (done, not done, reword),
 `remove_checklist_items` (confirm); items by their `number` from `get_task` or their text.
 
-**Boards**: `get_project_board`, `update_project_board` (affects every project: confirm);
+**Boards**: `get_project_board`, `update_project_board` (affects every project: confirm;
+removing a status projects still use needs `replace`, old name → a name that stays);
 `list_task_templates`, `create_task_template`, `update_task_template`,
 `delete_task_template` (confirm).
 
 **People on a job** (a dub, document, image or Playground job, per target language):
-`list_job_people` shows who is and who could be assigned; `assign_job_people` (removing
-needs confirm).
+`list_job_people` shows who is and who could be assigned, by language key;
+`assign_job_people` takes those keys (removing needs confirm).
 
 ## Rules
 

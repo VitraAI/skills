@@ -60,9 +60,12 @@ A Drive file: `find_assets` by name. A local file: `vitra.py upload <path>`. Lan
 
 - `translate_subtitle_file` with target languages (paid: price and ask first; pass `duration_seconds` if Vitra asks for the length).
 - `get_subtitles` until ready; with `language`, numbered lines and `revision`.
+- More languages: `add_subtitle_language` BEFORE editing subtitle text. It translates
+  from the transcript, so text edits aren't carried over to a later language: tell the
+  user and re-apply them.
 - Edit ⏸: `edit_subtitle_lines` (edits, split, merge, delete, rebuild; the last
-  three need confirm). Style: `set_subtitle_style` (position `"default"` puts back the
-  preset's own place). More languages: `add_subtitle_language`.
+  three need confirm; rebuild replaces text edits). Style: `set_subtitle_style`
+  (position `"default"` puts back the preset's own place).
 - Deliver: `download_subtitles` (srt, vtt, txt…), or `burn_subtitles` → `get_dub_export`.
 
 ## Also

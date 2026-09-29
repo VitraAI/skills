@@ -67,11 +67,11 @@ background: mention it once; nothing to do.
    Then the same with `"confirm": true`.
 4. **Wait** per language: `get_image_translation` until `completed` (show `image_url`) or
    `failed` (tell the user the reason it gives; retry only when it says a retry would help).
-   `ready_to_translate` (review mode) → `get_image_text` shows the analysed lines with
-   their proposed translation, not rendered yet; go through them with the user, then
-   render with `add_image_languages` (paid), passing their wording as `line_edits`
-   (`[{"line": 1, "text": "…"}]`, one language per call) and lines to leave in the
-   original as `keep_lines`.
+   `ready_to_translate` (review mode) → `get_image_text` shows the analysed source lines;
+   they are translated at render, so there is usually no translation to show yet. Go
+   through the source text with the user, then render with `add_image_languages` (paid),
+   passing any wording they want as `line_edits` (`[{"line": 1, "text": "…"}]`, one
+   language per call) and lines to leave in the original as `keep_lines`.
 5. **Review** ⏸: `get_image_text` shows numbered source → translation lines.
    `edit_image_text` changes lines, keeps lines in the original language (brand names),
    marks them verified or saves them to the memory; a re-render is paid.
@@ -86,7 +86,8 @@ an object), `compose_image_asset` (add or swap a logo or picture), `reanalyze_im
 `apply_image_quality_fixes`. `image_text_transcreation` reads the transcreation
 suggestions already made for the image (free; they are run per text layer in the Vitra
 web app); apply what the user accepts with `edit_image_text`.
-**History**: `list_image_translations`, `get_image_versions`, `update_image_translation`
+**History** (a `job_id` also takes the job's name from `list_image_translations`):
+`list_image_translations`, `get_image_versions`, `update_image_translation`
 (rename, move, restore with confirm), `retry_image_translation`,
 `delete_image_translation`, `save_image_as_template` (back to a Hyperlocal campaign).
 
