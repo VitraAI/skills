@@ -77,7 +77,7 @@ user agreed, since it may render). When the brief is ready, `quick_create_render
 `retry_image_creation` (paid again; only a failed image, a finished one has nothing to
 retry); `delete_image_creation` (confirm; a Drive copy stays).
 **Collections**: `list_image_collections`, `create_image_collection`,
-`update_image_collection` (add, remove, rename; `images` is the count left in it).
+`update_image_collection`, `delete_image_collection` (confirm) (add, remove, rename; `images` is the count left in it).
 
 ## Rules
 
