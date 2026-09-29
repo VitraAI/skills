@@ -24,7 +24,7 @@ features:
   - title: Batches and whole folders
     description: Up to 20 files at once, or every file in a Drive folder into a new translated folder.
   - title: Check and polish
-    description: A quality score with explained errors, AI proofreading, and back-translation to verify meaning.
+    description: A quality score with explained errors and suggested fixes, written back on your yes.
   - title: Correct line by line
     description: See every line with where it sits, correct or approve lines, and save them to your memory.
   - title: Keep it organized
@@ -62,10 +62,6 @@ mcp-tools:
     title: Read a translated document line by line
   - name: edit_document_lines
     title: Correct, verify or sync a translated document
-  - name: review_document_translation
-    title: AI-proofread or back-translate a document
-  - name: get_document_review
-    title: Read AI proofreading or back-translation results
   - name: run_document_quality_report
     title: Score a document translation
   - name: get_quality_report

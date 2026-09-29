@@ -1,15 +1,16 @@
 ---
 name: translation-quality
 description: >-
-  Scores a translation line by line with the Vitra Universe API — accuracy,
-  fluency, terminology and style (MQM) — against the organization's translation
-  memory and terminology, and returns an overall score, a verdict and the worst
-  lines with explained errors and suggested fixes; re-runs, cancels, lists and
-  exports reports as PDF. Use it whenever the user wants a translation reviewed
-  or rated — "how good is this French translation?", "check our vendor's
-  translations", "score these strings", "is this ready to publish?", "send me
-  the report as a PDF". Not for translating (document-translation,
-  translation-memory) or market compliance (content-compliance).
+  Reads and exports the translation quality reports Vitra Universe makes —
+  accuracy, fluency, terminology and style (MQM), scored line by line against
+  the organization's translation memory and terminology: the overall score, a
+  verdict and the worst lines with explained errors and suggested fixes, and
+  the report as a PDF. A report is run by the skill of the job it scores
+  (documents, dubs, images, DITA maps, design jobs). Use it whenever the user
+  asks about a quality report or score — "what did the French report say?",
+  "which lines failed?", "is this ready to publish?", "send me the report as a
+  PDF". Not for translating (document-translation, translation-memory) or
+  market compliance (content-compliance).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -27,7 +28,8 @@ metadata:
 ---
 # Translation Quality
 
-Evaluates source → target pairs. Reports spend credits per source word. A Vitra job (document, image, dub, DITA map, design job) is scored by its own skill's quality tool; the report is read here the same way.
+Reads and exports quality reports. A report is run on a Vitra job by that job's own
+quality-report tool (paid, in the job's skill); every report is read here the same way.
 
 ## How to call Vitra
 
@@ -51,22 +53,31 @@ background: mention it once; nothing to do.
 
 ## Workflow
 
-1. **Inputs**: the source and target texts as pairs, the language keys, and a memory
-   (`list_translation_memories`; several → ask which by name).
-2. **Price, ask, start**:
-   ```bash
-   python3 scripts/vitra.py call run_quality_report '{"tm_id": "…", "source_language": "english_united_states", "target_language": "french_france", "pairs": [{"source": "…", "target": "…"}], "estimate_only": true}'
-   ```
-   Then the same with `"confirm": true`. Give a `reference` to find the latest report again.
-3. **Read**: `get_quality_report` until done; `findings: 5` adds the 5 worst segments
+1. **Run a report** (paid: price, ask, confirm) with the tool of the job it scores; each
+   returns a `report_id`:
+
+   | Job | Run with | Write fixes back with |
+   |---|---|---|
+   | Document | `run_document_quality_report` | `apply_document_quality_fixes` |
+   | Dub | `run_dub_quality_report` | `apply_dub_quality_fixes` |
+   | Image | `run_image_quality_report` | `apply_image_quality_fixes` |
+   | DITA map | `run_dita_map_quality_report` | `apply_dita_map_quality_fixes` |
+   | Design job | `run_design_job_quality_report` | `apply_design_job_quality_fixes` |
+
+   The job's own skill (document-translation, video-dubbing, image-translation,
+   dita-translation, design-file-translation) finds the job and explains its options.
+2. **Read**: `get_quality_report` with the `report_id` (or a `reference` with
+   `source_language` and `target_language` for the latest one), again after
+   `check_again_in_seconds` while it runs. `findings: 5` adds the 5 worst segments
    (numbered from 1, like the summary). Summarize the score, verdict and main problems
    rather than every finding.
-4. **Deliver**: `get_quality_report_pdf` (call again until the link is ready; on
+   ```bash
+   python3 scripts/vitra.py call get_quality_report '{"report_id": "…", "findings": 5}'
+   ```
+3. **Deliver**: `get_quality_report_pdf` (call again until the link is ready; on
    `stalled`, stop and tell the user, share the scores instead and try the PDF later).
-
-Reports: `list_quality_reports`, `rerun_quality_report` (paid again: estimate first),
-`cancel_quality_report` (confirm; credits kept; a finished report has nothing to
-cancel), `delete_quality_report` (confirm).
+4. **Fix**: only on the user's yes, with the job's apply tool above (it overwrites lines:
+   confirm). A failed report is run again with the job's run tool (paid again).
 
 ## Rules
 

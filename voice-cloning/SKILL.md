@@ -64,7 +64,7 @@ background: mention it once; nothing to do.
 4. **Wait**: `list_cloned_voices` until the voice is ready. Then text-to-speech or
    video-dubbing can use it.
 
-Jobs: `list_playground_jobs` with `kind: voice_clone`, `rename_playground_job`,
+Jobs: `list_playground_jobs` with `kind: voice_clone`,
 `manage_playground_job` (`retry` a failed clone: paid, needs consent again),
 `delete_playground_job` (confirm).
 

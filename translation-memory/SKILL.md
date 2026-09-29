@@ -68,7 +68,7 @@ A large batch returns an operation id: `get_memory_translation`.
 
 **Look up and correct**: `search_memory_terms`; `correct_memory_term` (show before →
 after, confirm); `set_memory_term_status` (unverified, verified, approved);
-`delete_memory_terms` (confirm).
+`delete_memory_terms` (one language's translation of a phrase per item; confirm).
 
 **Memories** ⏸: `create_translation_memory` (confirm name and languages;
 `list_memory_providers` for VitraTM or Phrase), `update_translation_memory`,

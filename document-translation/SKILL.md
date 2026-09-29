@@ -5,11 +5,10 @@ description: >-
   original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML,
   JSON, XML, XLIFF, InDesign (.idml) and plain text — one file, a batch, or a
   whole Drive folder — through the organization's translation memory; then
-  reviews it line by line, proofreads, back-translates, scores it with a
-  quality report and writes fixes back. Use it whenever the user wants files
-  or text translated or checked — "translate this contract into German",
-  "translate everything in our Q3 folder", "proofread the French version",
-  "back-translate it so I can check", "change line 12 of the Spanish file".
+  reviews it line by line, scores it with a quality report and writes fixes
+  back. Use it whenever the user wants files or text translated or checked —
+  "translate this contract into German", "translate everything in our Q3
+  folder", "score the French version", "change line 12 of the Spanish file".
   Not for video or subtitles (video-dubbing, video-subtitles, subtitle-translation), text in images
   (image-translation) or DITA maps (dita-translation).
 compatibility: >-
@@ -78,11 +77,7 @@ background: mention it once; nothing to do.
 5. **Review** ⏸: `get_document_lines` (numbered, 50 per page) → `edit_document_lines` to
    correct lines, mark them verified or approved, or sync with the memory (pulling from the
    memory overwrites edits: confirm).
-6. **Checks** (paid per source word, no price check: ask first): `review_document_translation`
-   with `proofread` or `back_translate`, read with `get_document_review` (same `kind` the
-   start names), apply accepted corrections with `action: apply_proofreading`. Proofreading
-   only looks at unverified lines: status "not_started" with a reason means nothing needed
-   checking and nothing was charged; "already_done" means read the existing results. Score: `run_document_quality_report` → `get_quality_report` →
+6. **Score** (paid: ask first): `run_document_quality_report` → `get_quality_report` →
    `apply_document_quality_fixes` (confirm).
 
 History: `list_document_translations`, `manage_document_translation` (rename, move to a
