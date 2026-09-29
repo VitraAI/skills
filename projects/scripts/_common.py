@@ -299,6 +299,15 @@ def credential() -> str:
     return "signin" if isinstance(entry, dict) and entry.get("access_token") else "none"
 
 
+def _login(args: str = "") -> str:
+    """The command that runs this skill's login.py, with absolute paths, so it
+    works from any folder an agent runs in (and on Windows, where python3 may
+    not exist)."""
+    script = Path(__file__).resolve().parent / "login.py"
+    cmd = f'"{sys.executable or "python3"}" "{script}"'
+    return f"{cmd} {args}" if args else cmd
+
+
 def _missing() -> None:
     app = (os.environ.get(APP_URL_VAR) or DEFAULT_APP_URL).rstrip("/")
     had = _SIGNIN_ENDED or credential() == "signin"
@@ -322,10 +331,10 @@ def _missing() -> None:
                  "organization, then tell me when you're done."),
             next_action=(
                 "Show the user sign_in_url as a clickable link and wait. When they say "
-                "they're done, run scripts/login.py --status, then run this command "
+                f"they're done, run {_login('--status')}, then run this command "
                 "again. If their browser shows \"This site can't be reached\", ask them "
                 "for the full address in the address bar and run "
-                "scripts/login.py --finish '<address>'."),
+                f"{_login()} --finish '<address>'."),
             sign_in_url=url,
             server=base_url(),
             sign_up=f"{app}/auth/sign-up",
@@ -336,7 +345,7 @@ def _missing() -> None:
          else f"Not signed in to Vitra at {base_url()}.\n")
         + "\n"
         "Sign in (opens the browser, then pick an organization):\n"
-        "  python3 scripts/login.py\n"
+        f"  {_login()}\n"
         "\n"
         f"New to Vitra? Sign up first: {app}/auth/sign-up\n"
         "\n"
@@ -345,7 +354,7 @@ def _missing() -> None:
         f"set {ENV_VAR}=uvk_... where the agent runs, or in a .env beside SKILL.md.",
         ask=("You need to sign in to Vitra. Shall I open the sign-in page? "
              f"(New to Vitra? Sign up at {app}/auth/sign-up first.)"),
-        next_action=("Run scripts/login.py once the user agrees, then run this command again. "
+        next_action=(f"Run {_login()} once the user agrees, then run this command again. "
                      f"This machine talks to {base_url()} (VITRA_UNIVERSE_BASE_URL changes it)."),
         server=base_url(),
         sign_in=f"{app}/auth/sign-in",
@@ -478,13 +487,13 @@ def auth_error(status: int, what: str = "do this") -> str:
         if signin:
             return (
                 "Your Vitra sign-in was not accepted — it may have ended, or you "
-                "left that organization. Sign in again: python3 scripts/login.py"
+                f"left that organization. Sign in again: {_login()}"
             )
         return (
             f"Your API key ({ENV_VAR}) was not accepted by {base_url()}. It may be "
             "mistyped, revoked, expired, or made on another Vitra environment: a key "
             "works only where it was created. It overrides browser sign-in: unset it "
-            "to sign in with scripts/login.py instead, or ask your Vitra org "
+            f"to sign in with {_login()} instead, or ask your Vitra org "
             "administrator for a new key for this server."
         )
     if status == 429:

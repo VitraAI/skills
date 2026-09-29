@@ -30,7 +30,7 @@ Translates subtitle files with their timing kept. Translating and adding languag
 
 ## How to call Vitra
 
-Run from this skill's folder. Every command prints one JSON object.
+Run from this skill's folder (or use the full path to its `scripts/vitra.py`). Every command prints one JSON object.
 
 ```bash
 python3 scripts/vitra.py describe <tool>                  # its arguments: read before a first call
@@ -39,6 +39,8 @@ python3 scripts/vitra.py upload <path>                    # local file -> asset.
 python3 scripts/vitra.py download <url> --to <path>       # save a link a tool returned
 python3 scripts/vitra.py tools --find "<words>"           # any other tool you may use
 ```
+
+Text with quotes or apostrophes, or a Windows shell: write the JSON to a file and run `call <tool> --args-file <file>` instead of quoting it. Where `python3` isn't found, use `python`.
 
 Not signed in (exit 2): the error carries `sign_in_url`. Show it to the user as a
 link, wait until they say they signed in, run `python3 scripts/login.py --status`,

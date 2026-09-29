@@ -5,7 +5,7 @@ the rules and the wording; nothing about Vitra lives here.
 
   vitra.py tools [--find WORDS]          the tools you may use (name, title)
   vitra.py describe TOOL                 what TOOL does and the arguments it takes
-  vitra.py call TOOL [ARGS_JSON] [--intent TEXT] [--toolsets a,b]
+  vitra.py call TOOL [ARGS_JSON | - | --args-file FILE] [--intent TEXT] [--toolsets a,b]
                                          run TOOL with a JSON object of arguments
   vitra.py upload PATH                   put a local file in Vitra; prints its asset
                                          (and duration_seconds for MP4/MOV/M4A/M4V/MP3/WAV)
@@ -259,7 +259,17 @@ def cmd_call(a: argparse.Namespace) -> int:
     if not a.tool.replace("_", "").isalnum():
         _common.die(_common.EXIT_API_ERROR, "A tool name has only letters, digits and _.",
                     error_code="UNKNOWN_TOOL", retryable=False)
-    body: dict = {"args": _parse_args(a.args)}
+    raw = a.args
+    if a.args_file:
+        if a.args is not None:
+            _common.die(_common.EXIT_API_ERROR, "Pass the arguments once: as ARGS_JSON or --args-file, not both.",
+                        error_code="BAD_ARGUMENTS", retryable=False)
+        try:
+            raw = Path(a.args_file).expanduser().read_text(encoding="utf-8-sig")
+        except OSError as e:
+            _common.die(_common.EXIT_API_ERROR, f"Can't read --args-file {a.args_file} ({e.strerror}).",
+                        error_code="BAD_ARGUMENTS", retryable=False)
+    body: dict = {"args": _parse_args(raw)}
     if a.intent:
         body["user_intent"] = a.intent[:255]
     # Any call may change something, so a lost answer is never "just retry":
@@ -530,6 +540,8 @@ def main() -> int:
             sp.add_argument("tool")
         if name == "call":
             sp.add_argument("args", nargs="?", help="JSON object of arguments, or - for stdin")
+            sp.add_argument("--args-file", help="read the JSON arguments from this file "
+                            "(any shell: no quoting of apostrophes or quotes)")
             sp.add_argument("--intent", help="briefly, what the user wants")
     up = sub.add_parser("upload")
     up.add_argument("path")
