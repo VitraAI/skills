@@ -61,6 +61,10 @@ def _fail_http(status: int, payload: object, *, wrote: bool) -> None:
     body = payload if isinstance(payload, dict) else {}
     message = _common.api_message(payload)
     if status == 401:
+        if _common.credential() == "signin":
+            # The sign-in ended or was revoked: forget it and hand out a new link.
+            _common.write_signin(None)
+            _common._missing()
         _common.die(_common.EXIT_AUTH_REJECTED, _common.auth_error(401))
     extra = {k: body[k] for k in ("required", "available", "owed", "issues", "retryAfter")
              if k in body}

@@ -27,6 +27,7 @@ QUOTED = {
     "awaiting_voices", "review_ready", "needs_memory",  # dub / subtitle states
     "ready_to_translate",  # image translation state
     "save_to_drive", "back_translate",  # action values
+    "sign_in_url",  # the not-signed-in error carries it
 }
 
 # Server tools deliberately left out of every skill (e.g. organization-admin

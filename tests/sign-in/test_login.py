@@ -150,9 +150,20 @@ class LoginTest(unittest.TestCase):
         return json.loads((Path(self.home) / "universe-signin.json").read_text())[self.fake.base]
 
     def test_not_signed_in_says_how(self) -> None:
-        out = self.run_script("vitra.py", "tools")
+        out = self.run_script("check_access.py") if (SCRIPTS / "check_access.py").exists() \
+            else self.run_script("vitra.py", "call", "get_credits", "{}")
         self.assertEqual(out["error"]["code"], "AUTH_MISSING")
-        self.assertIn("login.py", out["error"]["message"])
+        link = out["error"]["sign_in_url"]
+        self.assertTrue(link.startswith(self.fake.base + "/api/auth/oauth2/authorize?"))
+        self.assertIn(link, out["error"]["ask"])
+        self.assertIn("--finish", out["error"]["next_action"])
+        # A second try while that sign-in waits hands out the same link.
+        again = self.run_script("vitra.py", "call", "get_credits", "{}")
+        self.assertEqual(again["error"]["sign_in_url"], link)
+        # Following it signs this machine in.
+        with urllib.request.urlopen(link, timeout=30) as res:
+            self.assertIn(b"signed in", res.read())
+        self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
 
     def test_sign_in_then_scripts_use_the_token(self) -> None:
         self.sign_in()

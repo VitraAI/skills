@@ -41,9 +41,11 @@ python3 scripts/vitra.py download <url> --to <path>       # save a link a tool r
 python3 scripts/vitra.py tools --find "<words>"           # any other tool you may use
 ```
 
-Not signed in (exit 2): ask the user, then run `python3 scripts/login.py` and,
-once they finish in the browser, `python3 scripts/login.py --status`. No browser
-on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
+Not signed in (exit 2): the error carries `sign_in_url`. Show it to the user as a
+link, wait until they say they signed in, run `python3 scripts/login.py --status`,
+then repeat the command. Their browser shows "site can't be reached": ask for the
+address in its address bar and run `python3 scripts/login.py --finish '<address>'`.
+No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 
 ## Start
 
@@ -100,7 +102,7 @@ Explain `message` in plain words; `retryable: true` means the same command may r
 
 | Exit | Meaning | What to do |
 |---|---|---|
-| 2 | Not signed in | Ask, then `python3 scripts/login.py` |
+| 2 | Not signed in | Show the user `sign_in_url`; after they sign in, `python3 scripts/login.py --status` |
 | 3 | Not allowed | Their role can't use this tool (or its toolset is off): their Vitra admin can grant it. Don't retry |
 | 4 | API error, or the tool needs something | Follow `message`; `INSUFFICIENT_CREDITS` carries `required` and `available`. Fix arguments with `describe`; never resend unchanged |
 | 5 | Timed out | Check the status or list tool before trying again |

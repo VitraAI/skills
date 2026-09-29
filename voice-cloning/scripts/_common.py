@@ -302,6 +302,34 @@ def credential() -> str:
 def _missing() -> None:
     app = (os.environ.get(APP_URL_VAR) or DEFAULT_APP_URL).rstrip("/")
     had = _SIGNIN_ENDED or credential() == "signin"
+    # Start the sign-in now, so every agent can hand the user a link at once.
+    info = None
+    try:
+        import login  # vendored next to this file
+
+        info = login.begin(open_browser=False, quiet=True)
+    except Exception:  # noqa: BLE001 — fall back to the instructions below
+        info = None
+    if info:
+        url = info["sign_in_url"]
+        die(
+            EXIT_AUTH_MISSING,
+            (f"Your Vitra sign-in for {base_url()} has ended." if had
+             else f"Not signed in to Vitra at {base_url()}.")
+            + f"\n\nSign in here, then pick your organization:\n  {url}\n\n"
+            f"New to Vitra? Sign up first: {app}/auth/sign-up",
+            ask=(f"Please sign in to Vitra: open {url} , sign in and pick your "
+                 "organization, then tell me when you're done."),
+            next_action=(
+                "Show the user sign_in_url as a clickable link and wait. When they say "
+                "they're done, run scripts/login.py --status, then run this command "
+                "again. If their browser shows \"This site can't be reached\", ask them "
+                "for the full address in the address bar and run "
+                "scripts/login.py --finish '<address>'."),
+            sign_in_url=url,
+            server=base_url(),
+            sign_up=f"{app}/auth/sign-up",
+        )
     die(
         EXIT_AUTH_MISSING,
         (f"Your Vitra sign-in for {base_url()} has ended.\n" if had

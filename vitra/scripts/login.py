@@ -75,10 +75,21 @@ def _out(obj: dict) -> int:
 
 # ── Sign in ──────────────────────────────────────────────────────────────────
 
-def start() -> int:
+def begin(open_browser: bool = True, quiet: bool = False) -> dict | None:
+    """Start a browser sign-in and return its link, reusing one still waiting.
+
+    `quiet`: return None instead of failing when this server can't do browser
+    sign-in, so a caller can fall back to other instructions.
+    """
+    pending, plan_age = _read_pending(), _plan_age()
+    if pending.get("status") == "waiting" and pending.get("url") and plan_age is not None \
+            and plan_age < WAIT_SECONDS - 60:
+        return {"sign_in_url": pending["url"], "browser_opened": False, "reused": True}
     base = _common.base_url()
     status, meta = _get_json(f"{base}/.well-known/vitra-agent")
     if status != 200 or not isinstance(meta, dict) or not meta.get("client_id"):
+        if quiet:
+            return None
         _common.die(
             _common.EXIT_API_ERROR,
             "This Vitra server doesn't offer browser sign-in for skills yet. "
@@ -90,6 +101,8 @@ def start() -> int:
     # machine is set up for: a tampered answer can't send the code elsewhere.
     for key in ("authorization_endpoint", "token_endpoint"):
         if not _same_site(meta.get(key), base):
+            if quiet:
+                return None
             _common.die(_common.EXIT_API_ERROR,
                         "The server's sign-in details point somewhere else; not signing in.",
                         error_code="SIGNIN_UNTRUSTED", retryable=False)
@@ -134,6 +147,8 @@ def start() -> int:
             break
         time.sleep(0.05)
     if not url:
+        if quiet:
+            return None
         _common.die(_common.EXIT_API_ERROR,
                     "Couldn't start the sign-in helper on this machine "
                     f"({_read_pending().get('message') or 'no free local port'}).")
@@ -142,9 +157,16 @@ def start() -> int:
     try:
         import webbrowser
 
-        opened = webbrowser.open(url)
+        opened = webbrowser.open(url) if open_browser else False
     except Exception:  # noqa: BLE001 — no browser is a normal case here
         opened = False
+    return {"sign_in_url": url, "browser_opened": opened, "reused": False}
+
+
+def start() -> int:
+    info = begin(open_browser=True)
+    assert info is not None  # begin() fails loudly when not quiet
+    url, opened = info["sign_in_url"], info["browser_opened"]
     sys.stderr.write(f"Sign in to Vitra in your browser: {url}\n")
     return _out({
         "status": "waiting_for_browser",
@@ -160,6 +182,15 @@ def start() -> int:
               "login.py --finish '<that address>'."
         ),
     })
+
+
+def _plan_age() -> float | None:
+    """Seconds since the waiting sign-in was started, None if there is none."""
+    try:
+        plan = json.loads(_plan_file().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return time.time() - int(plan.get("created_at") or 0)
 
 
 def _plan_file() -> Path:
