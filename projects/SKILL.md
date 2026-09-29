@@ -67,7 +67,7 @@ defaults to Medium),
 **Tasks**: `get_task`, `create_task`, `update_task` (move to another status by name),
 `delete_task` (confirm), `set_task_people` (assign, watch; `remove` needs confirm).
 Checklists: `add_checklist_items`, `update_checklist_items` (done, not done, reword),
-`remove_checklist_items` (confirm).
+`remove_checklist_items` (confirm); items by their `number` from `get_task` or their text.
 
 **Boards**: `get_project_board`, `update_project_board` (affects every project: confirm);
 `list_task_templates`, `create_task_template`, `update_task_template`,

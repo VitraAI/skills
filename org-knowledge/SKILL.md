@@ -54,7 +54,7 @@ background: mention it once; nothing to do.
 
 ## Workflow
 
-1. **Find**: `search_org_knowledge` with the user's words (optional `category`,
+1. **Find**: `search_org_knowledge` with the user's words, in any order (optional `category`,
    `favorites_only`; `full_text` for the whole text), then `get_knowledge_entry` by title.
    Answer from what the entries say and name the entries you used.
    ```bash

@@ -19,8 +19,6 @@ features:
     description: Waiting steps are shown to you; your decision is relayed, never guessed.
   - title: Build with AI
     description: Describe a workflow in plain words, check it and save it.
-  - title: Build with AI
-    description: Describe a workflow in plain words, check it and save it.
 use-cases:
   - title: Launch day
     description: One command starts translation, dubbing and checks together.

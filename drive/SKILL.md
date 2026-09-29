@@ -53,7 +53,8 @@ background: mention it once; nothing to do.
 
 ## Workflow
 
-1. **Find**: `find_assets` by name. Look inside a folder: `browse_drive` (`view` is
+1. **Find**: `find_assets` by name (every word must be in the name; nothing in the
+   trash, or in a trashed folder, comes back). Look inside a folder: `browse_drive` (`view` is
    folder, favourites or trash). Storage used: `get_drive_storage`.
 2. **Upload** a local file: `vitra.py upload <path>` (it wraps `create_upload_url` +
    `register_upload`; called directly, pass the file's `size_bytes` too) and keep the

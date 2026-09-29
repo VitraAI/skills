@@ -68,6 +68,7 @@ over a sign-in and acts with its creator's role in one organization.
 `get_credits` for the balance. Price work before it starts:
 ```bash
 python3 scripts/vitra.py call quote_cost '{}'          # the priceable rates
+python3 scripts/vitra.py call quote_cost '{"search": "compliance"}'  # rates for one product
 python3 scripts/vitra.py call quote_cost '{"items": [...]}'
 ```
 `describe quote_cost` for the item shape. Job tools with `estimate_only` return the same
