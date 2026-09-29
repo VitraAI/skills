@@ -66,9 +66,11 @@ background: mention it once; nothing to do.
    image translation is charged; later languages reuse its job and cost nothing), tell the
    user, then on their yes:
    ```bash
-   python3 scripts/vitra.py call translate_template_image '{"template": "Diwali offer", "language": "tamil_india", "confirm": true}'
+   python3 scripts/vitra.py call translate_template_image '{"template": "Diwali offer", "language": "ta-IN", "confirm": true}'
    ```
-   then `get_image_translation` until done and `save_image_as_template` to use it.
+   then `get_image_translation` until done (its `target_language` is the language's name,
+   e.g. `"Tamil"`, not `"ta-IN"`) and `save_image_as_template` to use it.
+   `list_template_localizations` shows each language's title and caption.
 5. **Overlays** (the per-contact text and fields): `get_template_overlays`,
    `edit_template_overlay` (a language with no overlay yet is created from its `add_text`
    elements), `copy_template_overlay` from another language with `from_language`
@@ -90,8 +92,9 @@ background: mention it once; nothing to do.
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are BCP-47 codes** for templates, localizations and overlays (e.g.
+  `"ta-IN"`), as `describe` shows; `get_image_translation` takes the language's name
+  (`"Tamil"`) or its `list_languages` key. Never guess: `describe` the tool.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.
