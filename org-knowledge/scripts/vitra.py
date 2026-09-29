@@ -44,7 +44,69 @@ TOOLS_PATH = "/v1/agent/tools"
 MAX_ARGS_BYTES = 256 * 1024
 
 
+# Where the published skills live; each skill has skills/<name>.json there.
+CATALOG_VAR = "VITRA_SKILLS_CATALOG_URL"
+DEFAULT_CATALOG = "https://vitraai.github.io/skills"
+UPDATE_CHECK_SECONDS = 24 * 3600
+
+
+def _local_hash(skill_dir: Path) -> str:
+    """This copy's fingerprint, computed like scripts/build.mjs contentHash."""
+    import hashlib
+
+    paths = ["SKILL.md"] + sorted(f"scripts/{p.name}" for p in (skill_dir / "scripts").glob("*.py"))
+    lines = ""
+    for rel in sorted(paths):
+        f = skill_dir / rel
+        if f.is_file():
+            lines += f"{rel}\0{hashlib.sha256(f.read_bytes()).hexdigest()}\n"
+    return hashlib.sha256(lines.encode()).hexdigest()
+
+
+def _update_notice() -> dict | None:
+    """At most once a day per skill: is a newer version of this skill published?
+
+    Never replaces anything: it only tells the user. Silent when the catalog
+    can't be reached (offline, sandboxed) or when VITRA_SKILLS_NO_UPDATE_CHECK=1.
+    """
+    import time
+
+    if os.environ.get("VITRA_SKILLS_NO_UPDATE_CHECK") == "1":
+        return None
+    skill_dir = Path(__file__).resolve().parent.parent
+    name = skill_dir.name
+    stamp = _common.signin_file().with_name("skills-update-check.json")
+    try:
+        seen = json.loads(stamp.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        seen = {}
+    last = seen.get(name) if isinstance(seen, dict) else None
+    if isinstance(last, dict) and time.time() - float(last.get("at", 0)) < UPDATE_CHECK_SECONDS:
+        return last.get("notice")
+    notice = None
+    try:
+        base = (os.environ.get(CATALOG_VAR) or DEFAULT_CATALOG).rstrip("/")
+        with urllib.request.urlopen(f"{base}/skills/{name}.json", timeout=3) as res:
+            published = json.loads(res.read().decode("utf-8")).get("contentHash")
+        if isinstance(published, str) and published and published != _local_hash(skill_dir):
+            notice = {"available": True,
+                      "how": "npx skills update -g -y (then restart the agent)"}
+    except Exception:  # noqa: BLE001 — offline or blocked: say nothing, try later
+        return None
+    try:
+        seen = seen if isinstance(seen, dict) else {}
+        seen[name] = {"at": time.time(), "notice": notice}
+        _common.write_private(stamp, seen)
+    except OSError:
+        pass
+    return notice
+
+
 def _out(obj: object) -> int:
+    if isinstance(obj, dict) and obj.get("status") == "ok":
+        notice = _update_notice()
+        if notice:
+            obj["skills_update"] = notice
     print(json.dumps(obj, ensure_ascii=False))
     return 0
 

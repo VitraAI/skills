@@ -97,9 +97,31 @@ write(
   }),
 );
 
+/**
+ * A skill's fingerprint as an installed copy can compute it: SKILL.md and
+ * scripts/*.py only (installers add or drop other files), each as
+ * "<path>\0<sha256 hex>\n", sorted by path. scripts/vitra.py computes the
+ * same to tell the user when a newer version is published.
+ */
+function contentHash(skill) {
+  const lines = skill.files
+    .map((f) => f.path)
+    .filter((p) => p === 'SKILL.md' || /^scripts\/[^/]+\.py$/.test(p))
+    .sort()
+    .map((p) => {
+      const h = createHash('sha256').update(readFileSync(join(skill.dir, p))).digest('hex');
+      return `${p}\0${h}\n`;
+    })
+    .join('');
+  return createHash('sha256').update(lines).digest('hex');
+}
+
 const index = [];
 for (const skill of skills) {
-  write(`skills/${skill.name}.json`, json(toDetail(skill)));
+  write(
+    `skills/${skill.name}.json`,
+    json({ ...toDetail(skill), contentHash: contentHash(skill) }),
+  );
   write(`downloads/${skill.name}.zip`, await zipSkill(skill, `${skill.name}/`));
 
   const flat = await zipSkill(skill, '');

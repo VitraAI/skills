@@ -45,6 +45,8 @@ link, wait until they say they signed in, run `python3 scripts/login.py --status
 then repeat the command. Their browser shows "site can't be reached": ask for the
 address in its address bar and run `python3 scripts/login.py --finish '<address>'`.
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
+If a result carries `skills_update`, tell the user once that a newer version of the
+Vitra skills is out: they update with `npx skills update -g -y` and restart the agent.
 
 ## Start
 

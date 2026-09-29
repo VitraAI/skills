@@ -28,6 +28,7 @@ QUOTED = {
     "ready_to_translate",  # image translation state
     "save_to_drive", "back_translate",  # action values
     "sign_in_url",  # the not-signed-in error carries it
+    "skills_update",  # vitra.py notes a newer published version
 }
 
 # Server tools deliberately left out of every skill (e.g. organization-admin

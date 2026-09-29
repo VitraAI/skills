@@ -62,7 +62,7 @@ class VitraTest(unittest.TestCase):
     def setUp(self) -> None:
         self.fake = Fake()
         self.env = {**os.environ, "VITRA_UNIVERSE_BASE_URL": self.fake.base,
-                    "VITRA_UNIVERSE_API_KEY": "uvk_test", "VITRA_HOME": tempfile.mkdtemp()}
+                    "VITRA_UNIVERSE_API_KEY": "uvk_test", "VITRA_HOME": tempfile.mkdtemp(), "VITRA_SKILLS_NO_UPDATE_CHECK": "1"}
 
     def tearDown(self) -> None:
         self.fake.httpd.shutdown()
@@ -142,6 +142,40 @@ class VitraTest(unittest.TestCase):
                 path = Path(tmp) / name
                 path.write_bytes(data)
                 self.assertEqual(vitra._media_seconds(path), want, name)
+
+    def test_tells_once_a_day_when_a_newer_version_is_published(self) -> None:
+        import http.server
+        sys.path.insert(0, str(SCRIPT.parent))
+        import vitra  # noqa: E402
+        mine = vitra._local_hash(SCRIPT.parent.parent)
+        served = {"hash": "0" * 64}
+        hits = []
+
+        class C(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def do_GET(self):  # noqa: N802
+                hits.append(self.path)
+                data = json.dumps({"name": "brand-kit", "contentHash": served["hash"]}).encode()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+        cat = http.server.ThreadingHTTPServer(("127.0.0.1", 0), C)
+        threading.Thread(target=cat.serve_forever, daemon=True).start()
+        self.env.pop("VITRA_SKILLS_NO_UPDATE_CHECK")
+        self.env["VITRA_SKILLS_CATALOG_URL"] = f"http://127.0.0.1:{cat.server_address[1]}"
+        out = self.run_cli("tools")
+        self.assertTrue(out["skills_update"]["available"])
+        self.assertEqual(hits, ["/skills/brand-kit.json"])
+        self.run_cli("tools")                      # cached for the day
+        self.assertEqual(len(hits), 1)
+        served["hash"] = mine                      # same as published: no notice
+        home = tempfile.mkdtemp(); self.env["VITRA_HOME"] = home
+        self.assertNotIn("skills_update", self.run_cli("tools"))
+        cat.shutdown()
 
 
 if __name__ == "__main__":

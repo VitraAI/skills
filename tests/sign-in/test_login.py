@@ -123,7 +123,8 @@ class LoginTest(unittest.TestCase):
         self.fake = FakeVitra()
         self.home = tempfile.mkdtemp()
         self.env = {**os.environ, "VITRA_UNIVERSE_BASE_URL": self.fake.base,
-                    "VITRA_HOME": self.home, "BROWSER": "true"}
+                    "VITRA_HOME": self.home, "BROWSER": "true",
+                    "VITRA_SKILLS_NO_UPDATE_CHECK": "1"}
         self.env.pop("VITRA_UNIVERSE_API_KEY", None)
 
     def tearDown(self) -> None:
