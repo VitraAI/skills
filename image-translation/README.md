@@ -1,6 +1,6 @@
 # image-translation
 
-Image Translation: an agent skill for Vitra Universe. Translates the text inside an image — signage, packaging, ad creatives, screenshots, menus, infographics — with the Vitra Universe Image Translator and re-renders it in the target languages with the layout kept; then corrects lines, keeps brand names, edits or adds objects and logos, re-renders at other aspect ratios, runs AI QC, proofreading, back-translation, transcreation and quality scores, and saves results to the Drive.
+Image Translation: an agent skill for Vitra Universe. Translates the text inside an image — signage, packaging, ad creatives, screenshots, menus, infographics — with the Vitra Universe Image Translator and re-renders it in the target languages with the layout kept; then corrects lines, keeps brand names, edits or adds objects and logos, re-renders at other aspect ratios, reads AI transcreation suggestions, runs quality scores, and saves results to the Drive.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

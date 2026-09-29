@@ -25,7 +25,7 @@ metadata:
   tags: Automation, Workflows
   source: vitra
   added: "2026-09-26"
-  updated: "2026-09-28"
+  updated: "2026-09-29"
 ---
 # Workflows
 
@@ -70,7 +70,7 @@ background: mention it once; nothing to do.
 **Runs** (name a run as `run`, as `list_flow_runs` shows it; when names repeat the tool
 lists them, so ask the user which and pass its `run_id`): `list_flow_runs`,
 `manage_flow_run` (rename, move to a work folder, `retry` a failed run: paid again, so ask
-first and pass `confirm: true`; remove step owners), `cancel_flow_run` (confirm). A failed
+first and pass `confirm: true`), `cancel_flow_run` (confirm). A failed
 run can't be deleted from here; it stays in the history.
 **Build or change a workflow**: `design_workflow` (plain words → proposed graph; relay its
 questions), `list_workflow_steps`, `validate_workflow`, then `create_workflow`, or

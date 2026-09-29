@@ -5,13 +5,12 @@ description: >-
   design-tool and office plugins (Figma, Canva, Adobe and Word): lists the
   jobs with their languages and review status, reads a job line by line,
   corrects, verifies or approves lines, syncs edits with the translation
-  memory, renames a job or files it in a work folder, runs AI proofreading,
-  back-translation, QC and transcreation, scores a language with a quality
-  report and writes its fixes back. Use it when the user mentions a
-  translation made in a design plugin — "check the Figma translation", "what
-  did the Canva job translate the headline to?", "fix line 4 of the German
-  Figma file", "proofread the Photoshop job", "score the French version of the
-  banner". Not for uploading files to translate (document-translation) or text
+  memory, renames a job or files it in a work folder, suggests creative
+  alternatives for a line, scores a language with a quality report and writes
+  its fixes back. Use it when the user mentions a translation made in a design
+  plugin — "check the Figma translation", "what did the Canva job translate
+  the headline to?", "fix line 4 of the German Figma file", "give me other
+  options for the headline", "score the French version of the banner". Not for uploading files to translate (document-translation) or text
   baked into flat images (image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
@@ -26,7 +25,7 @@ metadata:
   tags: Figma, Design, Translation
   source: vitra
   added: "2026-09-28"
-  updated: "2026-09-28"
+  updated: "2026-09-29"
 ---
 # Design File Translation
 
@@ -64,10 +63,9 @@ background: mention it once; nothing to do.
    ```bash
    python3 scripts/vitra.py call edit_design_job_lines '{"job": "Spring banner", "set": [{"line": 4, "text": "…"}]}'
    ```
-4. **AI checks** (paid: ask first, then `confirm: true`): `proofread_design_job`
-   (start → results → apply the chosen lines), `back_translate_design_job`,
-   `qc_design_job`, `transcreate_design_line` (creative alternatives for one line; the
-   user picks one).
+4. **Alternatives** (paid: ask first, then `confirm: true`): `transcreate_design_line`
+   suggests creative alternatives for one line, each with its back-translation; the user
+   picks one and `action: apply` uses it.
 5. **Score** (paid): `run_design_job_quality_report` → `get_quality_report` (explain the
    worst lines) → `apply_design_job_quality_fixes` (confirm), then `sync` the memory.
 

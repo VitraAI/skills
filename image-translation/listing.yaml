@@ -69,12 +69,6 @@ mcp-tools:
     title: Re-analyse an image
   - name: resize_image_translation
     title: Resize a translated image
-  - name: image_text_qc_report
-    title: QC report on image text
-  - name: image_text_proofreading
-    title: Proofread image text
-  - name: image_text_back_translation
-    title: Back-translate image text
   - name: image_text_transcreation
     title: Transcreate image text
   - name: run_image_quality_report

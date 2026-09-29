@@ -1,6 +1,6 @@
 # image-creator
 
-Image Creator: an agent skill for Vitra Universe. Generates images from a text prompt with the Vitra Universe Image Creator, edits them in plain language, shapes multi-format briefs with Quick Create, applies the organization's brand kit, keeps collections and saves images to the organization's Drive.
+Image Creator: an agent skill for Vitra Universe. Generates images with the Vitra Universe Image Creator: shapes a brief in plain language with Quick Create and renders it in one or more formats, edits the images in plain language, applies the organization's brand kit, keeps collections and saves images to the organization's Drive.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

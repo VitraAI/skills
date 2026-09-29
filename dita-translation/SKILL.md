@@ -3,12 +3,11 @@ name: dita-translation
 description: >-
   Follows, fixes and delivers DITA map translations (technical documentation:
   a .zip of .ditamap and .dita topics, with SVG images) in Vitra Universe:
-  shows progress per language, previews any file, retries failed topics,
-  downloads one translated zip per language, builds a QC report of PDFs,
-  scores a language with a quality report and writes its fixes back. Use it
-  when the user has DITA or DITA-OT content in Vitra — "is the Japanese DITA
-  map done?", "retry the failed topics", "download the German docs zip",
-  "score the French manual". Not for single Word or XML files
+  shows progress per language with any failed topics, previews any file,
+  downloads one translated zip per language, scores a language with a quality
+  report and writes its fixes back. Use it when the user has DITA or DITA-OT
+  content in Vitra — "is the Japanese DITA map done?", "which topics failed?",
+  "download the German docs zip", "score the French manual". Not for single Word or XML files
   (document-translation), subtitles (video-subtitles, subtitle-translation) or images
   (image-translation).
 compatibility: >-
@@ -24,7 +23,7 @@ metadata:
   tags: Documents, Translation, Technical writing
   source: vitra
   added: "2026-09-26"
-  updated: "2026-09-28"
+  updated: "2026-09-29"
 ---
 # DITA Map Translation
 
@@ -55,8 +54,8 @@ background: mention it once; nothing to do.
 1. **Find the map**: `list_dita_maps` (name, source language, progress per language).
 2. **Progress** per language: `get_dita_map` with `map` and `language` shows files done,
    running and failed, with their paths.
-3. **Failed files**: `retry_dita_map` (all failed files of a language, or one `file`); no
-   extra charge. Check again with `get_dita_map`.
+3. **Failed files**: name them to the user by path. They can't be retried from here; the
+   language can still be delivered with their original text (step 5).
 4. **Look at a file**: `preview_dita_file` with its path and `variant` (source or
    translation).
 5. **Deliver** one language at a time:
@@ -65,8 +64,7 @@ background: mention it once; nothing to do.
    ```
    With failed files it refuses unless `allow_partial: true` (their originals are packed
    instead: tell the user first). `vitra.py download` saves the zip.
-6. **Checks** (paid, ask first): `run_dita_map_qc_report` → `get_dita_map_qc_report` (a
-   zip of PDFs); `run_dita_map_quality_report` → `get_quality_report` →
+6. **Score** (paid, ask first): `run_dita_map_quality_report` → `get_quality_report` →
    `apply_dita_map_quality_fixes` (overwrites phrases: confirm).
 
 ## Rules

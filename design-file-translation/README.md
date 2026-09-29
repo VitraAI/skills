@@ -1,6 +1,6 @@
 # design-file-translation
 
-Design File Translation: an agent skill for Vitra Universe. Follows and finishes translations sent to Vitra Universe from the design-tool and office plugins (Figma, Canva, Adobe and Word): lists the jobs with their languages and review status, reads a job line by line, corrects, verifies or approves lines, syncs edits with the translation memory, renames a job or files it in a work folder, runs AI proofreading, back-translation, QC and transcreation, scores a language with a quality report and writes its fixes back.
+Design File Translation: an agent skill for Vitra Universe. Follows and finishes translations sent to Vitra Universe from the design-tool and office plugins (Figma, Canva, Adobe and Word): lists the jobs with their languages and review status, reads a job line by line, corrects, verifies or approves lines, syncs edits with the translation memory, renames a job or files it in a work folder, suggests creative alternatives for a line, scores a language with a quality report and writes its fixes back.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

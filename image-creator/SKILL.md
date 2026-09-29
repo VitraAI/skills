@@ -1,10 +1,10 @@
 ---
 name: image-creator
 description: >-
-  Generates images from a text prompt with the Vitra Universe Image Creator,
-  edits them in plain language, shapes multi-format briefs with Quick Create,
-  applies the organization's brand kit, keeps collections and saves images to
-  the organization's Drive. Use it whenever the user wants an image, banner,
+  Generates images with the Vitra Universe Image Creator: shapes a brief in
+  plain language with Quick Create and renders it in one or more formats, edits
+  the images in plain language, applies the organization's brand kit, keeps
+  collections and saves images to the organization's Drive. Use it whenever the user wants an image, banner,
   poster, ad creative, social post visual or illustration made — "create an
   image of…", "make me a sale banner", "design a poster in our brand colors",
   "give me this in Instagram and LinkedIn formats" — and for follow-ups like
@@ -24,7 +24,7 @@ metadata:
   tags: Image, Popular
   source: vitra
   added: "2026-09-10"
-  updated: "2026-09-28"
+  updated: "2026-09-29"
 ---
 # Image Creator
 
@@ -53,25 +53,28 @@ background: mention it once; nothing to do.
 ## Workflow
 
 1. **Brand** (only if the user mentions it): `list_brand_kits`; several → ask which, by
-   name. `get_brand_kit` gives colours, fonts and style: fold them into the prompt. No kit
-   yet → the brand-kit skill drafts one.
-2. **Generate**: write the prompt fully in the user's terms (subject, style, mood, exact
-   text). Price, ask, then create. Show the image link; keep `creation_id`.
+   name. Pass its name as `brand_kit` to `quick_create`. No kit yet → the brand-kit skill
+   drafts one.
+2. **Brief** with Quick Create: `quick_create` with the user's request written fully in
+   their terms (subject, style, mood, exact text; optional `aspect_ratio`). Omit `chat` to
+   start; pass the chat it returns to continue. It may render when asked, so it needs
+   `confirm: true` once the user agreed to the credits. Relay its reply and any questions;
+   repeat until the brief is ready.
+3. **Render**: `quick_create_render` on the chat, one image per format (e.g.
+   `"instagram_square"`; omit `formats` for the brief's own). Price, ask, then render. Show
+   the image links; keep each `creation_id`.
    ```bash
-   python3 scripts/vitra.py call generate_image '{"prompt": "…", "estimate_only": true}'
-   python3 scripts/vitra.py call generate_image '{"prompt": "…", "confirm": true}'
+   python3 scripts/vitra.py call quick_create_render '{"chat": "<chat_id>", "formats": ["instagram_square"], "estimate_only": true}'
+   python3 scripts/vitra.py call quick_create_render '{"chat": "<chat_id>", "formats": ["instagram_square"], "confirm": true}'
    ```
-3. **Edit** ⏸ each round: `edit_image` on the LATEST `creation_id` with the user's
+4. **Edit** ⏸ each round: `edit_image` on the LATEST `creation_id` with the user's
    instructions (price, ask, `confirm: true`). Each edit is a new image: chain on it. For a
    precise change, `analyze_image_creation` lists the text, people and objects it sees.
-4. **Save** only when asked: `save_image_to_drive` (optional Drive `folder` by name), or
+5. **Save** only when asked: `save_image_to_drive` (optional Drive `folder` by name), or
    `vitra.py download <image link> --to <path>` for a local copy.
 
-**Guided, multi-format brief** ("a campaign in 3 formats"): `quick_create` with the user's
-message (omit `chat` to start; pass the returned chat to continue; `confirm: true` once the
-user agreed, since it may render). When the brief is ready, `quick_create_render` with the
-`formats` (estimate first). Past chats: `list_quick_create_chats`,
-`rename_quick_create_chat`, `delete_quick_create_chat`.
+**Past chats**: `list_quick_create_chats` (with `chat`: its messages, images and whether
+the brief is ready), `rename_quick_create_chat`, `delete_quick_create_chat`.
 
 **History**: `list_image_creations` (newest first, with why a failed one failed);
 `retry_image_creation` (paid again; only a failed image, a finished one has nothing to
