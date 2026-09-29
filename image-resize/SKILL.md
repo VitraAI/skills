@@ -62,7 +62,7 @@ background: mention it once; nothing to do.
    A PRO estimate splits the price: tell the user its summary (credits charged now, more
    when the plans are approved, and the total). Then the same call with `"confirm": true`.
 4. **Wait**: `get_adapted_sizes` until every size is done or failed. Partial success is
-   normal: report the sizes that worked.
+   normal: report the sizes that worked. Status "no_sizes": it never got any; stop polling.
 5. **Work on one size** ⏸ with `manage_adapted_size`, naming the size by label or WxH:
    `approve` (a PRO plan), `redo` (with a `note`), `review` (numbered issues), `fix`
    (issue numbers or "all"), `versions`, `restore` (confirm), `save_to_drive`.
