@@ -85,7 +85,9 @@ removing a status projects still use needs `replace`, old name → a name that s
 
 **People on a job** (a dub, document, image or Playground job, per target language):
 `list_job_people` shows who is and who could be assigned, by language key;
-`assign_job_people` takes those keys (removing needs confirm).
+`assign_job_people` takes those keys (removing needs confirm). Both take the job's id
+(`job_id` or `translation_id` from the tool that started or listed it), not its name:
+list the job with its own skill's tool first.
 
 ## Rules
 

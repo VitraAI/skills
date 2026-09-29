@@ -71,6 +71,8 @@ background: mention it once; nothing to do.
      where `describe translate_document` lists IDML). Charged per source word (the total
      rounded up to a whole credit), counted when it starts: `estimate_only: true` prices
      pasted text exactly, but for a file only gives the per-word rate. Tell the user that, then `confirm: true` on their yes.
+     Pasted-text word counts include punctuation (each mark adds a third of a word), so
+     they can run above a plain count: say so if the user asks.
      ```bash
      python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "french_france", "format": "DOCX", "asset_id": "…", "estimate_only": true}'
      python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "french_france", "format": "DOCX", "asset_id": "…", "confirm": true}'
@@ -82,8 +84,10 @@ background: mention it once; nothing to do.
 4. **Wait**: `get_document_translation` (or `get_document_batch` for a batch or folder)
    until `completed`. Text (pasted or a .txt) comes back there, cut at 20,000 characters
    (read the rest with `get_document_lines`). A finished file is already saved in the
-   Drive's default folder: `find_assets` + `get_download_url` for a link;
+   Drive's default folder (`saved: true`): `find_assets` + `get_download_url` for a link;
    `save_document_to_drive` only files it in another folder (`save_again` for a second copy).
+   Status `already_saved` means that folder already holds the current copy: nothing new
+   was filed.
 5. **Review** ⏸: `get_document_lines` (numbered, 50 per page) → `edit_document_lines` to
    correct lines, mark them verified or approved, or sync with the memory (pulling from the
    memory overwrites edits: confirm).

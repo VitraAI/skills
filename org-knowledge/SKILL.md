@@ -74,7 +74,8 @@ background: mention it once; nothing to do.
    are private unless `shared: true`: ask before sharing with the whole organization.
 3. **Edit** ⏸: show before → after, then `update_knowledge_entry`. Every save is a
    version: `list_knowledge_versions`, then `restore_knowledge_version` (confirm; it can
-   change the title back: use the title it returns and relay its note).
+   change the title back: use the title it returns and relay its note). It is refused
+   when that old title now belongs to another entry: rename that one first (ask).
 4. **Tidy**: `favorite_knowledge_entry`; `delete_knowledge_entry` (confirm).
 
 **Categories**: `list_knowledge_categories`, `create_knowledge_category`,

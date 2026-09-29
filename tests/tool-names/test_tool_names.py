@@ -30,6 +30,9 @@ QUOTED = {
     "sign_in_url",  # the not-signed-in error carries it
     "skills_update",  # vitra.py notes a newer published version
     "brand_kit_id", "entry_id", "prompt_id",  # ids results carry when names repeat
+    "file_id",  # an upload's id, taken where a Drive path is
+    "already_saved",  # save_document_to_drive status
+    "billed_seconds",  # speech job result: seconds charged
 }
 
 # Server tools deliberately left out of every skill (e.g. organization-admin

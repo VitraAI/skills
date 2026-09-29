@@ -72,7 +72,8 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call text_to_speech '{"text": "…", "language": "english_united_kingdom", "provider": "elevenlabs", "voice_id": "…", "confirm": true}'
    ```
 4. **Wait**: `get_speech_job` until `completed`; give the audio link, or
-   `vitra.py download <link> --to <path>`.
+   `vitra.py download <link> --to <path>`. `billed_seconds` is what the clip was charged
+   for (at least one second, even when its length reads 0).
 
 Sessions: `list_playground_jobs` with `kind: speech`, `rename_playground_job` (by name; renames every clip),
 `manage_playground_job` (`save_to_drive`: unchanged clips are not copied twice,

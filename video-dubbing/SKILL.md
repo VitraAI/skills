@@ -103,6 +103,8 @@ the video is and call again with `duration_seconds`.
    confidential).
 5. **Issues**: `list_dub_issues`; `fix_dub_issues` (may shorten lines: say so; a status
    of needs_audio names lines to redo with `regenerate_dub_audio`, clean means done).
+   When the only errors are missing audio, go straight to `regenerate_dub_audio` (no
+   lines: every line without audio); it is paid, so price it and get a yes first.
    Errors block export: never try to bypass.
 6. **Export** one language at a time: `export_dub` (optional burned-in `subtitles`;
    `lip_sync` is paid and needs `confirm` and `consent`) → `get_dub_export` for the link →
@@ -114,7 +116,8 @@ the video is and call again with `duration_seconds`.
 
 Quality: `run_dub_quality_report` → `get_quality_report` → `apply_dub_quality_fixes`
 (confirm; then regenerate audio). Memory: `sync_dub_memory` (confirm). Settings:
-`get_dub_settings` (with `language`: its background audio tracks), `update_dub_settings`, `dub_background_audio`. Spreadsheet of every
+`get_dub_settings` (with `language`: its background audio tracks), `update_dub_settings`, `dub_background_audio` (`duration_seconds` is optional: Vitra
+reads the length from the file and checks a given one against it). Spreadsheet of every
 line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `stop_dub_work`
 (cancels a running job; a finished one answers nothing_running), `remove_dub_language`,
 `delete_dub_job` (confirm). A failed job can't be resumed: tell the user why; starting

@@ -3,8 +3,8 @@ name: content-compliance
 description: >-
   Checks content against each market's rules before it goes out, with the Vitra
   Universe API: text, images, audio and video are scored per market (approved,
-  review or blocked) with the rules they break and the frames or media that
-  break them, plus unsafe-content detection; a flagged image can be regenerated
+  review or blocked) with the rules they break and why, the media and sampled
+  video frames, plus unsafe-content detection; a flagged image can be regenerated
   to meet a market's rules; past checks are listed or deleted; and reviewers'
   own verdicts on the review queue are relayed. Use it whenever the user asks if
   content is okay for a market or audience — "is this ad OK for Saudi Arabia?",
@@ -75,7 +75,9 @@ background: mention it once; nothing to do.
 4. **Verdict**: `get_content_check` until done. Explain each flagged concern in plain
    words; `get_content_decision` has per-rule detail (its AI summary may name
    places loosely: name only the markets it lists under `markets`), `get_decision_media` the
-   media links and a video's flagged frames (only what the check has).
+   media links and a video's sampled frames with timestamps. Frames are not tied to a
+   rule: what was flagged is in the rule reasons of `get_content_decision`. An empty frame
+   list comes with a `reason`: relay it in plain words.
 5. **Fix a flagged image** (image checks only; paid, flat per fix): `fix_flagged_image`
    with the check and the market, `estimate_only: true` first, ask, then `confirm: true`
    → `get_image_fix`. Earlier fixes: `list_image_fixes`.

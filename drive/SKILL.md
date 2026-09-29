@@ -74,7 +74,10 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py download "<url>" --to ./downloads/
    ```
 4. **Organize**: `create_drive_folder` (optional `in_folder`), `rename_drive_item`,
-   `move_drive_items` (`to_folder`), `set_drive_favourite`.
+   `move_drive_items` (`to_folder`), `set_drive_favourite`. Name items by path
+   ("Campaigns/Diwali/banner.png"); the `asset_id` from `find_assets` or `browse_drive`
+   (or an upload's `file_id`) works too, except for `set_drive_favourite`, which needs the
+   name or path.
 5. **Trash** ⏸: list exactly what goes, get a yes, then `trash_drive_items` with
    `confirm: true`. `restore_drive_items` brings items back from the trash.
 

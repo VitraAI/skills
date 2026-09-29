@@ -73,7 +73,8 @@ background: mention it once; nothing to do.
 **Save or change**: `create_prompt` (private unless `shared: true`: confirm text and
 sharing), `update_prompt` (each edit is a new version), `list_prompt_versions`,
 `restore_prompt_version` (confirm; it can change the title back: use the title it
-returns and relay its note), `favorite_prompt`, `delete_prompt` (confirm; it goes for
+returns and relay its note; refused when that old title is now another prompt's: rename
+that one first, with the user's yes), `favorite_prompt`, `delete_prompt` (confirm; it goes for
 everyone it was shared with).
 
 **Categories**: `list_prompt_categories`, `create_prompt_category`,

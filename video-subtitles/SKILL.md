@@ -80,8 +80,8 @@ the video is and call again with `duration_seconds`.
 - From a video: `start_subtitles` (paid; `needs_memory` → ask which and call again).
 - `get_subtitles` until ready; with `language`, numbered lines and `revision`.
 - More languages: `add_subtitle_language` BEFORE editing subtitle text. It translates
-  from the transcript, so text edits aren't carried over to a later language: tell the
-  user and re-apply them.
+  from the transcript, so text and timing edits aren't carried over to a later language:
+  relay its `note` in plain words, then re-check the new language and re-apply edits.
 - Edit ⏸: `edit_subtitle_lines` (edits, split, merge, delete, rebuild; the last
   three need confirm; rebuild replaces text edits). Style: `set_subtitle_style`
   (position `"default"` puts back the preset's own place).

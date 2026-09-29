@@ -69,7 +69,9 @@ linked resources (glossaries, term bases, style guide).
 
 **Translate short texts** (UI strings, product copy): free, no credits. Memory first,
 machine for the rest; new translations are stored as unverified entries. Target
-languages are `list_languages` keys (or the codes the memory lists).
+languages are `list_languages` keys (or the codes the memory lists), and only ones the
+memory already covers: any other is refused, not added. To add one, ask the user, then
+`update_translation_memory` with `add_target_languages`.
 ```bash
 python3 scripts/vitra.py call translate_with_memory '{"tm_id": "…", "texts": ["Checkout"], "target_languages": ["german_germany"]}'
 ```

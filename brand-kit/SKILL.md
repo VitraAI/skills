@@ -60,7 +60,8 @@ background: mention it once; nothing to do.
 ## Workflow
 
 **Which kits exist**: `list_brand_kits`; one in full: `get_brand_kit`. Name a kit by its
-name; when two kits share one, ask which and pass its `brand_kit_id` instead.
+name as `brand_kit`; when two kits share one, ask which and pass its `brand_kit_id`
+(from `list_brand_kits`) instead. Get, update and delete take one of the two.
 
 **New kit**:
 1. Source ⏸: a public website (`source: url`), up to 6 brand `images`, or a brand-book

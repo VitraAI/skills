@@ -15,8 +15,8 @@ features:
     description: Text, images, audio and video, checked per market.
   - title: Clear verdicts
     description: Approved, review or blocked, with the rules each concern breaks.
-  - title: Frame-level detail
-    description: The media and video frames behind each concern.
+  - title: Media and frames
+    description: The checked media and sampled video frames, with timestamps.
   - title: Automatic image fixes
     description: Regenerate a flagged image to meet the market's rules.
   - title: Review queue
@@ -25,7 +25,7 @@ use-cases:
   - title: Global ad launch
     description: Check one creative for every market before it ships.
   - title: Video QA
-    description: Find the frames that break a market's rules.
+    description: See which rules a video breaks, and why.
 mcp-toolset: quality
 mcp-tools:
   - name: list_qc_regions
