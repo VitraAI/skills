@@ -63,39 +63,76 @@ def _local_hash(skill_dir: Path) -> str:
     return hashlib.sha256(lines.encode()).hexdigest()
 
 
-def _update_notice() -> dict | None:
-    """At most once a day per skill: is a newer version of this skill published?
+def _in_git_checkout(path: Path) -> bool:
+    """A developer's own repo: never overwrite unpublished work."""
+    return any((p / ".git").exists() for p in [path, *path.parents])
 
-    Never replaces anything: it only tells the user. Silent when the catalog
-    can't be reached (offline, sandboxed) or when VITRA_SKILLS_NO_UPDATE_CHECK=1.
+
+def _updater(skill_dir: Path) -> list[str] | None:
+    """The command that refreshes this install, or None if there is none here."""
+    import shutil
+
+    if "/.claude/plugins/" in skill_dir.as_posix():
+        claude = shutil.which("claude")
+        if claude:
+            return ["sh", "-c", f'"{claude}" plugin marketplace update vitra && '
+                                f'"{claude}" plugin update vitra@vitra']
+        return None
+    npx = shutil.which("npx")
+    return [npx, "-y", "skills", "update", "-g", "-y"] if npx else None
+
+
+def _update_notice() -> dict | None:
+    """At most once a day per skill: if a newer version is published, update in
+    the background (it takes effect on the next run).
+
+    Silent when the catalog can't be reached (offline, sandboxed), when no
+    updater is installed, in a git checkout, or with VITRA_SKILLS_NO_UPDATE_CHECK=1.
     """
+    import subprocess
     import time
 
     if os.environ.get("VITRA_SKILLS_NO_UPDATE_CHECK") == "1":
         return None
     skill_dir = Path(__file__).resolve().parent.parent
+    if _in_git_checkout(skill_dir):
+        return None
     name = skill_dir.name
     stamp = _common.signin_file().with_name("skills-update-check.json")
     try:
         seen = json.loads(stamp.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         seen = {}
-    last = seen.get(name) if isinstance(seen, dict) else None
+    seen = seen if isinstance(seen, dict) else {}
+    last = seen.get(name)
     if isinstance(last, dict) and time.time() - float(last.get("at", 0)) < UPDATE_CHECK_SECONDS:
-        return last.get("notice")
+        return None
     notice = None
     try:
         base = (os.environ.get(CATALOG_VAR) or DEFAULT_CATALOG).rstrip("/")
         with urllib.request.urlopen(f"{base}/skills/{name}.json", timeout=3) as res:
             published = json.loads(res.read().decode("utf-8")).get("contentHash")
-        if isinstance(published, str) and published and published != _local_hash(skill_dir):
-            notice = {"available": True,
-                      "how": "npx skills update -g -y (then restart the agent)"}
-    except Exception:  # noqa: BLE001 — offline or blocked: say nothing, try later
+    except Exception:  # noqa: BLE001 — offline or blocked: try again later
         return None
+    if isinstance(published, str) and published and published != _local_hash(skill_dir):
+        command = _updater(skill_dir)
+        if command:
+            log = _common.signin_file().with_name("skills-update.log")
+            try:
+                with open(log, "ab") as out:
+                    popen: dict = {"stdout": out, "stderr": out, "stdin": subprocess.DEVNULL}
+                    if os.name == "nt":
+                        popen["creationflags"] = 0x00000008 | 0x00000200
+                    else:
+                        popen["start_new_session"] = True
+                    subprocess.Popen(command, **popen)
+                notice = {"updating": True,
+                          "note": "A newer version of the Vitra skills is installing in the "
+                                  "background; it takes effect the next time a skill runs."}
+            except OSError:
+                notice = None
     try:
-        seen = seen if isinstance(seen, dict) else {}
-        seen[name] = {"at": time.time(), "notice": notice}
+        seen[name] = {"at": time.time()}
         _common.write_private(stamp, seen)
     except OSError:
         pass

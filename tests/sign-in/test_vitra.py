@@ -143,11 +143,17 @@ class VitraTest(unittest.TestCase):
                 path.write_bytes(data)
                 self.assertEqual(vitra._media_seconds(path), want, name)
 
-    def test_tells_once_a_day_when_a_newer_version_is_published(self) -> None:
-        import http.server
-        sys.path.insert(0, str(SCRIPT.parent))
-        import vitra  # noqa: E402
-        mine = vitra._local_hash(SCRIPT.parent.parent)
+    def test_updates_itself_once_a_day_when_a_newer_version_is_published(self) -> None:
+        import http.server, shutil, stat, time  # noqa: E401
+        # An installed copy (outside any git checkout) and a fake `npx` on PATH.
+        root = Path(tempfile.mkdtemp())
+        skill = root / "brand-kit"
+        shutil.copytree(SCRIPT.parent.parent, skill, ignore=shutil.ignore_patterns("__pycache__", ".env"))
+        bindir = root / "bin"; bindir.mkdir()
+        marker = root / "npx-args"
+        npx = bindir / "npx"
+        npx.write_text(f"#!/bin/sh\necho \"$@\" > {marker}\n")
+        npx.chmod(npx.stat().st_mode | stat.S_IEXEC)
         served = {"hash": "0" * 64}
         hits = []
 
@@ -157,7 +163,7 @@ class VitraTest(unittest.TestCase):
 
             def do_GET(self):  # noqa: N802
                 hits.append(self.path)
-                data = json.dumps({"name": "brand-kit", "contentHash": served["hash"]}).encode()
+                data = json.dumps({"contentHash": served["hash"]}).encode()
                 self.send_response(200)
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
@@ -167,16 +173,25 @@ class VitraTest(unittest.TestCase):
         threading.Thread(target=cat.serve_forever, daemon=True).start()
         self.env.pop("VITRA_SKILLS_NO_UPDATE_CHECK")
         self.env["VITRA_SKILLS_CATALOG_URL"] = f"http://127.0.0.1:{cat.server_address[1]}"
-        out = self.run_cli("tools")
-        self.assertTrue(out["skills_update"]["available"])
-        self.assertEqual(hits, ["/skills/brand-kit.json"])
-        self.run_cli("tools")                      # cached for the day
+        self.env["PATH"] = f"{bindir}:{self.env['PATH']}"
+        run = lambda: json.loads(subprocess.run(  # noqa: E731
+            [sys.executable, str(skill / "scripts" / "vitra.py"), "tools"], env=self.env,
+            capture_output=True, text=True, timeout=60).stdout.strip().splitlines()[-1])
+        out = run()
+        self.assertTrue(out["skills_update"]["updating"])
+        for _ in range(50):
+            if marker.exists():
+                break
+            time.sleep(0.1)
+        self.assertEqual(marker.read_text().split(), ["-y", "skills", "update", "-g", "-y"])
+        self.assertNotIn("skills_update", run())       # once a day
         self.assertEqual(len(hits), 1)
-        served["hash"] = mine                      # same as published: no notice
-        home = tempfile.mkdtemp(); self.env["VITRA_HOME"] = home
-        self.assertNotIn("skills_update", self.run_cli("tools"))
         cat.shutdown()
 
+    def test_never_updates_a_git_checkout(self) -> None:
+        self.env.pop("VITRA_SKILLS_NO_UPDATE_CHECK")
+        self.env["VITRA_SKILLS_CATALOG_URL"] = "http://127.0.0.1:9"   # would fail anyway
+        self.assertNotIn("skills_update", self.run_cli("tools"))  # the repo copy is a checkout
 
 if __name__ == "__main__":
     unittest.main()
