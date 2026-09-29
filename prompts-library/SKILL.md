@@ -32,7 +32,8 @@ The team's saved prompts, by title. Nothing here spends credits.
 
 ## How to call Vitra
 
-Run from this skill's folder (or use the full path to its `scripts/vitra.py`). Every command prints one JSON object.
+Run the scripts by the full path of this skill's folder (`python3 <this skill's folder>/scripts/vitra.py …`);
+don't `cd` into it, since some agents block that. Every command prints one JSON object.
 
 ```bash
 python3 scripts/vitra.py describe <tool>                  # its arguments: read before a first call

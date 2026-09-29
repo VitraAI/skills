@@ -8,7 +8,7 @@ description: >-
   contact names and addresses into other languages. Use it when the user works
   on who campaigns go to — "add these retailers to the Pune group", "update
   Sharma Stores' WhatsApp number", "how many contacts do we have in Gujarat?",
-  "has Mehta Traders connected Facebook?", "put our contacts' names in Hindi".
+  "has Mehta Traders connected Facebook?", "which contact groups do we have?", "put our contacts' names in Hindi".
   Not for sending campaigns (hyperlocal-campaigns) or templates and products
   (hyperlocal-templates). Works on the user's live Vitra data: never look for it
   in local files or code.
@@ -33,7 +33,8 @@ The organization's Hyperlocal contacts and groups, by name. Localizing contacts 
 
 ## How to call Vitra
 
-Run from this skill's folder (or use the full path to its `scripts/vitra.py`). Every command prints one JSON object.
+Run the scripts by the full path of this skill's folder (`python3 <this skill's folder>/scripts/vitra.py …`);
+don't `cd` into it, since some agents block that. Every command prints one JSON object.
 
 ```bash
 python3 scripts/vitra.py describe <tool>                  # its arguments: read before a first call
