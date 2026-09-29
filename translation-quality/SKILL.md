@@ -58,12 +58,15 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call run_quality_report '{"tm_id": "…", "source_language": "english_united_states", "target_language": "french_france", "pairs": [{"source": "…", "target": "…"}], "estimate_only": true}'
    ```
    Then the same with `"confirm": true`. Give a `reference` to find the latest report again.
-3. **Read**: `get_quality_report` until done; `findings: true` adds the worst segments.
-   Summarize the score, verdict and main problems rather than every finding.
-4. **Deliver**: `get_quality_report_pdf` (call again until the link is ready).
+3. **Read**: `get_quality_report` until done; `findings: 5` adds the 5 worst segments
+   (numbered from 1, like the summary). Summarize the score, verdict and main problems
+   rather than every finding.
+4. **Deliver**: `get_quality_report_pdf` (call again until the link is ready; on
+   `stalled`, stop and tell the user, share the scores instead and try the PDF later).
 
 Reports: `list_quality_reports`, `rerun_quality_report` (paid again: estimate first),
-`cancel_quality_report` (confirm; credits kept), `delete_quality_report` (confirm).
+`cancel_quality_report` (confirm; credits kept; a finished report has nothing to
+cancel), `delete_quality_report` (confirm).
 
 ## Rules
 

@@ -75,7 +75,7 @@ A fixed wording per language goes in `translations`; `describe add_glossary_entr
 `reorder_style_guide_rules`, `copy_style_guide_language`. A guide's files:
 `set_style_guide_file_languages`, `remove_style_guide_file` (confirm);
 `extract_style_guide_rules` rebuilds the rules from the files and replaces every rule:
-clear yes first.
+clear yes first (a guide with no files has nothing to extract; its rules stay).
 
 **Use them**: a memory follows them once linked (`link_memory_resources`, in the
 translation-memory skill).
