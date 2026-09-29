@@ -10,7 +10,7 @@ description: >-
   our product-launch workflow for the new video", "start the weekly
   localization flow", "approve the review step", "where is my workflow run?",
   "build a workflow that dubs then checks compliance". Not for one-off jobs a
-  specific skill does directly (document-translation, translate-video,
+  specific skill does directly (document-translation, video-dubbing,
   image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

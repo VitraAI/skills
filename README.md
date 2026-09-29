@@ -18,7 +18,7 @@ plus the scripts it runs.
 | [`image-resize`](image-resize/) | Re-compose one image for other sizes (Story, LinkedIn, 1080x1920…) |
 | [`image-translation`](image-translation/) | Translate the text baked into an image and keep its layout; fix lines, objects and logos |
 | [`design-file-translation`](design-file-translation/) | Review, correct and score translations sent from the Figma, Canva, Adobe and Word plugins |
-| [`translate-video`](translate-video/) | Dub a video with voices from the voice library, make subtitles, translate SRT/VTT files; review, export or burn in |
+| [`video-dubbing`](video-dubbing/) | Dub a video with voices from the voice library, make subtitles, translate SRT/VTT files; review, export or burn in |
 | [`document-translation`](document-translation/) | Translate text, Office, PDF, spreadsheet and InDesign files, batches or Drive folders; review and score them |
 | [`dita-translation`](dita-translation/) | Follow, retry, score and download DITA map translations, one zip per language |
 | [`translation-memory`](translation-memory/) | Translation memories: translate strings memory-first, correct entries, share, link, VitraTM settings |

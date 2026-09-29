@@ -61,7 +61,7 @@ mcp-tools:
   - name: quote_cost
     title: Price work in credits
 related-skills:
-  - name: translate-video
+  - name: video-dubbing
     why: Run a single dub directly, outside a workflow.
   - name: document-translation
     why: Translate one document directly, outside a workflow.

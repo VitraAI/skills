@@ -47,7 +47,7 @@ mcp-tools:
   - name: quote_cost
     title: Price work in credits
 related-skills:
-  - name: translate-video
+  - name: video-dubbing
     why: Dub the video first; its export can lip-sync too.
   - name: text-to-speech
     why: Generate the new audio track to sync to.

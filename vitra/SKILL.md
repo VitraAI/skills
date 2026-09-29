@@ -30,7 +30,7 @@ metadata:
 ---
 # Vitra
 
-Sign-in, credits and the way to every other Vitra tool. Each section of the Vitra app has its own skill (drive, org-knowledge, image-creator, document-translation, translate-video, hyperlocal-campaigns and the rest); use this one for the account itself and for anything no other skill covers.
+Sign-in, credits and the way to every other Vitra tool. Each section of the Vitra app has its own skill (drive, org-knowledge, image-creator, document-translation, video-dubbing, hyperlocal-campaigns and the rest); use this one for the account itself and for anything no other skill covers.
 
 ## How to call Vitra
 

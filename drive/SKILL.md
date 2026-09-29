@@ -10,7 +10,7 @@ description: >-
   our Drive", "upload this PDF to Vitra", "give me a link to the German deck",
   "move these into the Q4 folder", "trash the old drafts", "what's in the Acme
   work folder?". Not for translating or editing the files themselves
-  (document-translation, image-translation, translate-video) or credits and
+  (document-translation, image-translation, video-dubbing) or credits and
   sign-in (vitra).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

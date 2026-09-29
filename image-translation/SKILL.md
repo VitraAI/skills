@@ -13,7 +13,7 @@ description: >-
   the second line of the German one" — even if they only say "translate this".
   Not for generating new images (image-creator), resizing an untranslated
   image (image-resize), or documents (document-translation) and subtitles
-  (translate-video).
+  (video-dubbing, video-subtitles).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in

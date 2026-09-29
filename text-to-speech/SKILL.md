@@ -7,7 +7,7 @@ description: >-
   text spoken or a voice-over made from a script — "read this out in a British
   male voice", "make an MP3 of this announcement in Hindi", "generate narration
   for these paragraphs", "say this in my cloned voice", "say SQL as sequel". Not
-  for dubbing an existing video (translate-video) or creating a new voice from
+  for dubbing an existing video (video-dubbing) or creating a new voice from
   samples (voice-cloning).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

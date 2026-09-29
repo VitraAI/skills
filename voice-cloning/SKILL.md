@@ -7,7 +7,7 @@ description: >-
   custom or cloned voice — "clone my voice from this recording", "make a voice
   from these samples of our narrator", "which cloned voices do we have?" — and
   only for the user's own voice or one they have the person's consent for. Not
-  for generating speech (text-to-speech) or dubbing (translate-video), which
+  for generating speech (text-to-speech) or dubbing (video-dubbing), which
   then use the cloned voice.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
@@ -58,7 +58,7 @@ on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
    python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "english_india", "consent": true, "confirm": true}'
    ```
 4. **Wait**: `list_cloned_voices` until the voice is ready. Then text-to-speech or
-   translate-video can use it.
+   video-dubbing can use it.
 
 Jobs: `list_playground_jobs` with `kind: voice_clone`, `rename_playground_job`,
 `manage_playground_job` (`retry` a failed clone: paid, needs consent again),

@@ -52,7 +52,7 @@
     "./prompts-library",
     "./terminology",
     "./text-to-speech",
-    "./translate-video",
+    "./video-dubbing", "./video-subtitles", "./subtitle-translation",
     "./translation-memory",
     "./translation-quality",
     "./vitra",

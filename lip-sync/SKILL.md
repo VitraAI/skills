@@ -7,7 +7,7 @@ description: >-
   audio — "lip-sync this video to the Spanish audio", "make the lips match the
   new voice-over", "sync his mouth to this recording" — and only for people who
   consented to their likeness being altered. Not for dubbing a video from
-  scratch (translate-video, which can lip-sync its own export) or making the
+  scratch (video-dubbing, which can lip-sync its own export) or making the
   audio (text-to-speech).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

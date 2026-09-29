@@ -9,7 +9,7 @@ description: >-
   when the user has DITA or DITA-OT content in Vitra — "is the Japanese DITA
   map done?", "retry the failed topics", "download the German docs zip",
   "score the French manual". Not for single Word or XML files
-  (document-translation), subtitles (translate-video) or images
+  (document-translation), subtitles (video-subtitles, subtitle-translation) or images
   (image-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

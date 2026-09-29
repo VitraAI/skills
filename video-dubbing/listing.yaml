@@ -1,35 +1,44 @@
 # The skill's page in the Skill Library (catalog.json / skills/<name>.json).
 # Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
-# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
-# the skill uses (checked against scripts/mcp-tools.json).
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra MCP tools
+# that do the same jobs (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Dub a video into other languages, make subtitles from a video, or translate
-  SRT and VTT files — then review every line, fix issues and export. Library
-  voices by default; a speaker's own cloned voice or lip-sync only with their
-  consent.
+  Dub a video into one or more languages, from upload to a reviewed, verified
+  download, without opening the editor. The run pauses so you decide each
+  speaker's voice — keep their own or pick another — then generates the dub and
+  stops for review. Lines can be corrected card by card, blocking issues are
+  listed and repaired, and each language is exported and downloaded one at a
+  time. Failed runs resume from the failed step instead of repeating paid work.
 when-to-use: >-
-  Reach for it whenever a video has to speak or read in another language, or a
-  subtitle file has to be translated. For narration from a script, use Text to
-  Speech.
+  Reach for it to dub or voice-translate a video — "make a Spanish version of
+  this clip", "add a Hindi voiceover". Input is a local video file or a public
+  URL, a source language and one or more target languages. For subtitles only,
+  audio-only files, or translating images and text, use a different skill.
 features:
-  - title: Dubbing with a voice decision
-    description: Pauses so each speaker gets a library voice or, with consent, their own.
-  - title: Line-by-line review
-    description: Edit, split, merge, re-voice lines; set emotions and pronunciations.
-  - title: Subtitles two ways
-    description: From a video, or by translating an SRT, VTT, ASS or SSA file, timing kept.
-  - title: Issues fixed before export
-    description: Lists what blocks export and fixes rate and timing problems.
-  - title: Export and deliver
-    description: Dubbed video per language, subtitles burned in, or subtitle files in many formats.
+  - title: Speaker-by-speaker voices
+    description: Pauses at the voice gate so each speaker keeps their own voice or gets a new one.
+  - title: Review before render
+    description: Stops after generating so text, timing, emotion and rate can be checked first.
+  - title: Line-level corrections
+    description: Edit, split, merge, re-translate or re-voice single lines and subtitles.
+  - title: More languages, same voices
+    description: Adds languages to the same dub, reusing each speaker's voice.
+  - title: Issues repaired
+    description: Lists blocking issues and fixes them within a budget, disclosing every change.
+  - title: Resumable runs
+    description: Picks up from the failed step and reuses identical uploads instead of redoing paid work.
+  - title: Full control
+    description: Stop a job, file it, sync lines with your memory, or export every line as a spreadsheet.
 use-cases:
-  - title: Marketing videos
+  - title: Localized marketing video
     description: Turn one product video into several market-ready language versions.
-  - title: E-learning
-    description: Caption and dub course content, reviewed line by line.
-  - title: Subtitle files
-    description: One caption file, every language your viewers speak.
+  - title: Training and e-learning
+    description: Dub course content while keeping the instructor's voice.
+  - title: Social clips
+    description: Voice-translate short clips for regional channels.
+  - title: Reviewed releases
+    description: Check every line before exporting a language for publication.
 mcp-toolset: dub
 mcp-tools:
   - name: get_guide
@@ -88,20 +97,6 @@ mcp-tools:
     title: Save an export to the Drive
   - name: start_subtitles
     title: Make subtitles from a video
-  - name: translate_subtitle_file
-    title: Translate a subtitle file
-  - name: get_subtitles
-    title: Check, read or search subtitles
-  - name: edit_subtitle_lines
-    title: Edit subtitle lines
-  - name: set_subtitle_style
-    title: Style subtitles
-  - name: add_subtitle_language
-    title: Add subtitle languages
-  - name: download_subtitles
-    title: Get subtitles as a file
-  - name: burn_subtitles
-    title: Render video with subtitles
   - name: run_dub_quality_report
     title: Score a dub's translation
   - name: get_quality_report
@@ -133,9 +128,7 @@ mcp-tools:
   - name: quote_cost
     title: Price work in credits
 related-skills:
+  - name: video-subtitles
+    why: Subtitles without a voice-over, or translated captions for the same video.
   - name: voice-cloning
-    why: Clone a narrator once and use the voice in every dub.
-  - name: lip-sync
-    why: Match mouth movements to a new audio track.
-  - name: translation-memory
-    why: Keep names and terms consistent across every dub.
+    why: Clone a speaker's voice so the dub keeps it in every language.

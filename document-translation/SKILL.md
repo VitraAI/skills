@@ -10,7 +10,7 @@ description: >-
   or text translated or checked — "translate this contract into German",
   "translate everything in our Q3 folder", "proofread the French version",
   "back-translate it so I can check", "change line 12 of the Spanish file".
-  Not for subtitles or video (translate-video), text in images
+  Not for video or subtitles (video-dubbing, video-subtitles, subtitle-translation), text in images
   (image-translation) or DITA maps (dita-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every

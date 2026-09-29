@@ -1,19 +1,15 @@
 ---
-name: translate-video
+name: video-subtitles
 description: >-
-  Dubs and subtitles videos and translates subtitle files with Vitra Translate
-  Video: dubs a video into other languages (voices from the Vitra voice
-  library by default, a speaker's cloned voice only with consent), makes
-  subtitles from a video, translates SRT, VTT, ASS or SSA files, lets the user
-  review and edit lines, speakers, emotions and pronunciations, fixes issues,
-  scores quality, then exports the dubbed video, burns subtitles in or
-  downloads subtitle files. Use it whenever the user wants a video dubbed,
-  voice-translated, captioned or localized, or a subtitle file translated —
-  "dub this video into Hindi", "add a French voiceover", "subtitle this clip",
-  "translate this SRT into Spanish and German", "burn the captions in", "fix
-  line 12 of the dub" — even if they don't say "dub". A "dubbing project" is a
-  dub, not a board project. Not for audio-only speech (text-to-speech), text
-  in images (image-translation) or documents (document-translation).
+  Makes subtitles from a video with Vitra Translate Video — transcribes it,
+  translates the captions into other languages with the organization's
+  translation memory — then lets the user review and edit lines, style them,
+  burn them into the video or download them as SRT, VTT and other formats. Use
+  it whenever the user wants captions or subtitles for a video — "subtitle this
+  clip", "add Spanish captions to this video", "burn the subtitles in", "give me
+  the SRT", "fix line 5 of the French subtitles". Not for a voice-over (video-
+  dubbing), translating a subtitle file the user already has (subtitle-
+  translation) or documents (document-translation).
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -22,16 +18,16 @@ compatibility: >-
 metadata:
   skill-author: Vitra.ai
   version: "1.0"
-  display-name: Translate Video
+  display-name: Video Subtitles
   category: Video
-  tags: Video, Subtitles, Translation, Popular
+  tags: Video, Subtitles, Translation
   source: vitra
   added: "2026-09-09"
   updated: "2026-09-28"
 ---
-# Translate Video
+# Video Subtitles
 
-Dubs, subtitles and subtitle-file translations in one place. Starting jobs, new languages, regenerated audio and quality reports spend credits; exports and burn-ins at standard rates don't.
+Subtitles for a video. Starting subtitles and adding languages spend credits; burn-ins at standard rates and downloads don't.
 
 ## How to call Vitra
 
@@ -49,13 +45,11 @@ Not signed in (exit 2): ask the user, then run `python3 scripts/login.py` and,
 once they finish in the browser, `python3 scripts/login.py --status`. No browser
 on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 
-## Pick the job
+## Start
 
-- **Dub** (a voice-over): `get_guide` with topic `dub`, and follow it.
-- **Subtitles from a video**, or **translate a subtitle file**: `get_guide` with topic
-  `subtitles`.
+`get_guide` with topic `subtitles`, and follow it.
 
-## The video or file
+## The video
 
 A Drive file: `find_assets` by name. A local file: `vitra.py upload <path>`; a video over
 ~100 MB: `large_video_upload` (`start` → PUT each part → `finish`) gives an `upload_id`
@@ -68,38 +62,9 @@ Memory: `list_translation_memories`; several → ask which by name.
 or a start refused with "couldn't read this video's length": ask the user how long
 the video is and call again with `duration_seconds`.
 
-## Dub
-
-1. `start_dub` (paid per minute per language): price it with `estimate_only: true`
-   (all the languages wanted, with `duration_seconds`), ask, then start it in ONE
-   language with `confirm: true` → `get_dub` until `awaiting_voices`. The other
-   languages come later with `add_dub_language`.
-   ```bash
-   python3 scripts/vitra.py call start_dub '{"file_name": "webinar.mp4", "source_language": "english_united_states", "target_languages": ["hindi_india"], "duration_seconds": 312.5, "confirm": true}'
-   ```
-2. **Voices** ⏸ per speaker: a voice from the Vitra voice library is the default
-   (`list_voices`, `find_voices_by_accent`; offer previews; the organization's cloned
-   voices are in it too, see voice-cloning). Cloning the speaker's own voice only when the
-   user confirms that person agreed: `"voice": "clone"` with `consent: true`. Then
-   `set_speaker_voices` → `get_dub` until `review_ready`.
-3. **Review the source first** with `get_dub_lines`, then `add_dub_language` for other
-   languages (paid) with the `revision` reviewed.
-4. **Edit** ⏸ with the `revision` you read, showing before → after: `edit_dub_lines`
-   (then `regenerate_dub_audio`, paid), `rewrite_dub_line` (suggestion only),
-   `restructure_dub_lines` (split, merge, add, delete), `edit_dub_speakers` (a cloned
-   voice needs `consent`), `set_dub_emotion`, pronunciations `list_pronunciations`,
-   `set_pronunciation`, `remove_pronunciation`; `transliterate` (sent to Google: nothing
-   confidential).
-5. **Issues**: `list_dub_issues`; `fix_dub_issues` (may shorten lines: say so). Errors
-   block export: never try to bypass.
-6. **Export** one language at a time: `export_dub` (optional burned-in `subtitles`;
-   `lip_sync` is paid and needs `confirm` and `consent`) → `get_dub_export` for the link →
-   optionally `save_dub_export_to_drive`.
-
 ## Subtitles
 
 - From a video: `start_subtitles` (paid; `needs_memory` → ask which and call again).
-- A subtitle file: `translate_subtitle_file` with target languages (paid).
 - `get_subtitles` until ready; with `language`, numbered lines and `revision`.
 - Edit ⏸: `edit_subtitle_lines` (edits, split, add, merge, delete, rebuild; the last
   three need confirm). Style: `set_subtitle_style`. More languages: `add_subtitle_language`.
@@ -107,11 +72,7 @@ the video is and call again with `duration_seconds`.
 
 ## Also
 
-Quality: `run_dub_quality_report` → `get_quality_report` → `apply_dub_quality_fixes`
-(confirm; then regenerate audio). Memory: `sync_dub_memory` (confirm). Settings:
-`get_dub_settings`, `update_dub_settings`, `dub_background_audio`. Spreadsheet of every
-line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `retry_dub` (after
-`failed`), `stop_dub_work`, `remove_dub_language`, `delete_dub_job` (confirm).
+Jobs: `list_dub_jobs`, `update_dub_job`, `retry_dub` (after `failed`), `stop_dub_work`, `delete_dub_job` (confirm).
 
 ## Rules
 

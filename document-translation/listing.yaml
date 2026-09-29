@@ -89,7 +89,7 @@ related-skills:
     why: Look up, correct or import the approved wording every translation reuses.
   - name: dita-translation
     why: Translate a whole DITA map (zipped topics) instead of single files.
-  - name: translate-video
+  - name: video-dubbing
     why: Translate subtitle files (SRT, VTT) instead of documents.
   - name: image-translation
     why: Translate text that is inside images, keeping their design.

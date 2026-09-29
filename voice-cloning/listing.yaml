@@ -46,5 +46,5 @@ mcp-tools:
 related-skills:
   - name: text-to-speech
     why: Speak any text in the voice you just cloned.
-  - name: translate-video
+  - name: video-dubbing
     why: Dub videos so each speaker keeps their own voice in other languages.
