@@ -24,7 +24,7 @@ metadata:
   tags: Projects, Tasks, Productivity
   source: vitra
   added: "2026-09-28"
-  updated: "2026-09-28"
+  updated: "2026-09-29"
 ---
 # Projects & Tasks
 
@@ -65,7 +65,7 @@ defaults to Medium),
 `set_project_people` (assign, watch; `remove` needs confirm).
 
 **Tasks**: `get_task`, `create_task`, `update_task` (move to another status by name),
-`delete_task` (confirm), `set_task_people` (assign, watch; `remove` needs confirm).
+`set_task_people` (assign, watch; `remove` needs confirm).
 Checklists: `add_checklist_items`, `update_checklist_items` (done, not done, reword),
 `remove_checklist_items` (confirm); items by their `number` from `get_task` or their text.
 

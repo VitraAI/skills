@@ -5,9 +5,8 @@ description: >-
   screenshots, menus, infographics — with the Vitra Universe Image Translator
   and re-renders it in the target languages with the layout kept; then
   corrects lines, keeps brand names, edits or adds objects and logos,
-  re-renders at other aspect ratios, runs AI QC, proofreading,
-  back-translation, transcreation and quality scores, and saves results to the
-  Drive. Use it whenever the user wants an image, poster, banner or creative
+  re-renders at other aspect ratios, reads AI transcreation suggestions, runs
+  quality scores, and saves results to the Drive. Use it whenever the user wants an image, poster, banner or creative
   localized or its text translated — "translate this poster into French",
   "make a Spanish version of this ad", "localize these product images", "fix
   the second line of the German one" — even if they only say "translate this".
@@ -27,7 +26,7 @@ metadata:
   tags: Image, Translation
   source: vitra
   added: "2026-09-10"
-  updated: "2026-09-28"
+  updated: "2026-09-29"
 ---
 # Image Translation
 
@@ -83,10 +82,10 @@ background: mention it once; nothing to do.
 an object), `compose_image_asset` (add or swap a logo or picture), `reanalyze_image`
 (redo the text analysis), `resize_image_translation` (another aspect ratio),
 `add_image_languages` (more languages).
-**Checks**: `image_text_qc_report`, `image_text_proofreading`,
-`image_text_back_translation`, `image_text_transcreation` (`action: start` is paid,
-`results` is free; apply what the user accepts with `edit_image_text`);
-`run_image_quality_report` → `get_quality_report` → `apply_image_quality_fixes`.
+**Checks**: `run_image_quality_report` → `get_quality_report` →
+`apply_image_quality_fixes`. `image_text_transcreation` reads the transcreation
+suggestions already made for the image (free; they are run per text layer in the Vitra
+web app); apply what the user accepts with `edit_image_text`.
 **History**: `list_image_translations`, `get_image_versions`, `update_image_translation`
 (rename, move, restore with confirm), `retry_image_translation`,
 `delete_image_translation`, `save_image_as_template` (back to a Hyperlocal campaign).

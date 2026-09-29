@@ -55,8 +55,6 @@ mcp-tools:
     title: Create a task
   - name: update_task
     title: Edit or move a task
-  - name: delete_task
-    title: Delete a task
   - name: set_task_people
     title: Assign people to a task
   - name: add_checklist_items

@@ -4,8 +4,8 @@
 # the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Follow and finish DITA map translations: progress per language, retry failed
-  topics, preview any file, and download one translated zip per language with
+  Follow and finish DITA map translations: progress per language with any
+  failed topics, preview any file, and download one translated zip per language with
   structure and markup intact, ready for your DITA-OT build. Score a language
   and write the fixes back.
 when-to-use: >-
@@ -21,9 +21,9 @@ features:
   - title: Memory-backed
     description: Reuses and feeds your organization's approved terminology.
   - title: Failed topics, handled
-    description: Retry only what failed, or ship now with the original text for those topics.
-  - title: QC and quality reports
-    description: A zip of QC PDFs, or a score with the worst phrases explained and fixes written back.
+    description: See exactly which topics failed, and ship now with the original text for those topics.
+  - title: Quality reports
+    description: A score with the worst phrases explained and fixes written back.
 use-cases:
   - title: Product manuals
     description: A full manual set, localized for every market at release time.
@@ -37,16 +37,10 @@ mcp-tools:
     title: List DITA map translations
   - name: get_dita_map
     title: Check a DITA map translation
-  - name: retry_dita_map
-    title: Retry failed DITA map files
   - name: preview_dita_file
     title: Read one file of a DITA map
   - name: download_dita_map
     title: Download a translated DITA map
-  - name: run_dita_map_qc_report
-    title: Build a DITA map QC report
-  - name: get_dita_map_qc_report
-    title: Get a DITA map QC report
   - name: run_dita_map_quality_report
     title: Score a DITA map translation
   - name: get_quality_report

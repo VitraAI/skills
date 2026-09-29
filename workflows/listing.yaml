@@ -39,7 +39,7 @@ mcp-tools:
   - name: list_flow_runs
     title: List workflow runs
   - name: manage_flow_run
-    title: Rename, file, retry or re-staff a workflow run
+    title: Rename, file or retry a workflow run
   - name: cancel_flow_run
     title: Cancel a workflow run
   - name: design_workflow

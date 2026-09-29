@@ -1,6 +1,6 @@
 # dita-translation
 
-DITA Map Translation: an agent skill for Vitra Universe. Follows, fixes and delivers DITA map translations (technical documentation: a .zip of .ditamap and .dita topics, with SVG images) in Vitra Universe: shows progress per language, previews any file, retries failed topics, downloads one translated zip per language, builds a QC report of PDFs, scores a language with a quality report and writes its fixes back.
+DITA Map Translation: an agent skill for Vitra Universe. Follows, fixes and delivers DITA map translations (technical documentation: a .zip of .ditamap and .dita topics, with SVG images) in Vitra Universe: shows progress per language with any failed topics, previews any file, downloads one translated zip per language, scores a language with a quality report and writes its fixes back.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

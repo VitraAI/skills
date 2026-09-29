@@ -4,9 +4,10 @@
 # the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Generate an image from a plain-language prompt, then keep refining it the same
-  way — "make the background darker", "remove the text" — until it's right. Each
-  call returns a finished image URL, edits chain from the image before, and
+  Shape a brief in plain language with Quick Create, render it in the formats you
+  need, then keep refining it the same way — "make the background darker",
+  "remove the text" — until it's right. Each render returns finished image URLs,
+  edits chain from the image before, and
   results can be filed straight into your organization's Drive. Point it at a
   brand kit and every image comes out on-brand.
 when-to-use: >-
@@ -15,12 +16,12 @@ when-to-use: >-
   translate the text inside an existing image or resize one to other formats,
   use Image Translation or Adaptive Resize instead.
 features:
-  - title: Prompt to finished image
-    description: See the price, say yes, and get a finished image back — no job to poll.
+  - title: Brief to finished images
+    description: Describe it, see the price, say yes, and get finished images back — no job to poll.
   - title: Edits in plain language
     description: Describe the change; each edit is a new image derived from the last, so edits chain.
   - title: On-brand output
-    description: Applies a saved brand kit's colors, fonts and style to the prompt.
+    description: Applies a saved brand kit's colors, fonts and style to the brief.
   - title: Multi-format briefs
     description: Shape a brief with Quick Create, then render it in several formats at once.
   - title: History and collections
@@ -40,10 +41,6 @@ mcp-tools:
     title: List the editable parts of a generated image
   - name: list_brand_kits
     title: List brand kits
-  - name: get_brand_kit
-    title: Read a brand kit
-  - name: generate_image
-    title: Generate an image
   - name: edit_image
     title: Edit a generated image
   - name: save_image_to_drive
