@@ -34,6 +34,7 @@ import html
 import json
 import os
 import secrets
+import socket
 import subprocess
 import threading
 import time
@@ -81,11 +82,38 @@ def begin(open_browser: bool = True, quiet: bool = False) -> dict | None:
     `quiet`: return None instead of failing when this server can't do browser
     sign-in, so a caller can fall back to other instructions.
     """
+    base = _common.base_url()
     pending, plan_age = _read_pending(), _plan_age()
     if pending.get("status") == "waiting" and pending.get("url") and plan_age is not None \
-            and plan_age < WAIT_SECONDS - 60:
+            and plan_age < WAIT_SECONDS - 60 and _pending_is_live(pending, base):
         return {"sign_in_url": pending["url"], "browser_opened": False, "reused": True}
-    base = _common.base_url()
+    plan = _new_plan(base, quiet)
+    if plan is None:
+        return None
+    return _spawn_helper(plan, open_browser, quiet)
+
+
+def _pending_is_live(pending: dict, base: str) -> bool:
+    """A waiting sign-in can be handed out again only when it is for this
+    server and its helper still answers on its port: a helper killed with its
+    agent's command (a Windows job, a sandbox) would leave a dead link."""
+    same_server = pending.get("base") == base if pending.get("base") else \
+        str(pending.get("url", "")).startswith(base.rstrip("/") + "/")
+    return same_server and _listening(pending.get("port"))
+
+
+def _listening(port: object) -> bool:
+    if not isinstance(port, int) or not 0 < port < 65536:
+        return False
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=0.5):
+            return True
+    except OSError:
+        return False
+
+
+def _new_plan(base: str, quiet: bool) -> dict | None:
+    """Ask the server how to sign in and make this sign-in's secrets."""
     status, meta = _get_json(f"{base}/.well-known/vitra-agent")
     if status != 200 or not isinstance(meta, dict) or not meta.get("client_id"):
         if quiet:
@@ -117,6 +145,10 @@ def begin(open_browser: bool = True, quiet: bool = False) -> dict | None:
         "verifier": verifier,
         "state": secrets.token_urlsafe(24),
     }
+    return plan
+
+
+def _spawn_helper(plan: dict, open_browser: bool, quiet: bool) -> dict | None:
     pending = _pending_file()
     pending.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     pending.unlink(missing_ok=True)
@@ -125,11 +157,22 @@ def begin(open_browser: bool = True, quiet: bool = False) -> dict | None:
     # file, and waits for the browser. Detached, so it outlives this command.
     popen: dict = {"stdin": subprocess.PIPE, "stdout": subprocess.DEVNULL,
                    "stderr": subprocess.DEVNULL, "close_fds": True}
+    cmd = [sys.executable, str(Path(__file__).resolve()), "--serve"]
     if os.name == "nt":
-        popen["creationflags"] = 0x00000008 | 0x00000200  # DETACHED | NEW_GROUP
+        # DETACHED | NEW_GROUP, plus BREAKAWAY_FROM_JOB: agent runners put each
+        # command in a job that kills its children when the command ends, which
+        # would take the helper down before the browser comes back. A job that
+        # forbids breaking away refuses the start, so try once without it
+        # (then `login.py --wait` is the way in).
+        popen["creationflags"] = 0x00000008 | 0x00000200 | 0x01000000
+        try:
+            child = subprocess.Popen(cmd, **popen)
+        except OSError:
+            popen["creationflags"] = 0x00000008 | 0x00000200
+            child = subprocess.Popen(cmd, **popen)
     else:
         popen["start_new_session"] = True
-    child = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--serve"], **popen)
+        child = subprocess.Popen(cmd, **popen)
     assert child.stdin is not None
     # Kept owner-only so `--finish` can complete the sign-in when the browser
     # can't reach this machine's helper (an agent sandbox, a remote shell).
@@ -184,6 +227,31 @@ def start() -> int:
               "login.py --finish '<that address>'."
         ),
     })
+
+
+def wait() -> int:
+    """Sign in without a background helper: this command itself waits for the
+    browser (up to 10 minutes). For agents whose commands can't leave anything
+    running (a Windows job, a strict sandbox): run it as a background command,
+    show the user the link on its first line, and read the result when it ends."""
+    plan = _new_plan(_common.base_url(), quiet=False)
+    assert plan is not None  # _new_plan fails loudly when not quiet
+    _pending_file().parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    _pending_file().unlink(missing_ok=True)
+    _common.write_private(_plan_file(), {**plan, "created_at": int(time.time())})
+
+    def show(url: str) -> None:
+        print(json.dumps({
+            "status": "waiting_for_browser",
+            "sign_in_url": url,
+            "ask": (f"Please sign in to Vitra: open {url} , sign in and pick your "
+                    "organization, then tell me when you're done."),
+            "next_action": ("Show the user sign_in_url as a clickable link. This command keeps "
+                            "running until they finish (10 minutes at most), then prints the result."),
+        }), flush=True)
+
+    _serve(plan, on_url=show)
+    return status()
 
 
 def _plan_age() -> float | None:
@@ -265,9 +333,14 @@ LOOPBACK = ("127.0.0.1", "localhost")
 
 def serve() -> int:
     """The background helper: catch the browser's return and keep the token."""
+    return _serve(json.loads(sys.stdin.read()))
+
+
+def _serve(plan: dict, on_url=None) -> int:
+    """Listen on this machine for the browser's return, exchange the code and
+    keep the token. `on_url` is told the sign-in link once it can be opened."""
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-    plan = json.loads(sys.stdin.read())
     redirect = urllib.parse.urlsplit(plan["redirect_uri"])
     if redirect.scheme != "http" or redirect.hostname not in LOOPBACK:
         # Only ever listen on this machine, whatever the server advertises.
@@ -342,7 +415,10 @@ def serve() -> int:
         "code_challenge": challenge,
         "code_challenge_method": "S256",
     })
-    _write_pending({"status": "waiting", "url": url, "pid": os.getpid()})
+    _write_pending({"status": "waiting", "url": url, "pid": os.getpid(),
+                    "port": port, "base": plan.get("base")})
+    if on_url:
+        on_url(url)
 
     deadline = time.time() + WAIT_SECONDS
     httpd.timeout = 1
@@ -401,6 +477,12 @@ def status() -> int:
                      "message": f"Using the API key in {_common.ENV_VAR}; it wins over a sign-in.",
                      "next_action": None})
     if kind == "none":
+        if pending.get("status") == "waiting" and pending.get("port") and \
+                not _listening(pending.get("port")):
+            return _out({"status": "not_signed_in",
+                         "reason": "The sign-in helper on this machine stopped before the browser came back.",
+                         "next_action": ("Run login.py --wait as a background command, show the user the "
+                                         "sign_in_url on its first line, and wait for it to finish.")})
         if pending.get("status") == "waiting":
             url = pending.get("url")
             return _out({"status": "waiting_for_browser", "sign_in_url": url,
@@ -467,11 +549,15 @@ def main() -> int:
     g.add_argument("--status", action="store_true", help="who is signed in, where")
     g.add_argument("--logout", action="store_true", help="forget this machine's sign-in")
     g.add_argument("--serve", action="store_true", help=argparse.SUPPRESS)
+    g.add_argument("--wait", action="store_true",
+                   help="sign in and wait here for the browser (no background helper)")
     g.add_argument("--finish", metavar="ADDRESS",
                    help="finish with the browser's address when it couldn't reach this machine")
     a = p.parse_args()
     if a.serve:
         return serve()
+    if a.wait:
+        return wait()
     if a.finish:
         return finish(a.finish)
     if a.status:

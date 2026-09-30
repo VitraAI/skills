@@ -47,7 +47,9 @@ Text with quotes or apostrophes, or a Windows shell: write the JSON to a file an
 Not signed in (exit 2): the error carries `sign_in_url`. Show it to the user as a
 link, wait until they say they signed in, run `python3 scripts/login.py --status`,
 then repeat the command. Their browser shows "site can't be reached": ask for the
-address in its address bar and run `python3 scripts/login.py --finish '<address>'`.
+address in its address bar and run `python3 scripts/login.py --finish '<address>'`. If it keeps
+failing (a sandboxed or Windows agent), run `python3 scripts/login.py --wait` as a
+background command and show the link on its first line; it signs in when they finish.
 No browser on the machine: set `VITRA_UNIVERSE_API_KEY` instead.
 A result with `skills_update` means the Vitra skills are updating themselves in the
 background: mention it once; nothing to do.

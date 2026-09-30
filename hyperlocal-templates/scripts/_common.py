@@ -334,7 +334,10 @@ def _missing() -> None:
                 f"they're done, run {_login('--status')}, then run this command "
                 "again. If their browser shows \"This site can't be reached\", ask them "
                 "for the full address in the address bar and run "
-                f"{_login()} --finish '<address>'."),
+                f"{_login()} --finish '<address>' at once (the code in it lasts only a few "
+                f"minutes). If the page keeps failing (a sandboxed or Windows agent), run "
+                f"{_login('--wait')} as a background command instead and show the link on its "
+                f"first line."),
             sign_in_url=url,
             server=base_url(),
             sign_up=f"{app}/auth/sign-up",

@@ -10,6 +10,7 @@ import base64
 import hashlib
 import json
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -278,6 +279,60 @@ class LoginTest(unittest.TestCase):
         self.fake.redirect = "http://0.0.0.0/callback"
         out = self.run_script("login.py")
         self.assertEqual(out["status"], "failed")
+
+
+    def pending(self) -> dict:
+        return json.loads((Path(self.home) / "universe-signin.pending.json").read_text())
+
+    def test_a_link_whose_helper_died_is_not_handed_out_again(self) -> None:
+        # An agent's Windows job or sandbox can kill the helper when the command ends.
+        first = self.run_script("vitra.py", "call", "get_credits", "{}")["error"]["sign_in_url"]
+        os.kill(self.pending()["pid"], signal.SIGTERM)
+        for _ in range(50):
+            try:
+                urllib.request.urlopen(first, timeout=1).close()
+            except OSError:
+                break
+            time.sleep(0.1)
+        status = self.run_script("login.py", "--status")
+        self.assertEqual(status["status"], "not_signed_in")
+        self.assertIn("--wait", status["next_action"])
+        # The next call starts a fresh sign-in instead of the dead link, and it works.
+        second = self.run_script("vitra.py", "call", "get_credits", "{}")["error"]["sign_in_url"]
+        self.assertNotEqual(second, first)
+        with urllib.request.urlopen(second, timeout=30) as res:
+            self.assertIn(b"signed in", res.read())
+        self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
+
+    def test_a_waiting_sign_in_for_another_server_is_not_reused(self) -> None:
+        first = self.run_script("vitra.py", "call", "get_credits", "{}")["error"]["sign_in_url"]
+        other = FakeVitra()
+        try:
+            self.env["VITRA_UNIVERSE_BASE_URL"] = other.base
+            link = self.run_script("vitra.py", "call", "get_credits", "{}")["error"]["sign_in_url"]
+            self.assertNotEqual(link, first)
+            self.assertTrue(link.startswith(other.base + "/api/auth/oauth2/authorize?"))
+        finally:
+            other.httpd.shutdown()
+
+    def test_wait_signs_in_without_a_background_helper(self) -> None:
+        proc = subprocess.Popen([sys.executable, str(SCRIPTS / "login.py"), "--wait"], env=self.env,
+                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+                                cwd=self.home)
+        try:
+            first = json.loads(proc.stdout.readline())
+            self.assertEqual(first["status"], "waiting_for_browser")
+            self.assertIn(first["sign_in_url"], first["ask"])
+            # The command itself is the listener: no detached helper was started.
+            self.assertEqual(self.pending()["pid"], proc.pid)
+            with urllib.request.urlopen(first["sign_in_url"], timeout=30) as res:
+                self.assertIn(b"signed in", res.read())
+            out, _ = proc.communicate(timeout=30)
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+        self.assertEqual(json.loads(out.strip().splitlines()[-1])["status"], "signed_in")
+        self.assertEqual(proc.returncode, 0)
 
 
 if __name__ == "__main__":
