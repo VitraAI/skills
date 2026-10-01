@@ -40,6 +40,7 @@ don't `cd` into it, since some agents block that. Every command prints one JSON 
 python3 scripts/vitra.py describe <tool>                  # its arguments: read before a first call
 python3 scripts/vitra.py call <tool> '<json>' --intent "<what the user wants>"
 python3 scripts/vitra.py upload <path>                    # local file -> asset.asset_id (and key)
+python3 scripts/vitra.py upload https://<link>            # public link: Vitra downloads it -> asset.asset_id
 python3 scripts/vitra.py download <url> --to <path>       # save a link a tool returned
 python3 scripts/vitra.py tools --find "<words>"           # any other tool you may use
 ```
@@ -68,8 +69,10 @@ background: mention it once; nothing to do.
    folder, favourites or trash). Storage used: `get_drive_storage`.
 2. **Upload** a local file: `vitra.py upload <path>` (it wraps `create_upload_url` +
    `register_upload`; called directly, pass the file's `size_bytes` too) and keep the
-   returned asset for the next skill. The user uploads it
-   themselves: `get_upload_link`, then `find_assets` once they say it's there.
+   returned asset for the next skill. A file at a public https link: `vitra.py upload
+   <link>` (it wraps `import_file`: Vitra downloads it, up to 2 GB, no local copy).
+   The user uploads it themselves: `get_upload_link`, then `find_assets` once they
+   say it's there.
 3. **Download**: `get_download_url` with the file name, then give the link or save it:
    ```bash
    python3 scripts/vitra.py call get_download_url '{"file": "Q3 deck (German).pptx"}'

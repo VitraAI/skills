@@ -40,6 +40,7 @@ don't `cd` into it, since some agents block that. Every command prints one JSON 
 python3 scripts/vitra.py describe <tool>                  # its arguments: read before a first call
 python3 scripts/vitra.py call <tool> '<json>' --intent "<what the user wants>"
 python3 scripts/vitra.py upload <path>                    # local file -> asset.asset_id (and key)
+python3 scripts/vitra.py upload https://<link>            # public link: Vitra downloads it -> asset.asset_id
 python3 scripts/vitra.py download <url> --to <path>       # save a link a tool returned
 python3 scripts/vitra.py tools --find "<words>"           # any other tool you may use
 ```

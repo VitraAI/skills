@@ -9,6 +9,9 @@ the rules and the wording; nothing about Vitra lives here.
                                          run TOOL with a JSON object of arguments
   vitra.py upload PATH                   put a local file in Vitra; prints its asset
                                          (and duration_seconds for MP4/MOV/M4A/M4V/MP3/WAV)
+  vitra.py upload https://LINK [--name NAME]
+                                         Vitra downloads the file at a public link itself
+                                         (no local copy); prints its asset
   vitra.py download URL --to PATH        save a link a tool returned to a local file
 
 Every command prints ONE JSON object on stdout. On failure:
@@ -449,7 +452,23 @@ def _mp4_seconds(path: Path) -> float | None:
     return round(length / scale, 3)
 
 
+def cmd_import(link: str, name: str | None) -> int:
+    """A file at a public link: the server downloads it (import_file), so the
+    bytes never pass through this machine."""
+    if urllib.parse.urlsplit(link).scheme != "https":
+        _common.die(_common.EXIT_DOWNLOAD, "Only public https:// links can be imported.",
+                    retryable=False)
+    args: dict = {"url": link}
+    if name:
+        args["file_name"] = name
+    asset = _call_tool("import_file", args)
+    return _out({"status": "ok", "asset": asset,
+                 "next_action": "Pass asset.asset_id to the tool that needs the file."})
+
+
 def cmd_upload(a: argparse.Namespace) -> int:
+    if a.path.lower().startswith(("https://", "http://")):
+        return cmd_import(a.path, a.name)
     path = Path(a.path).expanduser()
     if not path.is_file():
         _common.die(_common.EXIT_DOWNLOAD, f"No file at {path}.", error_code="FILE_NOT_FOUND",
@@ -544,7 +563,8 @@ def main() -> int:
                             "(any shell: no quoting of apostrophes or quotes)")
             sp.add_argument("--intent", help="briefly, what the user wants")
     up = sub.add_parser("upload")
-    up.add_argument("path")
+    up.add_argument("path", help="a local file, or a public https:// link")
+    up.add_argument("--name", help="Drive name for a file imported from a link")
     dl = sub.add_parser("download")
     dl.add_argument("url")
     dl.add_argument("--to", required=True, help="file or folder to save into")
