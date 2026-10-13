@@ -1,0 +1,50 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Sign in to your Vitra organization from any agent, check the credit balance,
+  price work before it starts, and find the Vitra tool or guide for anything
+  no other Vitra skill covers.
+when-to-use: >-
+  Reach for it for your account, sign-in and credits, or when you're not sure
+  which Vitra skill does something. Each app section (Drive, Memory, Image
+  Creator, Translate Video, Hyperlocal and the rest) has its own skill.
+features:
+  - title: Sign in and out
+    description: Browser sign-in to one organization, or an API key on a server.
+  - title: Credits and quotes
+    description: The balance, and the exact price of work before it starts.
+  - title: Find any tool
+    description: Search every Vitra tool by what it does, with step-by-step guides.
+  - title: Shared lookups
+    description: Languages, voices, translation memories and brand kits.
+use-cases:
+  - title: Budget check
+    description: See what a batch of jobs will cost before starting any of them.
+  - title: New to Vitra
+    description: Sign in and find out what Vitra can do from your agent.
+mcp-toolset: core
+mcp-tools:
+  - name: get_credits
+    title: Get credit balance
+  - name: quote_cost
+    title: Price work in credits
+  - name: get_guide
+    title: Get a workflow guide
+  - name: list_languages
+    title: List languages
+  - name: list_voices
+    title: List voices
+  - name: list_translation_memories
+    title: List translation memories
+  - name: list_brand_kits
+    title: List brand kits
+related-skills:
+  - name: drive
+    why: Find, upload and organize the files you work on.
+  - name: org-knowledge
+    why: Search and save what your organization knows.
+  - name: design-file-translation
+    why: Follow translations sent from the Figma, Canva, Adobe and Word plugins.

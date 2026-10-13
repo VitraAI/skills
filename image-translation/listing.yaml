@@ -1,0 +1,100 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Translate the text baked into an image — signage, packaging, ad creatives,
+  screenshots, menus — and get back a new image with the translated text set
+  into the original layout. Not a transcript: the output is the image itself,
+  ready to use. Reuse your organization's Translation Memory to keep approved
+  terminology, and re-render the result at other aspect ratios without
+  translating again.
+when-to-use: >-
+  Reach for it when an image's text needs to read in another language and the
+  design has to stay intact. To create a new image, resize one, or translate a
+  document or subtitle file, use Image Creator, Adaptive Resize or the document
+  skills instead.
+features:
+  - title: Layout preserved
+    description: Translated text is re-rendered into the original design, not overlaid.
+  - title: One call, end to end
+    description: Upload, text detection, translation and rendering run as a single job.
+  - title: Translation Memory
+    description: Lists your org's memories for the language pair and reuses approved wording.
+  - title: Resize after translating
+    description: Re-render a translated image at another aspect ratio with no re-translation.
+  - title: More languages, one analysis
+    description: Add languages to an image already translated; only the new translations are paid for.
+  - title: Fix any line
+    description: See the image's text line by line, correct or keep lines, and re-render.
+  - title: Save and find again
+    description: Save to the Drive, file into folders, list past images, retry failures.
+use-cases:
+  - title: Localized ad creatives
+    description: Ship one campaign visual in every market's language.
+  - title: Packaging and signage
+    description: Produce translated versions of product shots and in-store signs.
+  - title: App screenshots
+    description: Localize store screenshots while keeping the UI layout intact.
+  - title: Menus and flyers
+    description: Translate printed material and keep its design.
+mcp-toolset: image
+mcp-tools:
+  - name: find_assets
+    title: Find files in the Drive
+  - name: get_download_url
+    title: Get a download link
+  - name: list_languages
+    title: List languages
+  - name: list_translation_memories
+    title: List translation memories
+  - name: translate_image
+    title: Translate the text in an image
+  - name: get_image_translation
+    title: Check an image translation
+  - name: add_image_languages
+    title: Render an image in (more) languages
+  - name: get_image_text
+    title: Read the text in a translated image
+  - name: edit_image_text
+    title: Correct the text in a translated image
+  - name: save_image_translation_to_drive
+    title: Save a translated image to the Drive
+  - name: edit_image_element
+    title: Edit an object in a translated image
+  - name: compose_image_asset
+    title: Put a logo or picture into a translated image
+  - name: reanalyze_image
+    title: Re-analyse an image
+  - name: resize_image_translation
+    title: Resize a translated image
+  - name: image_text_transcreation
+    title: Transcreate image text
+  - name: run_image_quality_report
+    title: Quality-score a translated image
+  - name: get_quality_report
+    title: Get a quality report
+  - name: apply_image_quality_fixes
+    title: Apply a quality report to an image
+  - name: list_image_translations
+    title: List image translations
+  - name: get_image_versions
+    title: Version history of an image translation
+  - name: update_image_translation
+    title: Rename, file or restore an image translation
+  - name: retry_image_translation
+    title: Retry a failed image translation
+  - name: delete_image_translation
+    title: Delete an image translation
+  - name: save_image_as_template
+    title: Send a translated image back to Hyperlocal
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: image-resize
+    why: Exact pixel sizes for the translated image, or any other.
+  - name: image-creator
+    why: Create a new image instead of translating one.
+  - name: hyperlocal-templates
+    why: Use a translated creative as a campaign template.

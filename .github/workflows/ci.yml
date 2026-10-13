@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Validate and build
+    runs-on: ubuntu-latest
+    # The skills promise Python 3.10+: test the oldest and a current one.
+    strategy:
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      # SKILL.md spec, listings, references, secrets, manifest versions,
+      # and the vendored _lib helpers in every skill.
+      - run: npm run validate
+
+      # Every skill's scripts against a local fake Vitra API (no network).
+      - run: npm test
+
+      # The catalog and archives Pages would publish.
+      - run: npm run build

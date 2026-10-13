@@ -1,0 +1,76 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Reach every retailer or partner in your network with their own personalized
+  creative over WhatsApp or Facebook. Pick the audience by group or geography,
+  see reach and cost first, prepare the creatives, then send now or schedule —
+  nothing goes out without your explicit yes — and follow delivery and reads.
+when-to-use: >-
+  Reach for it for trade promotions, product launches, festival offers and
+  partner updates that should look local and personal at scale.
+features:
+  - title: Audience by geography or group
+    description: Target states, sales zones, areas or saved contact groups.
+  - title: Know the cost first
+    description: Reach and credits before anything is created.
+  - title: A creative per contact
+    description: Each contact gets their own personalized image.
+  - title: Send safely
+    description: Nothing is sent without an explicit yes; schedule, pause, resume or stop.
+  - title: Delivery tracking
+    description: Sent, delivered, read and failed, per channel; retry failed sends.
+use-cases:
+  - title: Festival offers
+    description: Personalized WhatsApp offers to every retailer in a region.
+  - title: Product launches
+    description: Announce a launch to the whole partner network at a set time.
+mcp-toolset: hyperlocal
+mcp-tools:
+  - name: list_contact_groups
+    title: List contact groups
+  - name: list_contact_places
+    title: List contact states, zones or areas
+  - name: find_contacts
+    title: Find Hyperlocal contacts
+  - name: list_creative_templates
+    title: List Hyperlocal creative templates
+  - name: estimate_broadcast
+    title: Estimate a broadcast
+  - name: create_broadcast
+    title: Prepare a broadcast
+  - name: get_broadcast
+    title: Check a broadcast
+  - name: regenerate_broadcast_creative
+    title: Regenerate one contact's creative
+  - name: send_broadcast
+    title: Send a broadcast now
+  - name: schedule_broadcast
+    title: Schedule a broadcast
+  - name: control_broadcast
+    title: Pause, resume, stop or unschedule a broadcast
+  - name: retry_broadcast_send
+    title: Retry one contact's failed message
+  - name: list_broadcast_contacts
+    title: List a broadcast's contacts
+  - name: get_broadcast_contact
+    title: One contact's delivery status
+  - name: refresh_broadcast_analytics
+    title: Refresh Facebook post insights
+  - name: list_broadcasts
+    title: List broadcasts
+  - name: delete_broadcast
+    title: Delete a broadcast
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: hyperlocal-contacts
+    why: Add contacts and build the groups a broadcast targets.
+  - name: hyperlocal-templates
+    why: Build the creative and message templates a broadcast sends.
+  - name: content-compliance
+    why: Check the creative against each market's rules before it goes out.

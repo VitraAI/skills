@@ -1,0 +1,80 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Keep your organization's approved translations in one place: translate short
+  texts memory-first, look up and correct past translations, set up and share
+  memories, and link the glossaries and style guide each memory follows.
+when-to-use: >-
+  Reach for it for consistency across jobs — checking how something was
+  translated before, correcting it once for every later job, or setting up a
+  memory for a new client.
+features:
+  - title: Memory-first translation
+    description: Short texts reuse approved translations; the rest is machine-translated.
+  - title: Look up and correct
+    description: Find past translations and fix them for every later job.
+  - title: Memories
+    description: Create, edit, delete and share memories.
+  - title: Linked rules
+    description: Attach glossaries, term bases and a style guide.
+  - title: VitraTM settings
+    description: How the organization's jobs translate and review.
+use-cases:
+  - title: App strings
+    description: Translate UI strings with the product's approved wording.
+  - title: New client
+    description: Set up a memory and link the client's glossary.
+mcp-toolset: memory
+mcp-tools:
+  - name: list_translation_memories
+    title: List translation memories
+  - name: get_translation_memory
+    title: Read a translation memory
+  - name: translate_with_memory
+    title: Translate text with a translation memory
+  - name: get_memory_translation
+    title: Get a large memory translation
+  - name: search_memory_terms
+    title: Search a translation memory
+  - name: correct_memory_term
+    title: Correct a translation memory entry
+  - name: set_memory_term_status
+    title: Verify or approve memory entries
+  - name: delete_memory_terms
+    title: Delete memory entries
+  - name: create_translation_memory
+    title: Create a translation memory
+  - name: list_memory_providers
+    title: List translation memory providers
+  - name: update_translation_memory
+    title: Edit a translation memory
+  - name: delete_translation_memory
+    title: Delete a translation memory
+  - name: link_memory_resources
+    title: Link glossaries, term bases or a style guide to a memory
+  - name: list_glossaries
+    title: List glossaries, term bases and style guides
+  - name: list_memory_shares
+    title: List who a memory is shared with
+  - name: share_translation_memory
+    title: Share a memory with organizations
+  - name: unshare_translation_memory
+    title: Stop sharing a memory
+  - name: get_vitratm_settings
+    title: Read VitraTM settings
+  - name: update_vitratm_settings
+    title: Change VitraTM settings
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: terminology
+    why: Edit the glossaries, term bases and style guides a memory follows.
+  - name: document-translation
+    why: Translate whole files through the memory.
+  - name: translation-quality
+    why: Read quality reports scored against the memory.

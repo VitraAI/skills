@@ -1,0 +1,26 @@
+{
+  "name": "vitra",
+  "version": "1.0.0",
+  "description": "Every Vitra skill in one install: translate documents, subtitles and images; dub videos, generate speech, clone voices and lip-sync; finish Figma, Canva, Adobe and Word plugin translations; manage translation memories, terminology, brand kits, projects, tasks, prompts, knowledge and the Drive; run WhatsApp and Facebook campaigns; score quality and check compliance, with your Vitra organization's account.",
+  "author": {
+    "name": "Vitra.ai",
+    "url": "https://www.vitra.ai"
+  },
+  "homepage": "https://universe.vitra.ai/skills",
+  "repository": "https://github.com/VitraAI/skills",
+  "license": "MIT",
+  "skills": "./",
+  "interface": {
+    "displayName": "Vitra",
+    "shortDescription": "Images, image translation and video dubbing with Vitra",
+    "developerName": "Vitra.ai",
+    "category": "Design",
+    "websiteURL": "https://www.vitra.ai",
+    "defaultPrompt": [
+      "Generate a banner of a mountain at sunrise with Vitra",
+      "Translate the text in this poster into French",
+      "Resize this creative for Instagram Story and LinkedIn",
+      "Dub this video into Spanish"
+    ]
+  }
+}

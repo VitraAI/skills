@@ -1,0 +1,55 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Get an expert-style review of any Vitra translation in minutes: an overall
+  score and pass/fail band, then the worst lines with each error explained —
+  accuracy, fluency, terminology, style — and a suggested better version, judged
+  against your organization's own terminology.
+when-to-use: >-
+  Reach for it after scoring a document, dub, image or design job, to
+  decide whether it is ready to publish, check a vendor's work, or share the
+  report as a PDF.
+features:
+  - title: Score and band
+    description: One number and a pass/fail band for the whole translation.
+  - title: Errors explained
+    description: Severity, category and the reason for every error, with a suggestion.
+  - title: Better versions
+    description: A corrected translation for lines that need one.
+  - title: Your terminology
+    description: Judged against your translation memory and glossaries.
+  - title: Reports as PDF
+    description: Share a finished report as a PDF.
+use-cases:
+  - title: Vendor review
+    description: Check a translation agency's delivery before paying.
+  - title: Release gate
+    description: Only ship translations that pass.
+  - title: Fix at the source
+    description: Find recurring errors and correct them in the memory.
+mcp-toolset: quality
+mcp-tools:
+  - name: get_quality_report
+    title: Get a quality report
+  - name: get_quality_report_pdf
+    title: Get a quality report as PDF
+  - name: run_document_quality_report
+    title: Score a document translation
+  - name: run_dub_quality_report
+    title: Score a dub's translation
+  - name: run_image_quality_report
+    title: Quality-score a translated image
+  - name: run_design_job_quality_report
+    title: Score a design job translation
+related-skills:
+  - name: translation-memory
+    why: Correct recurring errors once, in the memory everyone uses.
+  - name: document-translation
+    why: Re-translate content that didn't pass.
+  - name: terminology
+    why: Turn recurring findings into glossary terms and style rules.
+  - name: design-file-translation
+    why: Score translations sent from the design plugins.

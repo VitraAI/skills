@@ -1,0 +1,67 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Know before you publish: check text, images, audio and video against each
+  market's rules and get a clear approved, review or blocked verdict with the
+  reasons — then fix a flagged image automatically and relay reviewers' calls.
+when-to-use: >-
+  Reach for it before a creative, video or copy goes live in a market with its
+  own rules, or when the review queue needs a reviewer's verdict recorded.
+features:
+  - title: Every format
+    description: Text, images, audio and video, checked per market.
+  - title: Clear verdicts
+    description: Approved, review or blocked, with the rules each concern breaks.
+  - title: Media and frames
+    description: The checked media and sampled video frames, with timestamps.
+  - title: Automatic image fixes
+    description: Regenerate a flagged image to meet the market's rules.
+  - title: Review queue
+    description: Record a reviewer's approve or reject.
+use-cases:
+  - title: Global ad launch
+    description: Check one creative for every market before it ships.
+  - title: Video QA
+    description: See which rules a video breaks, and why.
+mcp-toolset: quality
+mcp-tools:
+  - name: list_qc_regions
+    title: List markets for content checks
+  - name: find_assets
+    title: Find files in the Drive
+  - name: check_content
+    title: Check content against market rules
+  - name: get_content_check
+    title: Get a content check result
+  - name: get_content_decision
+    title: Open a past content check
+  - name: get_decision_media
+    title: Get the media of a past check
+  - name: fix_flagged_image
+    title: Fix a flagged image
+  - name: get_image_fix
+    title: Get an image fix
+  - name: list_image_fixes
+    title: List past fixes of a flagged image
+  - name: list_content_checks
+    title: List past content checks
+  - name: delete_content_decision
+    title: Delete a past content check
+  - name: list_review_queue
+    title: List items waiting for review
+  - name: adjudicate_decision
+    title: Record a reviewer's verdict
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: compliance-markets
+    why: Add the markets and rules content is checked against.
+  - name: hyperlocal-campaigns
+    why: Send the approved creative to your network.
+  - name: image-creator
+    why: Make a new version of a blocked image.

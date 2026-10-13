@@ -1,0 +1,75 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. `mcp-toolset` + `mcp-tools`: the Vitra server tools
+# the skill uses (checked against scripts/mcp-tools.json).
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Keep the network your campaigns reach up to date: contacts with their
+  WhatsApp numbers and Facebook Pages, groups for targeting, and names and
+  addresses localized into each contact's language.
+when-to-use: >-
+  Reach for it before a campaign — to add new retailers, fix a number, or
+  build the group a broadcast should target.
+features:
+  - title: Contacts by name
+    description: Find, add, edit and delete retailers and partners.
+  - title: Channels
+    description: WhatsApp numbers and Facebook Page connections per contact.
+  - title: Groups
+    description: Build and maintain the groups broadcasts target.
+  - title: Localized details
+    description: Names and addresses in each contact's language.
+use-cases:
+  - title: Onboard retailers
+    description: Add a new distributor's retailers and group them by city.
+  - title: Clean the list
+    description: Fix numbers and remove contacts who left before a launch.
+mcp-toolset: hyperlocal
+mcp-tools:
+  - name: find_contacts
+    title: Find Hyperlocal contacts
+  - name: get_contact
+    title: Get one contact
+  - name: list_contact_places
+    title: List contact states, zones or areas
+  - name: create_contact
+    title: Add a contact
+  - name: update_contact
+    title: Edit a contact
+  - name: delete_contact
+    title: Delete a contact
+  - name: set_contact_whatsapp
+    title: Set or remove a contact's WhatsApp number
+  - name: get_contact_facebook
+    title: Check a contact's Facebook connection
+  - name: disconnect_contact_facebook
+    title: Disconnect a contact's Facebook Page
+  - name: list_contact_groups
+    title: List contact groups
+  - name: create_contact_group
+    title: Create a contact group
+  - name: update_contact_group
+    title: Rename or describe a contact group
+  - name: add_contacts_to_group
+    title: Add contacts to a group
+  - name: remove_contacts_from_group
+    title: Remove contacts from a group
+  - name: delete_contact_group
+    title: Delete a contact group
+  - name: estimate_contact_localization
+    title: Estimate contact localization
+  - name: localize_contacts
+    title: Localize contacts
+  - name: preview_contact_localization
+    title: Preview a contact's localization
+  - name: set_contact_localization
+    title: Save a contact's localized values
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
+related-skills:
+  - name: hyperlocal-campaigns
+    why: Send a broadcast to the contacts and groups you built.
+  - name: hyperlocal-templates
+    why: Prepare the creative those contacts will receive.

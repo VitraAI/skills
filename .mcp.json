@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vitra": {
+      "type": "http",
+      "url": "https://universe-api.vitra.ai/v1/mcp"
+    }
+  }
+}

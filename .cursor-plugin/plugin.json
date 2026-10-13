@@ -1,0 +1,22 @@
+{
+  "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
+  "name": "vitra",
+  "displayName": "Vitra",
+  "version": "1.0.0",
+  "description": "Every Vitra skill in one install: translate documents, subtitles and images; dub videos, generate speech, clone voices and lip-sync; finish Figma, Canva, Adobe and Word plugin translations; manage translation memories, terminology, brand kits, projects, tasks, prompts, knowledge and the Drive; run WhatsApp and Facebook campaigns; score quality and check compliance, with your Vitra organization's account.",
+  "author": {
+    "name": "Vitra.ai"
+  },
+  "homepage": "https://universe.vitra.ai/skills",
+  "repository": "https://github.com/VitraAI/skills",
+  "license": "MIT",
+  "skills": "./",
+  "keywords": [
+    "vitra",
+    "image-generation",
+    "image-translation",
+    "video-dubbing",
+    "subtitles",
+    "localization"
+  ]
+}
