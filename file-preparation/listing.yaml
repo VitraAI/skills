@@ -1,0 +1,33 @@
+# The skill's page in the Skill Library (catalog.json / skills/<name>.json).
+# Not part of the skill: no agent reads it, and scripts/build.mjs leaves it
+# out of every archive. This skill runs locally and calls no Vitra server
+# tools, so it has no mcp-toolset or mcp-tools.
+# `related-skills`: skills people move on to from this one, and why.
+about: >-
+  Bring a client's language assets into Vitra from any tool: translation
+  memories, term bases, glossaries and do-not-translate lists become files
+  Vitra imports, split to its limits, with a report of everything kept,
+  changed or left out.
+when-to-use: >-
+  Reach for it when you receive a TMX, TBX, MultiTerm or Trados export, or an
+  Excel glossary from a client or another platform, and want it in Vitra
+  without losing track of what came across.
+features:
+  - title: Any tool, any format
+    description: TMX, XLIFF, SDLTM, PO, TBX, MultiTerm XML, spreadsheets and zip archives.
+  - title: Split to fit
+    description: Parts sized to Vitra's per-file limits, with related concepts kept together.
+  - title: Glossary or term base
+    description: Do-not-translate lists become enforced glossaries automatically.
+  - title: Nothing lost silently
+    description: A report lists every row left out or changed, with its place in the source file.
+use-cases:
+  - title: Client onboarding
+    description: Import a new client's Trados memory and MultiTerm termbase.
+  - title: Platform migration
+    description: Move memories and glossaries from Phrase, memoQ or Smartling.
+related-skills:
+  - name: translation-memory
+    why: Create the memory to import the converted files into.
+  - name: terminology
+    why: Create the term base or glossary, and check the imported terms.
