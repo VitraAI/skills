@@ -22,6 +22,7 @@ plus the scripts it runs.
 | [`document-translation`](document-translation/) | Translate text, Office, PDF, spreadsheet and InDesign files, batches or Drive folders; review and score them |
 | [`translation-memory`](translation-memory/) | Translation memories: translate strings memory-first, correct entries, share, link, VitraTM settings |
 | [`terminology`](terminology/) | Glossaries, term bases and style guides |
+| [`file-preparation`](file-preparation/) | Convert TMs, term bases and glossaries from any tool into Vitra import files, split to its limits, with a report |
 | [`translation-quality`](translation-quality/) | Score a translation line by line and explain the worst lines |
 | [`content-compliance`](content-compliance/) | Check text, images, audio and video against each market's rules; fix flagged images; review queue |
 | [`compliance-markets`](compliance-markets/) | Markets and their compliance rules; draft rules with AI |
