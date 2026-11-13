@@ -87,6 +87,19 @@ class VitraTest(unittest.TestCase):
         self.assertEqual(body, {"args": {"name": "Q3 launch"}, "user_intent": "tidy"})
         self.assertEqual({k.lower(): v for k, v in headers.items()}.get("x-mcp-toolsets"), "hyperlocal_send")
 
+    def test_upload_a_link_has_vitra_import_it(self) -> None:
+        out = self.run_cli("upload", "https://cdn.example.com/joel.mp4", "--name", "Joel.mp4")
+        self.assertEqual(out["status"], "ok")
+        method, path, body, _ = self.fake.calls[-1]
+        self.assertEqual((method, path), ("POST", "/v1/agent/tools/import_file"))
+        self.assertEqual(body["args"], {"url": "https://cdn.example.com/joel.mp4",
+                                        "file_name": "Joel.mp4"})
+        # Never a plain-http link, and no request is made for one.
+        calls = len(self.fake.calls)
+        refused = self.run_cli("upload", "http://cdn.example.com/joel.mp4")
+        self.assertEqual(refused["status"], "failed")
+        self.assertEqual(len(self.fake.calls), calls)
+
     def test_failures_keep_facts_and_never_invite_a_blind_retry(self) -> None:
         out = self.run_cli("call", "start_dub", "{}")
         self.assertEqual(out["error"]["code"], "INSUFFICIENT_CREDITS")
