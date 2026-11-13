@@ -449,6 +449,17 @@ def _mp4_seconds(path: Path) -> float | None:
     return round(length / scale, 3)
 
 
+def _signed_upload_headers(link: dict, ctype: str) -> dict[str, str]:
+    """The headers the upload link is signed over, to send exactly as given
+    (storage refuses the PUT otherwise: HTML and SVG also carry a
+    Content-Disposition). An older server returns none and signs only the
+    Content-Type."""
+    signed = link.get("headers")
+    if not isinstance(signed, dict):
+        return {"Content-Type": ctype}
+    return {str(name): str(value) for name, value in signed.items()}
+
+
 def cmd_upload(a: argparse.Namespace) -> int:
     path = Path(a.path).expanduser()
     if not path.is_file():
@@ -462,8 +473,11 @@ def cmd_upload(a: argparse.Namespace) -> int:
                     retryable=True)
     size = path.stat().st_size
     with path.open("rb") as fh:
-        req = urllib.request.Request(upload_url, data=fh, method="PUT", headers={
-            "Content-Type": ctype, "Content-Length": str(size)})
+        req = urllib.request.Request(upload_url, data=fh, method="PUT",
+                                     headers=_signed_upload_headers(link, ctype))
+        req.add_header("Content-Length", str(size))
+        if not req.has_header("Content-type"):  # else urllib labels it form data
+            req.add_header("Content-Type", ctype)
         try:
             with urllib.request.urlopen(req, timeout=max(120.0, size / 1_000_000)) as res:
                 ok = res.status // 100 == 2
@@ -474,19 +488,29 @@ def cmd_upload(a: argparse.Namespace) -> int:
         except (urllib.error.URLError, OSError) as e:
             _common.die(_common.EXIT_API_ERROR, f"Network error during upload: {e}.",
                         error_code="NETWORK_ERROR", retryable=True)
+        except ValueError:  # a header http.client refuses to send
+            _common.die(_common.EXIT_API_ERROR, "Vitra gave no usable upload link.",
+                        retryable=False)
     if not ok:
         _common.die(_common.EXIT_API_ERROR, "The upload did not finish.", retryable=True)
     asset = _call_tool("register_upload", {"key": key, "file_name": path.name,
                                            "content_type": ctype})
-    # `key` is the storage key: the tools that take an `asset_key` (image
-    # translation, image resize) need it rather than the asset_id.
+    # register_upload keeps the file under a new key and deletes the upload
+    # key, so hand on the key it returns. An older server names none: there
+    # the file stays at the upload key.
+    kept = asset.get("key")
+    if isinstance(kept, str) and kept:
+        key = kept
     seconds = _media_seconds(path)
     return _out({"status": "ok", "file": path.name, "bytes": size, "asset": asset,
+                 # The storage key, for the tools that take an `asset_key`
+                 # (image translation, image resize) rather than the asset_id.
                  "key": key,
                  # The audio or video length, for the tools that take duration_seconds.
                  **({"duration_seconds": seconds} if seconds else {}),
-                 "next_action": "Pass asset.asset_id (or key, where a tool asks for "
-                                "asset_key) to the tool that needs the file."})
+                 "next_action": "Pass asset.asset_id to the tool that needs the file, "
+                                "or this key (where Vitra keeps the file) where a tool "
+                                "asks for asset_key."})
 
 
 def _link_file_name(url: urllib.parse.SplitResult) -> str:
