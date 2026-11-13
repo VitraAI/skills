@@ -67,9 +67,10 @@ background: mention it once; nothing to do.
    trash, or in a trashed folder, comes back). Look inside a folder: `browse_drive` (`view` is
    folder, favourites or trash). Storage used: `get_drive_storage`.
 2. **Upload** a local file: `vitra.py upload <path>` (it wraps `create_upload_url` +
-   `register_upload`; called directly, pass the file's `size_bytes` too) and keep the
-   returned asset for the next skill. The user uploads it
-   themselves: `get_upload_link`, then `find_assets` once they say it's there.
+   `register_upload`; called directly, PUT with exactly the returned `headers`, pass the
+   file's `size_bytes` too, and use the `key` that `register_upload` returns: the upload
+   key is gone after it) and keep the returned asset and key for the next skill. The user
+   uploads it themselves: `get_upload_link`, then `find_assets` once they say it's there.
 3. **Download**: `get_download_url` with the file name, then give the link or save it:
    ```bash
    python3 scripts/vitra.py call get_download_url '{"file": "Q3 deck (German).pptx"}'
