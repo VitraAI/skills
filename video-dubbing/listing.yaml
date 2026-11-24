@@ -81,6 +81,8 @@ mcp-tools:
     title: Teach a pronunciation
   - name: remove_pronunciation
     title: Remove a pronunciation rule
+  - name: transliterate
+    title: Type in another script
   - name: list_dub_issues
     title: List what blocks export
   - name: fix_dub_issues

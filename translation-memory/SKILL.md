@@ -61,7 +61,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -71,12 +71,14 @@ several → ask which by name. `get_translation_memory` shows its languages, eng
 linked resources (glossaries, term bases, style guide).
 
 **Translate short texts** (UI strings, product copy): free, no credits. Memory first,
-machine for the rest; new translations are stored as unverified entries. Target
-languages are `list_languages` keys (or the codes the memory lists), and only ones the
-memory already covers: any other is refused, not added. To add one, ask the user, then
-`update_translation_memory` with `add_target_languages`.
+machine for the rest; new translations are stored as unverified entries (a memory in
+Reference mode stores nothing: the AI checks every 100% match instead). Target
+languages are `list_languages` codes, and only ones the memory already covers: any other
+is refused, not added. To add one, ask the user, then `update_translation_memory` with
+`add_target_languages`. `include_origin: true` says why each translation reads as it
+does (memory matches, terms and rules used), when the user asks.
 ```bash
-python3 scripts/vitra.py call translate_with_memory '{"tm_id": "…", "texts": ["Checkout"], "target_languages": ["german_germany"]}'
+python3 scripts/vitra.py call translate_with_memory '{"tm_id": "…", "texts": ["Checkout"], "target_languages": ["de-DE"]}'
 ```
 A large batch returns an operation id: `get_memory_translation`.
 
@@ -85,7 +87,8 @@ after, confirm); `set_memory_term_status` (unverified, verified, approved);
 `delete_memory_terms` (one language's translation of a phrase per item; confirm).
 
 **Memories** ⏸: `create_translation_memory` (confirm name and languages;
-`list_memory_providers` for VitraTM or Phrase), `update_translation_memory`,
+`list_memory_providers` for VitraTM or Phrase; on VitraTM a `context`, who the memory is
+for, is optional but improves translations), `update_translation_memory`,
 `delete_translation_memory` (confirm; it leaves Vitra, but its provider may keep the
 entries: say so).
 
@@ -102,8 +105,7 @@ every job translates and what it costs: confirm.
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

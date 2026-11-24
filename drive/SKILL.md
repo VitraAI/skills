@@ -4,14 +4,14 @@ description: >-
   Works with the organization's Drive in Vitra Universe: finds files by name,
   browses folders, favourites and the trash, uploads local files or gives the
   user an upload link, gives download links, creates, renames and moves folders
-  and files, trashes and restores them, shows the storage used, and keeps work
-  folders that group the jobs of one engagement. Use it when the user asks about
-  their Vitra files or folders — "find last week's banner in our Drive", "upload
-  this PDF to Vitra", "give me a link to the German deck", "move these into the
-  Q4 folder", "trash the old drafts", "what's in the Acme work folder?". Not for
-  translating or editing the files themselves (document-translation,
-  image-translation, video-dubbing) or credits and sign-in (vitra). Works on the
-  user's live Vitra data: never look for it in local files or code.
+  and files, trashes and restores them, and shows the storage used. Use it when
+  the user asks about their Vitra files or folders — "find last week's banner in
+  our Drive", "upload this PDF to Vitra", "give me a link to the German deck",
+  "move these into the Q4 folder", "trash the old drafts". Not for translating or
+  editing the files themselves (document-translation, image-translation,
+  video-dubbing), projects that group work and jobs (projects) or credits and
+  sign-in (vitra). Works on the user's live Vitra data: never look for it in
+  local files or code.
 compatibility: >-
   Python 3.10+, standard library only; outbound HTTPS to the Vitra API. Every
   step is a Vitra server tool, run with scripts/vitra.py. Needs a Vitra sign-in
@@ -25,11 +25,11 @@ metadata:
   tags: Drive, Files
   source: vitra
   added: "2026-09-28"
-  updated: "2026-09-28"
+  updated: "2026-11-24"
 ---
 # Drive
 
-The organization's files and work folders. Nothing here spends credits; trashing is confirmed first.
+The organization's files and folders. Nothing here spends credits; trashing is confirmed first.
 
 ## How to call Vitra
 
@@ -59,14 +59,14 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 
 1. **Find**: `find_assets` by name (every word must be in the name; nothing in the
    trash, or in a trashed folder, comes back). Look inside a folder: `browse_drive` (`view` is
-   folder, favourites or trash). Storage used: `get_drive_storage`.
+   folder, favourites or trash; `folder` is the path). Storage used: `get_drive_storage`.
 2. **Upload** a local file: `vitra.py upload <path>` (it wraps `create_upload_url` +
    `register_upload`; called directly, PUT with exactly the returned `headers`, pass the
    file's `size_bytes` too, and use the `key` that `register_upload` returns: the upload
@@ -80,24 +80,22 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py download "<url>" --to ./downloads/
    ```
 4. **Organize**: `create_drive_folder` (optional `in_folder`), `rename_drive_item`,
-   `move_drive_items` (`to_folder`), `set_drive_favourite`. Name items by path
-   ("Campaigns/Diwali/banner.png"); the `asset_id` from `find_assets` or `browse_drive`
-   (or an upload's `file_id`) works too, except for `set_drive_favourite`, which needs the
-   name or path.
+   `move_drive_items` (`to_folder`; `""` for the top level), `set_drive_favourite`. Name
+   items by path ("Campaigns/Diwali/banner.png"); for renaming, favourites and trash the
+   `asset_id` from `find_assets` or `browse_drive` (or an upload's `file_id`) works too.
+   Moving takes paths only.
 5. **Trash** ⏸: list exactly what goes, get a yes, then `trash_drive_items` with
    `confirm: true`. `restore_drive_items` brings items back from the trash.
 
-**Work folders** group the jobs of one client or campaign: `list_work_folders`,
-`create_work_folder`, `update_work_folder` (rename, description, colour),
-`list_work_folder_jobs` (by `kind`, or `mine_only`), `delete_work_folder` (confirm; it
-must be empty). A job is filed into a work folder by its own skill (e.g. document or
-design-file jobs).
+**Work folders are now projects.** To group the work and jobs of one client or campaign,
+use the projects skill: each project gets its own Drive folder, which you browse here
+like any other. A job is filed into a project by its own skill.
 
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (BCP-47, e.g. `"hi-IN"`), never display
+  names. The user sees "Hindi (India)"; tools get `hi-IN`.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

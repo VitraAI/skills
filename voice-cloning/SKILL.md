@@ -57,7 +57,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -70,8 +70,8 @@ background: mention it once; nothing to do.
    then call again with `confirm: true` on their go-ahead. Provider `elevenlabs` or
    `cartesia`.
    ```bash
-   python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "english_india", "consent": true, "estimate_only": true}'
-   python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "english_india", "consent": true, "confirm": true}'
+   python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "en-IN", "consent": true, "estimate_only": true}'
+   python3 scripts/vitra.py call clone_voice '{"name": "Priya narrator", "provider": "elevenlabs", "sample_asset_ids": ["…"], "language": "en-IN", "consent": true, "confirm": true}'
    ```
 4. **Wait**: `list_cloned_voices` until the voice is ready. Then text-to-speech or
    video-dubbing can use it.
@@ -83,8 +83,7 @@ Jobs: `list_playground_jobs` with `kind: voice_clone`,
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

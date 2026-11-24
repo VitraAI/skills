@@ -60,7 +60,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -83,8 +83,8 @@ background: mention it once; nothing to do.
    ```bash
    python3 scripts/vitra.py call translate_template_image '{"template": "Diwali offer", "language": "ta-IN", "confirm": true}'
    ```
-   then `get_image_translation` until done (its `target_language` is the language's name,
-   e.g. `"Tamil"`, not `"ta-IN"`) and `save_image_as_template` to use it.
+   then `get_image_translation` (the `job_id` and `target_language`, e.g. `"ta-IN"`) until
+   done, and `save_image_as_template` to use it.
    `list_template_localizations` shows each language's title and caption.
 5. **Overlays** (the per-contact text and fields): `get_template_overlays`,
    `edit_template_overlay` (a language with no overlay yet is created from its `add_text`
@@ -108,9 +108,8 @@ background: mention it once; nothing to do.
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are BCP-47 codes** for templates, localizations and overlays (e.g.
-  `"ta-IN"`), as `describe` shows; `get_image_translation` takes the language's name
-  (`"Tamil"`) or its `list_languages` key. Never guess: `describe` the tool.
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
+  A WhatsApp template's `language` is Meta's own language code (`describe` says so).
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

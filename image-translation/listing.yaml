@@ -29,7 +29,7 @@ features:
   - title: Fix any line
     description: See the image's text line by line, correct or keep lines, and re-render.
   - title: Save and find again
-    description: Save to the Drive, file into folders, list past images, retry failures.
+    description: Save to the Drive, file into projects, list past images, retry failures.
 use-cases:
   - title: Localized ad creatives
     description: Ship one campaign visual in every market's language.

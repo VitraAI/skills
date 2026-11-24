@@ -60,7 +60,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -83,23 +83,23 @@ background: mention it once; nothing to do.
 4. **Edit** ⏸ each round: `edit_image` on the LATEST `creation_id` with the user's
    instructions (price, ask, `confirm: true`). Each edit is a new image: chain on it. For a
    precise change, `analyze_image_creation` lists the text, people and objects it sees.
-5. **Save** only when asked: `save_image_to_drive` (optional Drive `folder` by name), or
-   `vitra.py download <image link> --to <path>` for a local copy.
+5. **Save** only when asked: `save_image_to_drive` (optional Drive `folder` by name; else
+   the Image Creator folder). Every save is a new, date-stamped file: tell the user the
+   `file_name` it returns. Or `vitra.py download <image link> --to <path>` for a local copy.
 
 **Past chats**: `list_quick_create_chats` (with `chat`: its messages, images and whether
 the brief is ready), `rename_quick_create_chat`, `delete_quick_create_chat`.
 
 **History**: `list_image_creations` (newest first, with why a failed one failed);
-`retry_image_creation` (paid again; only a failed image, a finished one has nothing to
-retry); `delete_image_creation` (confirm; a Drive copy stays).
+`retry_image_creation` (paid again; only a failed or stuck image: one still running is
+refused, so wait and list again); `delete_image_creation` (confirm; a Drive copy stays).
 **Collections**: `list_image_collections`, `create_image_collection`,
 `update_image_collection`, `delete_image_collection` (confirm) (add, remove, rename; `images` is the count left in it).
 
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

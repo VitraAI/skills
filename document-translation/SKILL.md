@@ -3,8 +3,8 @@ name: document-translation
 description: >-
   Translates documents and text with the Vitra Universe API, keeping the
   original layout and formatting: Word, PowerPoint, Excel, CSV, PDF, HTML, JSON,
-  XML, XLIFF, InDesign (.idml) and plain text — one file, a batch, or a whole
-  Drive folder — through the organization's translation memory; then reviews it
+  XML, XLIFF, DITA, Markdown, YAML, InDesign (.idml) and plain text — one file,
+  a batch, or a whole Drive folder — through the organization's translation memory; then reviews it
   line by line, scores it with a quality report and writes fixes back. Use it
   whenever the user wants files or text translated or checked — "translate this
   contract into German", "translate everything in our Q3 folder", "score the
@@ -59,7 +59,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -67,18 +67,19 @@ background: mention it once; nothing to do.
 1. **What to translate.** A Drive file: `find_assets`. A local file: `vitra.py upload`.
    Plain text can go inline as `text`; a .txt file goes as its `asset_id` with `format: TEXT`.
 2. **Memory.** `list_translation_memories` for the target language; several → ask which by
-   name. The source language is the memory's; target languages are `list_languages` keys
-   (or the codes the memory lists), one of the memory's targets.
+   name. The source language is the memory's; the target language is a `list_languages`
+   code (e.g. `fr-FR`), one of the memory's targets.
 3. **Start** (ask first: paid):
-   - one file or text: `translate_document` (`format` from the file type; InDesign .idml
-     where `describe translate_document` lists IDML). Charged per source word (the total
+   - one file or text: `translate_document` (`format` from the file type, as
+     `describe translate_document` names it; this also takes InDesign .idml, DITA,
+     Markdown and YAML). Charged per source word (the total
      rounded up to a whole credit), counted when it starts: `estimate_only: true` prices
      pasted text exactly, but for a file only gives the per-word rate. Tell the user that, then `confirm: true` on their yes.
      Pasted-text word counts include punctuation (each mark adds a third of a word), so
      they can run above a plain count: say so if the user asks.
      ```bash
-     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "french_france", "format": "DOCX", "asset_id": "…", "estimate_only": true}'
-     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "french_france", "format": "DOCX", "asset_id": "…", "confirm": true}'
+     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "fr-FR", "format": "DOCX", "asset_id": "…", "estimate_only": true}'
+     python3 scripts/vitra.py call translate_document '{"tm_id": "…", "target_language": "fr-FR", "format": "DOCX", "asset_id": "…", "confirm": true}'
      ```
    - 1–20 text-format files of one format (TEXT, JSON, XML, XLIFF, HTML, CSV):
      `translate_document_batch` (no price check: one charge per source word of each file)
@@ -98,14 +99,14 @@ background: mention it once; nothing to do.
    works) → `get_quality_report` →
    `apply_document_quality_fixes` (confirm).
 
-History: `list_document_translations`, `manage_document_translation` (rename, move to a
-work folder), `retry_document_translation` (paid), `delete_document_translation` (confirm).
+History: `list_document_translations`, `manage_document_translation` (rename, or file it
+in a project by name), `retry_document_translation` (a failed or cancelled one; paid),
+`delete_document_translation` (confirm).
 
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

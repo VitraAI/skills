@@ -5,7 +5,7 @@ description: >-
   and office plugins (Figma, Canva, Adobe and Word): lists the jobs with their
   languages and review status, reads a job line by line, corrects, verifies or
   approves lines, syncs edits with the translation memory, renames a job or
-  files it in a work folder, suggests creative alternatives for a line, scores a
+  files it in a project, suggests creative alternatives for a line, scores a
   language with a quality report and writes its fixes back. Use it when the user
   mentions a translation made in a design plugin — "check the Figma
   translation", "what did the Canva job translate the headline to?", "fix line 4
@@ -60,12 +60,12 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 
-1. **Find the job** ⏸: `list_design_jobs` (by name, `app` or `language` as a `list_languages` key); several → ask
+1. **Find the job** ⏸: `list_design_jobs` (by name, `app` or `language` as a `list_languages` code); several → ask
    which by name. `get_design_job` shows its languages, status, memory and review counts.
 2. **Read**: `get_design_job_lines` (numbered; `filter` or `search` to narrow, `page` on).
 3. **Correct** ⏸: show before → after, then `edit_design_job_lines` with `set` (line and
@@ -81,14 +81,13 @@ background: mention it once; nothing to do.
 5. **Score** (paid): `run_design_job_quality_report` → `get_quality_report` (explain the
    worst lines) → `apply_design_job_quality_fixes` (confirm), then `sync` the memory.
 
-**Manage**: `manage_design_job` (rename, or move into a work folder by name);
+**Manage**: `manage_design_job` (rename, or move into a project by name);
 `delete_design_job` (confirm; credits already used are not returned).
 
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.
