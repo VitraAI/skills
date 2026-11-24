@@ -19,6 +19,10 @@ features:
     description: Parts sized to Vitra's per-file limits, with related concepts kept together.
   - title: Glossary or term base
     description: Do-not-translate lists become enforced glossaries automatically.
+  - title: Asks what matters
+    description: Says what each file is and will become, then asks the few real choices, each with a recommended answer.
+  - title: Data problems found
+    description: Placeholders, broken brackets, alternatives in one cell, special spaces and glossary vs term base clashes, listed for the client.
   - title: Nothing lost silently
     description: A report lists every row left out or changed, with its place in the source file.
 use-cases:
@@ -26,6 +30,8 @@ use-cases:
     description: Import a new client's Trados memory and MultiTerm termbase.
   - title: Platform migration
     description: Move memories and glossaries from Phrase, memoQ or Smartling.
+  - title: Per-language term lists
+    description: Combine a client's one-file-per-language term lists and DNT lists into one term base and one glossary.
 related-skills:
   - name: translation-memory
     why: Create the memory to import the converted files into.

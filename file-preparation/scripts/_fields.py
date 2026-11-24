@@ -21,7 +21,7 @@ _ALIASES: dict[str, list[str]] = {
     "subdomains": ["subdomain", "sub domain", "subdomains", "subcategory", "sub category",
                    "sub subject"],
     "definition": ["definition", "def", "meaning", "explanation", "description", "desc",
-                   "gloss"],
+                   "gloss", "concept definition", "term definition note", "definition text"],
     "concept_note": ["concept note", "entry note", "entry comment", "concept comment"],
     "note": ["note", "notes", "comment", "comments", "remark", "remarks", "term note",
              "translator note", "translator comment", "information", "info", "explanatory note"],

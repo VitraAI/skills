@@ -15,6 +15,7 @@ import os
 import re
 import sqlite3
 import zipfile
+from collections import Counter
 from dataclasses import dataclass, field
 from xml.etree import ElementTree as ET
 
@@ -38,6 +39,10 @@ class Parsed:
     # What a spreadsheet's columns were read as, for `inspect` and --map.
     mapping: dict | None = None
     dnt_hint: bool = False
+    # The file's name says it is a do-not-translate list.
+    dnt_list: bool = False
+    # Inline tags met in a memory (counted whether they were kept or dropped).
+    tags_found: int = 0
 
 
 class Unsupported(Exception):
@@ -147,10 +152,94 @@ _CODE_XLIFF1 = frozenset({"bpt", "ept", "ph", "it"})
 _CODE_XLIFF2 = frozenset({"ph", "sc", "ec", "cp", "sm", "em"})
 
 
+# ------------------------------------------------------------------- inline tags
+
+
+class Tags:
+    """Numbers one segment pair's inline tags the way Vitra writes them: <1>…</1> for a
+    paired tag, <2/> for a standalone one. Source tags are numbered in reading order; a
+    target tag takes the number of the source tag with the same id, so a translation
+    that moves a tag keeps its number."""
+
+    def __init__(self) -> None:
+        self.by_key: dict = {}
+        self.n = 0
+        self.unmatched = 0  # target tags with no source tag of the same id
+
+    def number(self, key, source: bool) -> int:
+        if key is not None and key in self.by_key:
+            return self.by_key[key]
+        if not source:
+            self.unmatched += 1
+        self.n += 1
+        if key is not None:
+            self.by_key[key] = self.n
+        return self.n
+
+
+# Elements that only wrap text (kept, no tag of their own) and markers with no text.
+_TRANSPARENT = frozenset({"hi", "mrk", "sub"})
+_MARKERS = frozenset({"sm", "em", "cp"})
+
+
+def _inline(el: ET.Element | None, tags: Tags, source: bool) -> str:
+    """Text of a TMX <seg> or an XLIFF <source>/<target>/<mrk> with its inline tags as <n>…</n> / <n/>.
+
+    TMX: bpt/ept (paired by i, linked across languages by x), ph/it/ut (standalone).
+    XLIFF 1.2: g (wraps text), bx/ex and bpt/ept (paired by rid or id), x/ph/it (standalone).
+    XLIFF 2: pc (wraps text), sc/ec (paired by startRef), ph (standalone)."""
+    if el is None:
+        return ""
+    opened: dict[str, int] = {}
+    keyless = [0]
+    out: list[str] = []
+
+    def key_of(ch: ET.Element, kind: str):
+        x = ch.get("x")
+        if x:
+            return ("x", x)
+        ident = ch.get("rid") or ch.get("id") or ch.get("i") or ch.get("startRef")
+        if ident:
+            return (kind, ident)
+        keyless[0] += 1
+        return ("#", keyless[0])
+
+    def walk(node: ET.Element) -> None:
+        out.append(node.text or "")
+        for ch in node:
+            t = _local(ch.tag)
+            if t in ("bpt", "bx", "sc"):
+                n = tags.number(key_of(ch, "pair"), source)
+                pair = ch.get("i") or ch.get("rid") or ch.get("id") or ""
+                opened[pair] = n
+                out.append(f"<{n}>")
+            elif t in ("ept", "ex", "ec"):
+                pair = ch.get("i") or ch.get("rid") or ch.get("startRef") or ch.get("id") or ""
+                n = opened.pop(pair, None)
+                out.append(f"</{n}>" if n is not None else f"<{tags.number(key_of(ch, 'pair'), source)}/>")
+            elif t in ("ph", "it", "ut", "x"):
+                out.append(f"<{tags.number(key_of(ch, 'one'), source)}/>")
+            elif t in ("g", "pc"):
+                n = tags.number(key_of(ch, "pair"), source)
+                out.append(f"<{n}>")
+                walk(ch)
+                out.append(f"</{n}>")
+            elif t in _TRANSPARENT:
+                walk(ch)
+            elif t in _MARKERS:
+                pass
+            else:
+                walk(ch)
+            out.append(ch.tail or "")
+
+    walk(el)
+    return clean_newlines("".join(out))
+
+
 # --------------------------------------------------------------------------- TMX
 
 
-def read_tmx(path: str, name: str, log: Log) -> Parsed:
+def read_tmx(path: str, name: str, log: Log, keep_tags: bool = True) -> Parsed:
     out = Parsed(name, "tmx", "tm", kind_reason="TMX is a translation memory format")
     header_src = ""
     n = 0
@@ -175,7 +264,7 @@ def read_tmx(path: str, name: str, log: Log) -> Parsed:
                 if _local(p.tag) == "prop" and p.get("type") == "x-vitra-review-status":
                     status = (p.text or "").strip().lower() or None
             date = tuv.get("changedate") or tuv.get("creationdate") or ""
-            tuvs.append((lang, clean_newlines(_text(seg, _CODE_TMX)), status, date))
+            tuvs.append((lang, seg, status, date))
         for c in el:
             t = _local(c.tag)
             if t == "prop":
@@ -188,14 +277,22 @@ def read_tmx(path: str, name: str, log: Log) -> Parsed:
         if not src_lang or src_lang == "*all*":
             src_lang = tuvs[0][0] if tuvs else ""
         src = next((t for t in tuvs if t[0].lower() == src_lang.lower()), None)
-        el.clear()
         if src is None:
+            el.clear()
             log.exclude(name, where, "TM", src_lang, "", "", "No text in the source language")
             continue
-        for lang, text, status, date in tuvs:
+        for lang, seg, status, date in tuvs:
             if lang.lower() == src_lang.lower():
                 continue
-            out.tm_rows.append(TmRow(src[0], src[1], lang, text, where, status, date or tu_date))
+            if keep_tags:
+                tags = Tags()
+                s_text, t_text = _inline(src[1], tags, True), _inline(seg, tags, False)
+                if tags.n:
+                    out.tags_found += tags.n
+            else:
+                s_text, t_text = clean_newlines(_text(src[1], _CODE_TMX)), clean_newlines(_text(seg, _CODE_TMX))
+            out.tm_rows.append(TmRow(src[0], s_text, lang, t_text, where, status, date or tu_date))
+        el.clear()
     return out
 
 
@@ -219,29 +316,41 @@ def _sdl_status(conf: str | None) -> str | None:
     return "unverified"
 
 
-def read_xliff(path: str, name: str, log: Log) -> Parsed:
+def read_xliff(path: str, name: str, log: Log, keep_tags: bool = True) -> Parsed:
     out = Parsed(name, "xliff", "tm", kind_reason="XLIFF is a bilingual translation file")
     root = ET.parse(path).getroot()
     version = root.get("version", "")
     if version.startswith("2") or root.get("srcLang"):
-        _xliff2(root, name, out, log)
+        _xliff2(root, name, out, log, keep_tags)
     else:
-        _xliff1(root, name, out, log)
+        _xliff1(root, name, out, log, keep_tags)
     return out
 
 
-def _segments(el: ET.Element | None) -> dict[str, str]:
+def _pair(out: Parsed, s_el, t_el, drop: frozenset, keep_tags: bool) -> tuple[str, str]:
+    """Source and target text of one segment, tags numbered together or dropped."""
+    if not keep_tags:
+        return (clean_newlines(_text(s_el, drop)),
+                clean_newlines(_text(t_el, drop)) if t_el is not None else "")
+    tags = Tags()
+    s_text = _inline(s_el, tags, True)
+    t_text = _inline(t_el, tags, False) if t_el is not None else ""
+    out.tags_found += tags.n
+    return s_text, t_text
+
+
+def _segments(el: ET.Element | None) -> dict[str, ET.Element]:
     """Trados-style <mrk mtype="seg" mid> segments of a <seg-source>/<target>."""
-    found: dict[str, str] = {}
+    found: dict[str, ET.Element] = {}
     if el is None:
         return found
     for m in el.iter():
         if _local(m.tag) == "mrk" and m.get("mtype") == "seg":
-            found[m.get("mid", "")] = clean_newlines(_text(m, _CODE_XLIFF1))
+            found[m.get("mid", "")] = m
     return found
 
 
-def _xliff1(root: ET.Element, name: str, out: Parsed, log: Log) -> None:
+def _xliff1(root: ET.Element, name: str, out: Parsed, log: Log, keep_tags: bool = True) -> None:
     for f in root.iter():
         if _local(f.tag) != "file":
             continue
@@ -266,16 +375,15 @@ def _xliff1(root: ET.Element, name: str, out: Parsed, log: Log) -> None:
                 for d in tu.iter():
                     if _local(d.tag) == "seg" and d.get("id") is not None:
                         confs[d.get("id")] = d.get("conf")
-                for mid, s_text in seg_src.items():
-                    t_text = seg_tgt.get(mid, "")
+                for mid, s_el in seg_src.items():
+                    s_text, t_text = _pair(out, s_el, seg_tgt.get(mid), _CODE_XLIFF1, keep_tags)
                     w = f"{where}, segment {mid}"
                     if not t_text.strip():
                         log.exclude(name, w, "TM", t_lang, s_text, "", "Not translated (empty target)")
                         continue
                     out.tm_rows.append(TmRow(s_lang, s_text, t_lang, t_text, w, _sdl_status(confs.get(mid))))
                 continue
-            s_text = clean_newlines(_text(source, _CODE_XLIFF1))
-            t_text = clean_newlines(_text(target, _CODE_XLIFF1)) if target is not None else ""
+            s_text, t_text = _pair(out, source, target, _CODE_XLIFF1, keep_tags)
             if not t_text.strip():
                 log.exclude(name, where, "TM", t_lang, s_text, "", "Not translated (no target)")
                 continue
@@ -288,7 +396,7 @@ def _xliff1(root: ET.Element, name: str, out: Parsed, log: Log) -> None:
                     log.drop_field(name, "XLIFF <note>", _plain(c))
 
 
-def _xliff2(root: ET.Element, name: str, out: Parsed, log: Log) -> None:
+def _xliff2(root: ET.Element, name: str, out: Parsed, log: Log, keep_tags: bool = True) -> None:
     src_lang, tgt_lang = root.get("srcLang", ""), root.get("trgLang", "")
     for unit in root.iter():
         if _local(unit.tag) != "unit":
@@ -304,9 +412,8 @@ def _xliff2(root: ET.Element, name: str, out: Parsed, log: Log) -> None:
             n += 1
             where = f"unit {uid}, segment {seg.get('id') or n}"
             kids = {_local(c.tag): c for c in seg}
-            s_text = clean_newlines(_text(kids.get("source"), _CODE_XLIFF2))
             target = kids.get("target")
-            t_text = clean_newlines(_text(target, _CODE_XLIFF2)) if target is not None else ""
+            s_text, t_text = _pair(out, kids.get("source"), target, _CODE_XLIFF2, keep_tags)
             if not t_text.strip():
                 log.exclude(name, where, "TM", tgt_lang, s_text, "", "Not translated (no target)")
                 continue
@@ -318,25 +425,61 @@ def _xliff2(root: ET.Element, name: str, out: Parsed, log: Log) -> None:
 # ------------------------------------------------------------------------- SDLTM
 
 
-def _sdl_segment(xml: str | None) -> tuple[str, str]:
-    """(culture, text) of a Trados Studio segment; tags dropped, text kept."""
+def _sdl_elements(xml: str | None) -> tuple[str, list]:
+    """(culture, [("text", value) | (tag type, anchor, alignment anchor)]) of a Trados Studio segment."""
     if not xml:
-        return "", ""
+        return "", []
     root = ET.fromstring(xml)
-    culture, parts = "", []
+    culture, items = "", []
     for el in root:
         tag = _local(el.tag)
         if tag == "CultureName":
             culture = (el.text or "").strip()
         elif tag == "Elements":
             for item in el:
+                kids = {_local(c.tag): (c.text or "") for c in item}
                 if _local(item.tag) == "Text":
-                    v = next((c for c in item if _local(c.tag) == "Value"), None)
-                    parts.append(v.text or "" if v is not None else "")
-    return culture, clean_newlines("".join(parts))
+                    items.append(("text", kids.get("Value", "")))
+                elif _local(item.tag) == "Tag":
+                    items.append((kids.get("Type", "Standalone"), kids.get("Anchor", ""),
+                                  kids.get("AlignmentAnchor", "")))
+    return culture, items
 
 
-def read_sdltm(path: str, name: str, log: Log) -> Parsed:
+def _sdl_render(items: list, tags: Tags, source: bool) -> str:
+    """Start/End tags become <n>…</n>, the rest <n/>. A target tag takes the number of the
+    source tag with the same alignment anchor."""
+    out, opened, seen = [], {}, Counter()
+    for it in items:
+        if it[0] == "text":
+            out.append(it[1])
+            continue
+        kind, anchor, align = it
+        if kind == "End":
+            n = opened.get(anchor)
+            out.append(f"</{n}>" if n is not None else f"<{tags.number(None, source)}/>")
+            continue
+        seen[kind] += 1
+        # The n-th tag of a kind: the match when the memory has no alignment anchors.
+        nth = ("nth", kind, seen[kind])
+        aligned = ("a", align) if align and align != "0" else None
+        if source:
+            n = tags.number(aligned or nth, True)
+            tags.by_key.setdefault(nth, n)
+        else:
+            n = tags.number(aligned if aligned in tags.by_key else nth, False)
+        opened[anchor] = n
+        out.append(f"<{n}>" if kind == "Start" else f"<{n}/>")
+    return clean_newlines("".join(out))
+
+
+def _sdl_segment(xml: str | None) -> tuple[str, str]:
+    """(culture, text) of a Trados Studio segment; tags dropped, text kept."""
+    culture, items = _sdl_elements(xml)
+    return culture, clean_newlines("".join(v for k, v, *_ in items if k == "text"))
+
+
+def read_sdltm(path: str, name: str, log: Log, keep_tags: bool = True) -> Parsed:
     out = Parsed(name, "sdltm", "tm", tool="Trados Studio", kind_reason="SDLTM is a Trados Studio memory")
     con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
     try:
@@ -354,8 +497,14 @@ def read_sdltm(path: str, name: str, log: Log) -> Parsed:
         for tu_id, s_xml, t_xml, date in con.execute(q):
             where = f"TU id {tu_id}"
             try:
-                s_lang, s_text = _sdl_segment(s_xml)
-                t_lang, t_text = _sdl_segment(t_xml)
+                if keep_tags:
+                    (s_lang, s_items), (t_lang, t_items) = _sdl_elements(s_xml), _sdl_elements(t_xml)
+                    tags = Tags()
+                    s_text, t_text = _sdl_render(s_items, tags, True), _sdl_render(t_items, tags, False)
+                    out.tags_found += tags.n
+                else:
+                    s_lang, s_text = _sdl_segment(s_xml)
+                    t_lang, t_text = _sdl_segment(t_xml)
             except ET.ParseError as e:
                 log.exclude(name, where, "TM", "", "", "", f"Unreadable segment XML: {e}")
                 continue

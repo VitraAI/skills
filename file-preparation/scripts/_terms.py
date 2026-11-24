@@ -17,8 +17,9 @@ import os
 import re
 from collections import Counter
 
+import _checks
 from _model import (LIMIT_BYTES, LIMIT_GLOSSARY_ENTRIES, LIMIT_TB_CONCEPTS, Concept, GlossaryEntry, Log,
-                    Term, claim, fold_key, norm_key, to_bool)
+                    Term, claim, fold_key, is_placeholder, norm_key, to_bool)
 from _tm import Resolver
 from _xlsx import MAX_CELL_CHARS, strip_invalid_xml, write_xlsx
 
@@ -164,7 +165,8 @@ def _term_cells(t: Term, file: str, log: Log) -> dict[str, str]:
     return out
 
 
-def prepare_concepts(concepts: list[Concept], file: str, log: Log, resolve: Resolver) -> list[Concept]:
+def prepare_concepts(concepts: list[Concept], file: str, log: Log, resolve: Resolver,
+                     fix_spaces: bool = False) -> list[Concept]:
     """Resolve languages, clean terms, drop empty concepts. Returns usable concepts."""
     ready = []
     for c in concepts:
@@ -175,6 +177,18 @@ def prepare_concepts(concepts: list[Concept], file: str, log: Log, resolve: Reso
                 log.exclude(file, t.where, "Term", t.lang, t.text, "",
                             f"Language '{t.lang}' is not in Vitra's language list" if t.lang else "No language")
                 continue
+            if is_placeholder(t.text, term=True):
+                src_term = next((x.text for x in c.terms if x is not t and not is_placeholder(x.text, term=True)), "")
+                log.exclude(file, t.where, "Term", code, src_term, t.text,
+                            f"The cell says \"{t.text.strip()}\" instead of a term")
+                log.issue(file, t.where, "Term base", "Placeholder instead of a term", f"{code}: {src_term}",
+                          f"The {code} term is \"{t.text.strip()}\"",
+                          f"Left out: the concept has no {code} term", "check")
+                continue
+            if fix_spaces and _checks.SPECIAL_SPACES.search(t.text):
+                fixed = _checks.SPECIAL_SPACES.sub(lambda m: "" if m.group(0) == "\u200b" else " ", t.text)
+                log.change(file, t.where, f"Term ({code})", t.text, fixed, "Special spaces replaced with normal spaces")
+                t.text = fixed
             cleaned = clean_term(t.text)
             if not cleaned:
                 log.exclude(file, t.where, "Term", code, t.text, "", "Empty term")
@@ -198,13 +212,102 @@ def prepare_concepts(concepts: list[Concept], file: str, log: Log, resolve: Reso
     return ready
 
 
-def is_dnt(c: Concept, file_hint: bool) -> bool:
+def split_alternatives(concepts: list[Concept], src: str, file: str, log: Log) -> None:
+    """A target term holding several alternatives ("a/b", "a；b") becomes one term per alternative."""
+    for c in concepts:
+        s_text = next((t.text for t in c.terms if t.lang == src), "")
+        out = []
+        for t in c.terms:
+            parts = _checks.alternatives(t.text, s_text) if t.lang != src and s_text else None
+            if not parts:
+                out.append(t)
+                continue
+            log.change(file, t.where, f"Term ({t.lang})", t.text, " | ".join(parts),
+                       "Several alternatives in one cell: each became its own term")
+            for part in parts:
+                out.append(Term(lang=t.lang, text=part.strip(), where=t.where, fields=dict(t.fields),
+                                extra=list(t.extra) + [("Original cell", t.text)], dnt=t.dnt))
+        c.terms = out
+
+
+def concept_key(c: Concept, src: str) -> tuple[str, str] | None:
+    """Two concepts are the same when their source term and definition are (case and spacing aside)."""
+    s = next((t.text for t in c.terms if t.lang == src), "")
+    if not s:
+        return None
+    return fold_key(s), fold_key(c.fields.get("definition", ""))
+
+
+def merge_concepts(groups: list[tuple[str, list[Concept]]], src: str, join_within: bool,
+                   log: Log) -> list[Concept]:
+    """One concept list from several files (per-language lists of one term base).
+
+    A concept joins the first earlier concept with the same source term and definition,
+    from ANOTHER file; within one file only when join_within is set (the user chose to
+    merge repeated terms). Terms already there are not added twice."""
+    out: list[Concept] = []
+    index: dict[tuple[str, str], list[Concept]] = {}
+    for file, concepts in groups:
+        for c in concepts:
+            key = concept_key(c, src)
+            # A match that already holds a concept of this file is a repeat inside the file:
+            # joined only when the user chose to merge repeated terms.
+            target = next((cand for cand in index.get(key, []) if join_within or file not in cand._files),
+                          None) if key is not None else None
+            if target is None:
+                c._files = [file]  # type: ignore[attr-defined]
+                out.append(c)
+                if key is not None:
+                    index.setdefault(key, []).append(c)
+            else:
+                _join(target, c, file, log)
+    return out
+
+
+def _join(into: Concept, c: Concept, file: str, log: Log) -> None:
+    into._files.append(file)  # type: ignore[attr-defined]
+    have = {(t.lang, norm_key(t.text)): t for t in into.terms}
+    for t in c.terms:
+        same = have.get((t.lang, norm_key(t.text)))
+        if same is None:
+            into.terms.append(t)
+            have[(t.lang, norm_key(t.text))] = t
+            continue
+        for k, v in t.fields.items():
+            if not same.fields.get(k):
+                same.fields[k] = v
+            elif fold_key(same.fields[k]) != fold_key(v) and k != "status":
+                item = (k.replace("_", " ").capitalize() + " (another row)", v)
+                if item not in same.extra:
+                    same.extra.append(item)
+        for item in t.extra:
+            if item not in same.extra:
+                same.extra.append(item)
+    for k, v in c.fields.items():
+        if not into.fields.get(k):
+            into.fields[k] = v
+        elif fold_key(into.fields[k]) != fold_key(v):
+            into.extra.append((k.replace("_", " ").capitalize() + " (another row)", v))
+    for item in c.extra:
+        if item not in into.extra:
+            into.extra.append(item)
+    if c.dnt is False or into.dnt is False:
+        into.dnt = False
+    elif c.dnt is True:
+        into.dnt = True
+    log.change(file, c.where, "Concept", next((t.text for t in c.terms), ""), f"joined {into.where}",
+               "Same source term and definition: one concept")
+
+
+def is_dnt(c: Concept, file_hint: bool, explicit_only: bool = False) -> bool:
+    """Do-not-translate: said so by the file (a DNT field), or, unless explicit_only, every
+    language holds the same single term (or a one-language concept in a file that says DNT)."""
     if c.dnt is not None:
         return c.dnt
     flags = [t.dnt for t in c.terms if t.dnt is not None]
     if flags and all(flags):
         return True
-    if flags and not any(flags):
+    if flags and not any(flags) or explicit_only:
         return False
     langs = {t.lang for t in c.terms}
     if len(langs) == 1:
@@ -234,7 +337,8 @@ def _note_lines(c: Concept, dnt: bool) -> str:
     return "\n".join(lines)
 
 
-def tb_rows(concepts: list[Concept], dnt_flags: list[bool], file: str, log: Log) -> list[tuple[Concept, list[list[str]]]]:
+def tb_rows(concepts: list[Concept], dnt_flags: list[bool], file: str, log: Log,
+            default_status: str | None = None) -> list[tuple[Concept, list[list[str]]]]:
     used: set[str] = set()
     out = []
     n = 0
@@ -261,6 +365,8 @@ def tb_rows(concepts: list[Concept], dnt_flags: list[bool], file: str, log: Log)
                 continue
             seen[key] = t
             cells = _term_cells(t, file, log)
+            if default_status and not cells.get("Status"):
+                cells["Status"] = default_status
             row = (concept_cells if i == 0 else [cid, "", "", "", "", ""]) + [t.lang, t.text] + \
                 [cells.get(h, "") for h in TB_HEADER[8:]]
             rows.append(row)
@@ -327,6 +433,9 @@ def concepts_to_entries(concepts: list[Concept], dnt_flags: list[bool], src: str
         lang = src_terms[0].lang
         case_sensitive = next((to_bool(t.fields.get("case_sensitive")) for t in c.terms
                                if t.fields.get("case_sensitive")), None)
+        info = _term_info(src_terms[0])
+        if info:
+            desc.append(info)
         if dnt:
             # Every spelling of a do-not-translate concept is its own entry: each must stay as is.
             seen: set[tuple[str, str]] = set()
@@ -353,7 +462,7 @@ def concepts_to_entries(concepts: list[Concept], dnt_flags: list[bool], src: str
             continue
         head = next((t for t in src_terms if _is_preferred(t)), src_terms[0])
         e = GlossaryEntry(where=c.where, term=head.text, lang=lang, description="\n".join(desc),
-                          translatable=None, case_sensitive=case_sensitive, tags=list(tags))
+                          translatable=True, case_sensitive=case_sensitive, tags=list(tags))
         others = [t.text for t in src_terms if t is not head]
         if others:
             e.description = "\n".join(filter(None, [e.description, "Also: " + "; ".join(others)]))
@@ -379,6 +488,16 @@ def concepts_to_entries(concepts: list[Concept], dnt_flags: list[bool], src: str
             e.translations.append((code, pick.text, "\n".join(note)))
         entries.append(e)
     return entries
+
+
+def _term_info(t: Term) -> str:
+    """A source term's own notes, for a glossary Description (an entry has no term fields)."""
+    lines = []
+    for key, label in (("usage", "Usage"), ("note", "Note")):
+        if t.fields.get(key):
+            lines.append(f"{label}: {t.fields[key]}")
+    lines += [f"{label}: {value}" for label, value in t.extra]
+    return "\n".join(lines)
 
 
 def _is_forbidden(t: Term) -> bool:

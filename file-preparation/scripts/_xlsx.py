@@ -219,14 +219,29 @@ _STYLES = (
     f'<styleSheet xmlns="{MAIN_NS}">'
     '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>'
     '<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
-    '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>'
+    '<fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'
+    + "".join(f'<fill><patternFill patternType="solid"><fgColor rgb="{c}"/><bgColor indexed="64"/></patternFill></fill>'
+              for c in ("FFE3F4E6", "FFFBE3E3", "FFFFF3D6", "FFF3F3F5"))
+    + '</fills>'
     '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-    '<cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+    '<cellXfs count="7"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
     '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
-    '<xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs>'
-    "</styleSheet>"
+    '<xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+    + "".join(f'<xf numFmtId="49" fontId="0" fillId="{f}" borderId="0" xfId="0" applyNumberFormat="1" applyFill="1"/>'
+              for f in (2, 3, 4, 5))
+    + "</cellXfs></styleSheet>"
 )
+
+
+class Styled(list):
+    """A report row with a background: "green", "red", "amber" or "grey". Import sheets never use it."""
+
+    STYLES = {"green": 3, "red": 4, "amber": 5, "grey": 6}
+
+    def __init__(self, values, fill: str | None = None):
+        super().__init__(values)
+        self.style = self.STYLES.get(fill or "", 2)
 
 
 def _sheet_name(name: str, used: set[str]) -> str:
@@ -301,7 +316,7 @@ def _write_sheet(fh, header: list[str], rows: Iterable[list[str]]) -> None:
     buf: list[str] = []
     for row in rows:
         r += 1
-        buf.append(_row(r, row, style=2))
+        buf.append(_row(r, row, style=getattr(row, "style", 2)))
         if len(buf) >= 500:
             put("".join(buf))
             buf.clear()
