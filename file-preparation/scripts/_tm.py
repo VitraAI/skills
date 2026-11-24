@@ -40,7 +40,37 @@ def _date_key(d: str) -> str:
     return re.sub(r"\D", "", d or "")[:14].ljust(14, "0")
 
 
-def build_units(rows: list[TmRow], file: str, log: Log, resolve: Resolver, default_status: str | None):
+# How one source with several translations into a language is decided.
+CONFLICT_RULES = {
+    "frequent": "the most used translation (ties: the most recently changed, then the last in the file)",
+    "latest": "the most recently changed translation (ties: the most used, then the last in the file)",
+    "last": "the translation that comes last in the file",
+}
+_RANK = {
+    "frequent": lambda c: (c["count"], c["date"], c["last"]),
+    "latest": lambda c: (c["date"], c["count"], c["last"]),
+    "last": lambda c: (c["last"],),
+}
+
+_SPECIAL_SPACE = {"\u00a0": "[NBSP]", "\u202f": "[NNBSP]", "\u2009": "[THIN SPACE]", "\u2007": "[FIGURE SPACE]",
+                  "\t": "[TAB]", "\n": "[LINE BREAK]", "\u3000": "[IDEOGRAPHIC SPACE]", "\u200b": "[ZERO WIDTH SPACE]"}
+
+
+def show_spaces(text: str) -> str:
+    """Text with its special spaces made visible, for the report."""
+    return "".join(_SPECIAL_SPACE.get(ch, ch) for ch in text)
+
+
+def _when(dk: str) -> str:
+    d = dk.rstrip("0")
+    if not d:
+        return ""
+    dk = dk.ljust(14, "0")
+    return f"{dk[0:4]}-{dk[4:6]}-{dk[6:8]} {dk[8:10]}:{dk[10:12]}"
+
+
+def build_units(rows: list[TmRow], file: str, log: Log, resolve: Resolver, default_status: str | None,
+                rule: str = "frequent"):
     """Validated, de-duplicated units in first-seen order:
     [(source language, source text, [(target language, text, status)])]."""
     units: dict[tuple[str, str], dict] = {}
@@ -94,12 +124,17 @@ def build_units(rows: list[TmRow], file: str, log: Log, resolve: Resolver, defau
         elif src != u["src"]:
             log.change(file, r.where, "Source text", src[:300], u["src"][:300],
                        "Same source text with different spacing: merged into one entry")
+            log.duplicates.append({"file": file, "language": t_code, "where": r.where,
+                                   "source": show_spaces(src), "target": show_spaces(tgt),
+                                   "in_vitra": "Merged into the unit whose source is " + show_spaces(u["src"])[:300]})
         cands = u["langs"].setdefault(t_code, {})
         ck = norm_key(tgt)
         c = cands.get(ck)
         if c is None:
-            c = cands[ck] = {"count": 0, "text": tgt, "status": status, "date": "", "last": 0, "wheres": []}
+            c = cands[ck] = {"count": 0, "text": tgt, "status": status, "date": "", "last": 0, "wheres": [],
+                             "texts": set()}
         c["count"] += 1
+        c["texts"].add(tgt)
         dk = _date_key(r.date)
         if dk >= c["date"]:
             c["date"], c["text"], c["status"] = dk, tgt, status or c["status"]
@@ -107,19 +142,57 @@ def build_units(rows: list[TmRow], file: str, log: Log, resolve: Resolver, defau
         c["wheres"].append(r.where)
 
     out = []
+    rank = _RANK.get(rule, _RANK["frequent"])
     for (s_code, _), u in sorted(units.items(), key=lambda kv: kv[1]["order"]):
         translations = []
         for t_code, cands in u["langs"].items():
-            ranked = sorted(cands.values(), key=lambda c: (c["count"], c["date"], c["last"]), reverse=True)
+            ranked = sorted(cands.values(), key=rank, reverse=True)
             keep = ranked[0]
-            for other in ranked[1:]:
-                why = ("used less often" if other["count"] < keep["count"]
-                       else "older" if other["date"] < keep["date"] else "earlier in the file")
-                log.exclude(file, ", ".join(other["wheres"][:5]), "TM", t_code, u["src"][:300], other["text"][:300],
-                            f"Another translation of the same source was kept ({why}): {keep['text'][:200]}")
+            for c in ranked:
+                if c["count"] > 1 or len(c["texts"]) > 1:
+                    log.duplicates.append({
+                        "file": file, "language": t_code, "where": ", ".join(c["wheres"][:5]),
+                        "source": show_spaces(u["src"]), "target": show_spaces(c["text"]),
+                        "in_vitra": (f"{c['count']} copies imported as one" +
+                                     (" (they differ only in spacing)" if len(c["texts"]) > 1 else ""))})
+            if len(ranked) > 1:
+                for c in ranked:
+                    kept = c is keep
+                    why = rule_reason(rule, keep, ranked) if kept else _drop_why(rule, c, keep)
+                    log.conflicts.append({"file": file, "language": t_code, "source": u["src"], "target": c["text"],
+                                          "where": ", ".join(c["wheres"][:5]), "times": c["count"],
+                                          "changed": _when(c["date"]), "kept": kept, "why": why})
+                for other in ranked[1:]:
+                    log.exclude(file, ", ".join(other["wheres"][:5]), "TM", t_code, u["src"][:300],
+                                other["text"][:300], "Another translation of the same source was kept "
+                                f"({_drop_why(rule, other, keep)})")
             translations.append((t_code, keep["text"], keep["status"] or ""))
         out.append((s_code, u["src"], translations))
     return out
+
+
+def _drop_why(rule: str, c: dict, keep: dict) -> str:
+    if rule == "last":
+        return "earlier in the file"
+    order = [("count", "used less often"), ("date", "older")]
+    if rule == "latest":
+        order.reverse()
+    for k, why in order:
+        if c[k] < keep[k]:
+            return why
+    return "earlier in the file"
+
+
+def rule_reason(rule: str, keep: dict, ranked: list[dict]) -> str:
+    if rule == "last":
+        return "last in the file"
+    if rule == "frequent":
+        if keep["count"] > ranked[1]["count"]:
+            return f"used most ({keep['count']} times)"
+        return "tied on use, most recently changed" if keep["date"] > ranked[1]["date"] else "tied, last in the file"
+    if keep["date"] > ranked[1]["date"]:
+        return "most recently changed"
+    return "same date, used most" if keep["count"] > ranked[1]["count"] else "tied, last in the file"
 
 
 def _rows(units):

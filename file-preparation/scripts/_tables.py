@@ -17,7 +17,7 @@ import sys
 
 import _lang
 from _fields import NOT_LANGUAGE_HEADERS, field_of, is_admin
-from _model import Concept, GlossaryEntry, Log, Term, TmRow, clean_newlines, header_key, to_bool
+from _model import Concept, GlossaryEntry, Log, Term, TmRow, clean_newlines, header_key, is_placeholder, to_bool
 from _readers import NeedsInput, Parsed, Unsupported
 from _xlsx import XlsxReader
 
@@ -36,6 +36,9 @@ _TM_ALIASES = {
 }
 _TEXT_WORDS = {"", "term", "terms", "text", "translation", "target", "source", "segment", "string",
                "value", "content"}
+# "Source term definition", "Target term text": the term itself in a source/target pair layout
+# (Acclaro, XTM and similar term-list exports name the term column this way).
+_SIDE_TEXT = {"term", "terms", "term text", "term definition", "text", "entry", "term entry"}
 
 _TERMS_HINT = re.compile(r"gloss|term|(^|[^a-z])tb([^a-z]|$)|dnt|do.?not.?translate|lexic|dictionar|"
                          r"brand|trademark|untranslat|vocab|nomenclat|wordlist|word.?list", re.I)
@@ -133,6 +136,17 @@ def column_roles(header: list[str], overrides: dict) -> list[dict]:
             spec["role"] = tm
         elif field_of(h) in ("language", "concept_id"):
             spec["role"] = field_of(h)
+        elif _side(k) and not _split_lang_field(h, overrides):
+            # "Source part of speech", "Target usage note": a field of the source or the target term.
+            side, rest = _side(k)
+            if rest in _SIDE_TEXT:
+                spec["role"] = "src_text" if side == "src" else "tgt_text"
+            elif field_of(rest):
+                spec.update(role="side", side=side, field=field_of(rest))
+            elif is_admin(rest):
+                spec["role"] = "admin"
+            else:
+                spec.update(role="side", side=side, field="extra")
         elif " | " in h and _as_language(h.split(" | ", 1)[0], overrides):
             # A column under a language band (two header rows merged): "<language> | <field>".
             band, rest = h.split(" | ", 1)
@@ -165,6 +179,13 @@ def column_roles(header: list[str], overrides: dict) -> list[dict]:
                 spec["role"] = "extra"
         roles.append(spec)
     return roles
+
+
+def _side(k: str) -> tuple[str, str] | None:
+    m = re.match(r"^(source|src|target|tgt|trg)\s+(.+)$", k)
+    if not m:
+        return None
+    return ("src" if m.group(1) in ("source", "src") else "tgt"), m.group(2)
 
 
 def _score(row: list[str], overrides: dict) -> int:
@@ -221,8 +242,13 @@ def roles_from_map(header: list[str], spec: dict, overrides: dict) -> list[dict]
         if lang and not code:
             raise Unsupported(f"--map: '{lang}' in \"{r}\" is not a language code Vitra accepts")
         tm = next((k for k, names in _TM_ALIASES.items() if rk in names), None)
+        side = _side(rk) if not tm else None
         if rk in ("ignore", "skip", ""):
             s["role"] = "ignore"
+        elif side and side[1] in _SIDE_TEXT:
+            s["role"] = "src_text" if side[0] == "src" else "tgt_text"
+        elif side and (field_of(side[1]) or side[1] == "extra"):
+            s.update(role="side", side=side[0], field=field_of(side[1]) or "extra")
         elif rk in ("text", "term") and code:
             s.update(role="lang", lang=code, field="text")
         elif tm:
@@ -336,7 +362,7 @@ def _looks_like_terms(values: list[str]) -> bool:
 
 def _build(label, fmt, roles, header, body, start, path, sheet, log: Log, opts) -> Parsed | None:
     by = lambda role: [s for s in roles if s["role"] == role]  # noqa: E731
-    fields = {s.get("field") for s in roles if s["role"] == "field"}
+    fields = {s.get("field") for s in roles if s["role"] in ("field", "side")}
     lang_cols = [s for s in roles if s["role"] == "lang"]
     hint_text = f"{os.path.basename(path)} {sheet} {' '.join(header)}"
     terms_hint = bool(_TERMS_HINT.search(hint_text))
@@ -421,6 +447,8 @@ def _role_text(s: dict) -> str:
         return f"{base}:{s['lang']}" if s.get("lang") else base
     if r == "field":
         return s["field"]
+    if r == "side":
+        return f"{'source' if s['side'] == 'src' else 'target'} {s['field'].replace('_', ' ')}"
     if r == "concept_id":
         return "concept id"
     return {"admin": "drop", "extra": "extra"}.get(r, r)
@@ -447,7 +475,7 @@ def _tm_pair_rows(p: Parsed, roles, body, start, path, log, opts) -> None:
     status_col = next((s for s in roles if s["role"] == "field" and s["field"] == "status"), None)
     fn_src, fn_tgt = _lang_from_filename(path, opts.lang_map)
     for s in roles:
-        if s["role"] in ("extra", "admin") or (s["role"] == "field" and s["field"] != "status"):
+        if s["role"] in ("extra", "admin", "side") or (s["role"] == "field" and s["field"] != "status"):
             for r in body[:1]:
                 log.drop_field(p.file, f"Column \"{s['header']}\"", _cell(r, s["col"]))
     for i, row in enumerate(body):
@@ -510,6 +538,9 @@ def _apply_field(target, f: str, label: str, value: str, log: Log, file: str) ->
     if not value.strip():
         return
     value = value.strip()
+    if is_placeholder(value):
+        log.value(file, label, value, "(left empty: means no value)")
+        return
     if isinstance(target, Concept):
         if f in ("dnt", "translatable"):
             b = to_bool(value)
@@ -558,8 +589,15 @@ def _wide_term_rows(p: Parsed, roles, body, start, path, log, opts) -> None:
     text_cols = [s for s in roles if (s["role"] == "lang" and s.get("field") in ("text", None))
                  or s["role"] in ("src_text", "tgt_text") or (s["role"] == "field" and s["field"] == "term")]
     fn_src, fn_tgt = _lang_from_filename(path, opts.lang_map)
+    # A pair layout with the language of each row in its own column (SourceLanguage / TargetLanguage).
+    row_lang = {"src_text": next((s for s in roles if s["role"] == "src_lang"), None),
+                "tgt_text": next((s for s in roles if s["role"] == "tgt_lang"), None)}
     for s in text_cols:
         if s.get("lang"):
+            continue
+        if row_lang.get(s["role"]):
+            s["lang_col"] = row_lang[s["role"]]["col"]
+            s["lang"] = "(per row)"
             continue
         if s["role"] in ("src_text",) or (s["role"] == "field") or (s["role"] == "lang" and not s.get("target")):
             s["lang"] = _need(_lang.resolve(opts.source_lang, opts.lang_map) if opts.source_lang else fn_src,
@@ -575,8 +613,10 @@ def _wide_term_rows(p: Parsed, roles, body, start, path, log, opts) -> None:
             same = [c for c in text_langs if c.split("-")[0] == s["lang"].split("-")[0]]
             if len(same) == 1:
                 s["lang"] = same[0]
+    used_lang_cols = {s["lang_col"] for s in text_cols if "lang_col" in s}
     concept_cols = [s for s in roles if s["role"] in ("field", "extra", "concept_id", "src_lang", "tgt_lang")
-                    and not (s["role"] == "field" and s["field"] == "term")]
+                    and not (s["role"] == "field" and s["field"] == "term") and s["col"] not in used_lang_cols]
+    side_cols = [s for s in roles if s["role"] == "side"]
     admin = [s for s in roles if s["role"] == "admin"]
     id_col = next((s for s in concept_cols if s["role"] == "concept_id"), None)
     prev: Concept | None = None
@@ -589,15 +629,40 @@ def _wide_term_rows(p: Parsed, roles, body, start, path, log, opts) -> None:
             # (synonyms on their own rows, as MultiTerm and Excel term exports write them).
             c = prev
         added = len(c.terms)
+        side_terms: dict[str, Term] = {}
         for s in text_cols:
             cell = _cell(row, s["col"])
+            lang = _cell(row, s["lang_col"]).strip() if "lang_col" in s else s["lang"]
             parts = _split_terms(cell)
             if len(parts) > 1:
-                log.change(p.file, where, f"Term ({s['lang']})", cell, " / ".join(parts),
+                log.change(p.file, where, f"Term ({lang})", cell, " / ".join(parts),
                            "One cell held several lines: each line became its own term")
             for txt in parts:
-                c.terms.append(Term(lang=s["lang"], text=txt, where=where))
+                t = Term(lang=lang, text=txt, where=where)
+                c.terms.append(t)
+                side = {"src_text": "src", "tgt_text": "tgt"}.get(s["role"])
+                if side and side not in side_terms:
+                    side_terms[side] = t
         row_terms = c.terms[added:]
+        for s in side_cols:
+            v = _cell(row, s["col"]).strip()
+            if not v:
+                continue
+            t = side_terms.get(s["side"])
+            label = s["header"]
+            if s["field"] in _CONCEPT_FIELDS:
+                _apply_field(c, s["field"], label, v, log, p.file)
+            elif s["field"] == "extra":
+                if is_placeholder(v):
+                    log.value(p.file, label, v, "(left empty: means no value)")
+                elif t is not None:
+                    t.extra.append((label, v))
+                else:
+                    c.extra.append((label, v))
+            elif t is not None:
+                _apply_field(t, s["field"], label, v, log, p.file)
+            else:
+                _apply_field(c, s["field"], label, v, log, p.file)
         for s in lang_fields:
             v = _cell(row, s["col"]).strip()
             if not v:
@@ -627,6 +692,8 @@ def _wide_term_rows(p: Parsed, roles, body, start, path, log, opts) -> None:
                     _apply_field(t, s["field"], s["header"], v, log, p.file)
             elif s["role"] == "field":
                 _apply_field(c, s["field"], s["header"], v, log, p.file)
+            elif is_placeholder(v):
+                log.value(p.file, s["header"], v, "(left empty: means no value)")
             else:
                 c.extra.append((s["header"], v))
         for s in admin:

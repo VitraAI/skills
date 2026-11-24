@@ -32,7 +32,7 @@ def run(*argv: str) -> tuple[int, dict]:
     return code, json.loads(buf.getvalue())
 
 
-def sheet(path: str, n: int = 0) -> list[list[str]]:
+def sheet(path: str, n: int | str = 0) -> list[list[str]]:
     rd = XlsxReader(path)
     try:
         return list(rd.rows(n))
@@ -87,13 +87,14 @@ class TmFormats(Base):
     def test_tmx_utf16_tags_conflicts_and_languages(self) -> None:
         res = self.convert(self.write("acme.tmx", TMX, "utf-16"))
         rows = as_dicts(sheet(self.outputs("TM")[0]))
-        self.assertEqual(rows[0]["Source text"], "Click Save now")  # tag code dropped, text kept
-        self.assertEqual(rows[0]["Target text"], "Klicken Sie jetzt auf Speichern")
+        # Inline tags kept as Vitra numbers them, the target's matched to the source's.
+        self.assertEqual(rows[0]["Source text"], "Click <1>Save</1> now")
+        self.assertEqual(rows[0]["Target text"], "Klicken Sie jetzt auf <1>Speichern</1>")
         hello = [r for r in rows if r["Source text"] == "Hello"]
         self.assertEqual([r["Target text"] for r in hello], ["Hallo"])  # most frequent wins
         self.assertNotIn("Odd", [r["Source text"] for r in rows])
         self.assertEqual(res["excluded"], 3)  # Servus, empty target, unknown language
-        report = sheet(res["report"], 3)
+        report = sheet(res["report"], "Left out")
         reasons = " ".join(r[6] for r in report[1:])
         self.assertIn("not in Vitra's language list", reasons)
         self.assertIn("Another translation of the same source was kept", reasons)
@@ -135,7 +136,8 @@ class TmFormats(Base):
 <target>Ciao <ph id="1"/>a tutti</target></segment></unit></file></xliff>"""
         self.convert(self.write("a.xlf", x))
         r = as_dicts(sheet(self.outputs("TM")[0]))[0]
-        self.assertEqual((r["Source text"], r["Target text"], r["Status"]), ("Hi there", "Ciao a tutti", "verified"))
+        self.assertEqual((r["Source text"], r["Target text"], r["Status"]),
+                         ("Hi <1/>there", "Ciao <1/>a tutti", "verified"))
 
     def test_sdltm(self) -> None:
         p = str(self.dir / "mem.sdltm")
@@ -153,7 +155,7 @@ class TmFormats(Base):
         self.convert(p)
         r = as_dicts(sheet(self.outputs("TM")[0]))[0]
         self.assertEqual((r["Source text"], r["Target text"], r["Target language"]),
-                         ("Press  to start", "Pulse  para empezar", "es-ES"))
+                         ("Press <1/> to start", "Pulse <1/> para empezar", "es-ES"))
 
     def test_po_needs_source_language_then_converts(self) -> None:
         po = ('msgid ""\nmsgstr ""\n"Language: pt_BR\\n"\n\n#: a.c:1\nmsgid "Open"\nmsgstr "Abrir"\n\n'
@@ -326,6 +328,178 @@ class Inputs(Base):
         tricky = ["=1+1", "01/02", "a\nb", "_x0041_", "<b>&amp;</b>", " lead"]
         write_xlsx(p, [("S", ["v"], [[t] for t in tricky])])
         self.assertEqual([r[0] for r in sheet(p)[1:]], tricky)
+
+
+# A per-language term list as Acclaro, XTM and similar tools export it: camelCase headers,
+# the language of each row in its own column, "N/A" for an empty cell.
+PAIR_HEADER = ["SourceLanguage", "TargetLanguage", "SourceTermDefinition", "TargetTermDefinition",
+               "SourcePartOfSpeech", "SourceContext", "ConceptDefinition", "TargetProduct", "TargetUsageNote"]
+
+
+def pair_list(path: str, target: str, rows: list[tuple]) -> str:
+    write_xlsx(path, [("TermEntries", PAIR_HEADER,
+                       [["EN-US", target, en, tr, "N/A", ctx, d, "Acme web", note] for en, tr, ctx, d, note in rows])])
+    return path
+
+
+class Interactive(Base):
+    def lists(self) -> list[str]:
+        """The same term list in German and French, plus German and French do-not-translate lists."""
+        de = pair_list(str(self.dir / "Acme_TermList_EN-US_DE-DE.xlsx"), "DE-DE", [
+            ("cart", "Warenkorb", "Add to cart", "Where items wait", "N/A"),
+            ("checkout", "Kasse", "N/A", "Paying for the cart", "N/A"),
+            ("support plan", "Supportplan", "N/A", "A paid plan", "N/A"),
+            ("support plan", "Supportvertrag", "N/A", "A contract for help", "N/A")])
+        fr = pair_list(str(self.dir / "Acme_TermList_EN-US_FR-FR.xlsx"), "FR-FR", [
+            ("cart", "panier", "Add to cart", "Where items wait", "N/A"),
+            ("checkout", "N/A", "N/A", "Paying for the cart", "N/A"),
+            ("support plan", "forfait d’assistance", "N/A", "A paid plan", "N/A")])
+        dnt_de = pair_list(str(self.dir / "Acme_DNT_EN-US_DE-DE.xlsx"), "DE-DE", [
+            ("AcmePay", "AcmePay", "N/A", "Payment product", "N/A"),
+            ("cart", "cart", "N/A", "N/A", "N/A"),
+            ("Acme Cloud", "Acme Cloud 365", "N/A", "N/A", "N/A")])
+        dnt_fr = pair_list(str(self.dir / "Acme_DNT_EN-US_FR-FR.xlsx"), "FR-FR", [
+            ("AcmePay", "AcmePay", "N/A", "Payment product", "N/A"),
+            ("cart", "cart", "N/A", "N/A", "N/A"),
+            ("Acme Cloud", "Acme Cloud 365", "N/A", "N/A", "N/A"),
+            ("Acme Go", "Acme Go", "N/A", "N/A", "N/A")])
+        return [de, fr, dnt_de, dnt_fr]
+
+    def test_pair_term_list_headers_languages_and_placeholders(self) -> None:
+        """What it tests: a camelCase pair layout with per-row language columns is read with its
+        real header row; "N/A" cells are empty, and an "N/A" term is left out and reported.
+        How it verifies it: the term base holds every row's terms with the right fields, and the
+        report and inspect list the placeholder."""
+        de, fr = self.lists()[:2]
+        res = self.convert(fr, "--term-status", "approved")
+        self.assertEqual(res["inputs"][0]["column_map"]["header_row"], 1)
+        rows = as_dicts(sheet(self.outputs("Term base")[0]))
+        cart_en = next(r for r in rows if r["Term"] == "cart")
+        self.assertEqual((cart_en["Language"], cart_en["Definition"], cart_en["Domain"], cart_en["Usage"],
+                          cart_en["Part of speech"], cart_en["Status"]),
+                         ("en-US", "Where items wait", "Acme web", "Add to cart", "", "approved"))
+        self.assertNotIn("N/A", [r["Term"] for r in rows])
+        checks = {c["check"]: c for c in res["issues"]["by_check"]}
+        self.assertEqual(checks["Placeholder instead of a term"]["count"], 1)
+        self.assertIn('The cell says "N/A" instead of a term', res["reasons"])
+
+    def test_inspect_asks_the_open_questions_and_stops_asking_once_answered(self) -> None:
+        """What it tests: inspect returns the decisions this data needs, recommended option
+        first, and a decision given on the command line is no longer asked.
+        How it verifies it: the question ids before and after passing the answers."""
+        files = self.lists()
+        code, res = run("inspect", *files)
+        self.assertEqual(code, 0)
+        asked = {d["id"]: d for d in res["decisions"]}
+        self.assertTrue({"merge_terms", "dnt_lists", "term_status"} <= set(asked))
+        merge = asked["merge_terms"]
+        self.assertTrue(merge["options"][0]["recommended"])
+        self.assertEqual(merge["options"][0]["args"], ["--merge-terms", "yes"])
+        code, res = run("inspect", *files, "--merge-terms", "yes", "--dnt-lists", "glossary",
+                        "--term-status", "new")
+        self.assertEqual({d["id"] for d in res["decisions"]} & {"merge_terms", "dnt_lists", "term_status"}, set())
+
+    def test_merge_per_language_lists_into_one_term_base_and_one_glossary(self) -> None:
+        """What it tests: --merge-terms joins per-language lists into multilingual concepts (same
+        source term and definition), keeps homographs apart, and turns the do-not-translate lists
+        into one glossary where translated entries and one-language entries stay translatable.
+        How it verifies it: concepts and glossary rows in the output, and the Issues sheet."""
+        res = self.convert(*self.lists(), "--merge-terms", "yes", "--term-status", "approved")
+        self.assertEqual(len(self.outputs("Term base")), 1)
+        tb = as_dicts(sheet(self.outputs("Term base")[0]))
+        concepts: dict[str, set] = {}
+        for r in tb:
+            concepts.setdefault(r["Concept ID"], set()).add((r["Language"], r["Term"]))
+        self.assertIn({("en-US", "cart"), ("de-DE", "Warenkorb"), ("fr-FR", "panier")}, concepts.values())
+        self.assertIn({("en-US", "checkout"), ("de-DE", "Kasse")}, concepts.values())  # fr was N/A
+        plans = [c for c in concepts.values() if ("en-US", "support plan") in c]
+        self.assertEqual(len(plans), 2)  # two meanings stay two concepts
+        gl = {r["Term"]: r for r in as_dicts(sheet(self.outputs("Glossary")[0]))}
+        self.assertEqual(gl["AcmePay"]["Translatable"], "no")
+        self.assertEqual((gl["Acme Cloud"]["Translatable"], gl["Acme Cloud"]["de-DE"]), ("yes", "Acme Cloud 365"))
+        self.assertEqual((gl["Acme Go"]["Translatable"], gl["Acme Go"]["fr-FR"], gl["Acme Go"].get("de-DE", "")),
+                         ("yes", "Acme Go", ""))
+        checks = {c["check"] for c in res["issues"]["by_check"]}
+        self.assertTrue({"Translated entry on a do-not-translate list", "Do-not-translate in some languages only",
+                         "Glossary and term base disagree", "Same term, different meanings"} <= checks)
+        issues = as_dicts(sheet(res["report"], "Issues"))
+        clash = next(i for i in issues if i["Check"] == "Glossary and term base disagree")
+        self.assertEqual(clash["Item"], "cart")
+
+    def test_join_duplicates_within_one_file(self) -> None:
+        """What it tests: rows repeating a source term without a definition become one concept
+        only when --join-duplicates yes is given.
+        How it verifies it: the number of concepts holding "hit" with and without the option."""
+        p = pair_list(str(self.dir / "Music_EN-US_IT-IT.xlsx"), "IT-IT", [
+            ("hit", "successo", "N/A", "N/A", "N/A"), ("hit", "hit", "N/A", "N/A", "N/A"),
+            ("track", "brano", "N/A", "N/A", "N/A")])
+        code, res = run("inspect", p)
+        self.assertIn("join_duplicates", {d["id"] for d in res["decisions"]})
+        res = self.convert(p, "--join-duplicates", "yes")
+        self.assertEqual(res["outputs"][0]["concepts"], 2)
+        rows = as_dicts(sheet(self.outputs("Term base")[0]))
+        self.assertEqual(sorted(r["Term"] for r in rows if r["Language"] == "it-IT"), ["brano", "hit", "successo"])
+
+    def test_cleanups_are_flagged_and_applied_only_when_chosen(self) -> None:
+        """What it tests: special spaces, alternatives in one cell, ending shorthand and broken
+        brackets are reported; --fix-spaces and --split-alternatives change only what they name.
+        How it verifies it: the terms written with and without the options."""
+        p = pair_list(str(self.dir / "UI_EN-US_IT-IT.xlsx"), "IT-IT", [
+            ("track", "traccia/brano", "N/A", "N/A", "N/A"),
+            ("favorite", "preferito/a", "N/A", "N/A", "N/A"),
+            ("tell us", "dicci\u00a0subito", "N/A", "N/A", "N/A"),
+            ("WHQL", "WHQL (Windows Hardware Quality Labs", "N/A", "N/A", "N/A")])
+        code, res = run("inspect", p)
+        checks = {c["check"]: c["count"] for c in res["issues"]["by_check"]}
+        self.assertEqual((checks["Several alternatives in one term"], checks["Ending shorthand in a term"],
+                          checks["Special spaces in a term"], checks["Unbalanced brackets"]), (1, 1, 1, 1))
+        self.assertTrue({"fix_spaces", "split_alternatives"} <= {d["id"] for d in res["decisions"]})
+        self.convert(p, "--fix-spaces", "yes", "--split-alternatives", "yes")
+        it = sorted(r["Term"] for r in as_dicts(sheet(self.outputs("Term base")[0])) if r["Language"] == "it-IT")
+        self.assertEqual(it, ["WHQL (Windows Hardware Quality Labs", "brano", "dicci subito", "preferito/a", "traccia"])
+
+
+class TmChoices(Base):
+    TMX = """<tmx version="1.4"><header srclang="en"/><body>
+<tu changedate="20200101T000000Z"><tuv xml:lang="en"><seg>Save</seg></tuv><tuv xml:lang="de"><seg>Sichern</seg></tuv></tu>
+<tu changedate="20200101T000000Z"><tuv xml:lang="en"><seg>Save</seg></tuv><tuv xml:lang="de"><seg>Sichern</seg></tuv></tu>
+<tu changedate="20250101T000000Z"><tuv xml:lang="en"><seg>Save</seg></tuv><tuv xml:lang="de"><seg>Speichern</seg></tuv></tu>
+<tu><tuv xml:lang="en"><seg>Go\u00a0now</seg></tuv><tuv xml:lang="de"><seg>Los</seg></tuv></tu>
+<tu><tuv xml:lang="en"><seg>Go now</seg></tuv><tuv xml:lang="de"><seg>Los</seg></tuv></tu>
+<tu><tuv xml:lang="en"><seg>Open <ph x="1">{0}</ph> or <bpt i="1" x="2">&lt;b&gt;</bpt>file<ept i="1">&lt;/b&gt;</ept></seg></tuv>
+<tuv xml:lang="de"><seg><bpt i="1" x="2">&lt;b&gt;</bpt>Datei<ept i="1">&lt;/b&gt;</ept> oder <ph x="1">{0}</ph> öffnen</seg></tuv></tu>
+</body></tmx>"""
+
+    def test_conflict_rule_and_conflict_sheet(self) -> None:
+        """What it tests: --conflicts picks the translation kept; the report's TM conflicts sheet
+        lists every alternative, kept or not, and duplicates are listed with special spaces shown.
+        How it verifies it: the kept text under each rule and the report sheets."""
+        p = self.write("ui.tmx", self.TMX)
+        code, res = run("inspect", p)
+        self.assertIn("conflicts", {d["id"] for d in res["decisions"]})
+        res = self.convert(p)
+        rows = {r["Source text"]: r["Target text"] for r in as_dicts(sheet(self.outputs("TM")[0]))}
+        self.assertEqual(rows["Save"], "Sichern")  # most used
+        conflicts = as_dicts(sheet(res["report"], "TM conflicts"))
+        self.assertEqual([(c["Translation"], c["Imported"]) for c in conflicts], [("Sichern", "Yes"), ("Speichern", "No")])
+        dups = as_dicts(sheet(res["report"], "TM duplicates"))
+        self.assertTrue(any("[NBSP]" in d["Source text (special spaces shown)"] for d in dups))
+        self.assertEqual(res["reasons"], {"Another translation of the same source was kept": 1})
+        self.convert(p, "--conflicts", "latest")
+        rows = {r["Source text"]: r["Target text"] for r in as_dicts(sheet(self.outputs("TM")[0]))}
+        self.assertEqual(rows["Save"], "Speichern")
+
+    def test_tags_follow_the_source_numbering_or_are_dropped(self) -> None:
+        """What it tests: a target that reorders its tags keeps the source's numbers (TMX x),
+        and --tags drop removes tag code as a direct TMX upload does.
+        How it verifies it: the written source and target text."""
+        p = self.write("ui.tmx", self.TMX)
+        self.convert(p, "--tags", "keep")
+        row = next(r for r in as_dicts(sheet(self.outputs("TM")[0])) if r["Source text"].startswith("Open"))
+        self.assertEqual((row["Source text"], row["Target text"]), ("Open <1/> or <2>file</2>", "<2>Datei</2> oder <1/> öffnen"))
+        self.convert(p, "--tags", "drop")
+        row = next(r for r in as_dicts(sheet(self.outputs("TM")[0])) if r["Source text"].startswith("Open"))
+        self.assertEqual(row["Source text"], "Open  or file")
 
 
 if __name__ == "__main__":

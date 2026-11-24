@@ -18,12 +18,23 @@ Drop this folder into your agent's skills directory. The agent reads
   - `<name> - Glossary.xlsx`
   - a large file is written in parts: `… - part 01 of 03.xlsx`
 - `conversion report.xlsx`, with these sheets:
-  - a summary
-  - the output files
+  - a summary, and the output files
+  - the choices made, and which were the user's answers
+  - every problem found in the data (placeholders, broken brackets, alternatives
+    in one cell, special spaces, glossary vs term base clashes…), with what Vitra
+    will hold and a column for the client's comments
+  - every TM source with several translations, colour-coded kept or not
+  - every repeated TM unit merged into one
   - every row left out, with its reason
   - every change
   - value mappings
   - fields that are not imported
+
+Before converting, the agent tells you what each file is and what it will
+become, lists the problems found, and asks the few choices that matter: one
+multilingual term base or one per language, which of several translations to
+keep, statuses, inline tags and optional clean-ups. Each comes with a
+recommended answer.
 
 Nothing is uploaded and no sign-in is needed. You import the files in the Vitra
 app, or with the translation-memory and terminology skills.

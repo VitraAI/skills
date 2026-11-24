@@ -80,6 +80,12 @@ class Log:
         self.not_imported: dict[tuple[str, str], list] = {}  # (file, field) -> [count, example]
         self.values: dict[tuple[str, str, str, str], int] = {}  # (file, column, before, after) -> count
         self.notes: list[str] = []
+        # Data problems worth a person's eye; nothing here stops a conversion (see _checks.py).
+        self.issues: list[dict] = []
+        # TM: every source with several translations, every alternative and which one was kept.
+        self.conflicts: list[dict] = []
+        # TM: rows merged into another one (exact copies, or spacing-only differences).
+        self.duplicates: list[dict] = []
 
     def exclude(self, file: str, where: str, kind: str, language: str, text: str,
                 detail: str, reason: str) -> None:
@@ -102,6 +108,12 @@ class Log:
     def note(self, text: str) -> None:
         if text not in self.notes:
             self.notes.append(text)
+
+    def issue(self, file: str, where: str, asset: str, check: str, item: str, detail: str,
+              in_vitra: str, level: str = "check") -> None:
+        """A data problem in the client's file. level: "check" (a person should look) or "info"."""
+        self.issues.append({"file": file, "where": where, "asset": asset, "check": check, "item": item,
+                            "detail": detail, "in_vitra": in_vitra, "level": level})
 
 
 # Output paths this run has written: a second input with the same name gets " (2)"
@@ -153,6 +165,21 @@ def to_bool(value: str | None) -> bool | None:
     return None
 
 
+_CAMEL = re.compile(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+
+
 def header_key(h: str) -> str:
-    h = re.sub(r"‹[^›]*›", " ", str(h).lower())  # MultiTerm "Usage Note ‹Usage Status›"
+    h = re.sub(r"‹[^›]*›", " ", str(h))  # MultiTerm "Usage Note ‹Usage Status›"
+    # camelCase and PascalCase headers ("SourceTermDefinition", "partOfSpeech") read as words.
+    h = _CAMEL.sub(" ", h).lower()
     return _WS.sub(" ", re.sub(r"[_\-./:()\[\]<>]+", " ", h)).strip()
+
+
+# What tools and clients write in a cell that has no value. Never imported as text.
+# A term cell is held to the short list: "NA" or "TBD" can be real terms.
+_PLACEHOLDER_TERMS = {"n/a", "n.a.", "n. a.", "#n/a", "-", "--", "—", "–", "null", "?", "??"}
+_PLACEHOLDER_FIELDS = _PLACEHOLDER_TERMS | {"na", "tbd", "tbc", "(none)", "(empty)", "none"}
+
+
+def is_placeholder(value: str | None, term: bool = False) -> bool:
+    return bool(value) and str(value).strip().lower() in (_PLACEHOLDER_TERMS if term else _PLACEHOLDER_FIELDS)

@@ -13,6 +13,18 @@ Every output file is an .xlsx with one sheet.
 Status is `unverified`, `verified`, `approved` or blank. A blank status takes
 the one chosen in the import dialog.
 
+Inline tags (bold, links, placeholders) are written as numbered tags, unless
+`--tags drop` is given:
+
+| In the source tool | In the sheet |
+|---|---|
+| A paired tag (`<bpt>`/`<ept>`, `<g>`, `<pc>`, Trados Start/End) | `<1>text</1>` |
+| A standalone tag (`<ph>`, `<x/>`, `<it>`, Trados placeholder) | `<2/>` |
+
+Source tags are numbered in reading order. A target tag takes the number of the
+source tag it belongs to (TMX `x`, XLIFF `id`/`rid`, Trados alignment anchors), so
+a translation that moves a tag keeps its number.
+
 **Term base**: one row per term. The concept columns are filled on the first
 row of each concept.
 
@@ -72,6 +84,7 @@ Each column takes one role:
 | `text:<code>` | Text or term in that language (one column per language) |
 | `<field>:<code>` | A term field for that language, e.g. `note:fr-FR`, `part of speech:de-DE`, `status:ja-JP`, `synonyms:es-ES` |
 | `<field>` | A field for the whole row or concept: `concept id`, `language`, `term`, `domain`, `subdomains`, `definition`, `concept note`, `url`, `dnt`, `translatable`, `tags`, or any term field |
+| `source <field>`, `target <field>` | A field of the row's source or target term in a pair layout, e.g. `source usage`, `target note`; `target extra` keeps it as labelled text |
 | `extra` | Keep the value as labelled text in the note or description |
 | `drop` | Count the column in the report, but don't import it |
 | `ignore` | Skip the column silently |
@@ -89,6 +102,16 @@ Languages are recognized in three forms:
 - tool names: `German (Germany)`, `Chinese (Simplified, China)`,
   `Norwegian (Bokmal, Norway)`
 - inside headers: `Term (fr-FR)`, `German - Part of speech`, `de-DE note`
+
+Headers in camelCase or PascalCase (`SourceTermDefinition`, `partOfSpeech`) are
+read as words. A header that starts with Source or Target names a field of that
+side's term: `TargetUsageNote` is the target term's usage, and `SourceTermDefinition`
+or `Target term` is the term itself. A pair layout can give each row's languages in
+its own columns (`SourceLanguage`, `TargetLanguage`).
+
+Cells that only say there is no value (`N/A`, `-`, `#N/A`, `TBD`, `none`) are left
+empty. In a term column, such a cell is left out and listed in the report's Issues
+sheet.
 
 A row of language names above a row of field names, as in MultiTerm and many
 Excel termbase exports, is read as one header. In a sheet with a concept ID
