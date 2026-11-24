@@ -59,7 +59,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -71,7 +71,8 @@ background: mention it once; nothing to do.
    python3 scripts/vitra.py call find_contacts '{"search": "Sharma Stores"}'
    ```
 2. **Add or edit** ⏸: `create_contact`, `update_contact` with only the details the user
-   gave (show before → after); `delete_contact` (confirm).
+   gave (show before → after; a contact can also carry their own `website`);
+   `delete_contact` (confirm).
 3. **Channels**: `set_contact_whatsapp` sets or removes a WhatsApp number;
    `get_contact_facebook` shows whether their Facebook Page is connected (optionally with
    an invite link to pass on; if it comes with an invite_link_warning, don't send the link:
@@ -89,8 +90,7 @@ background: mention it once; nothing to do.
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are BCP-47 codes** here (e.g. `"hi-IN"`, `"ta-IN"`), as `describe` shows,
-  never display names or `list_languages` keys.
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

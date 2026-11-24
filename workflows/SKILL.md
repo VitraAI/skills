@@ -59,7 +59,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
@@ -67,14 +67,18 @@ background: mention it once; nothing to do.
 1. **Find it**: `list_flows` (name, steps and the inputs a run needs). Ask which if
    several fit.
 2. **Inputs**: collect every input the workflow lists; each input's `takes` says what it
-   needs (memories and markets by name, languages as `list_languages` keys). A file input
-   takes the Drive file's name, or `{"file": "<name>", "asset_id": "<id>"}` when names
+   needs (memories and markets by name, languages as `list_languages` codes such as
+   `"hi-IN"`). A file input takes the Drive file's name, or `{"file": "<name>", "asset_id": "<id>"}` when names
    repeat (from `find_assets` or `vitra.py upload`), or an https link; never a bare
    asset id. `run_flow` checks the inputs against the workflow before it starts.
 3. **Run** ⏸ after confirming the workflow, inputs and likely cost with the user:
    ```bash
-   python3 scripts/vitra.py call run_flow '{"flow": "Product launch", "inputs": {"video": "…"}, "name": "Launch – Sept", "confirm": true}'
+   python3 scripts/vitra.py call run_flow '{"flow": "Product launch", "inputs": {"video": "…"}, "name": "Launch – Sept", "project": "Q4 launch", "confirm": true}'
    ```
+   `project` files the run in a project, by name (`list_projects`; ask which if unsure).
+   A workflow that clones a voice or lip-syncs a video also needs `consent: true`: pass it
+   only after the user confirms the person whose voice or face is used agreed.
+   `step_settings` changes a fixed step setting for this run only, when the user asks.
 4. **Follow**: `get_flow_run` after `check_again_in_seconds`; relay progress by step name.
    A finished step's `result` holds the translated text, or the job id and the tool that
    opens it.
@@ -82,8 +86,8 @@ background: mention it once; nothing to do.
    `decide_flow_step` (`confirm: true`; rejecting cancels the run).
 
 **Runs** (name a run as `run`, as `list_flow_runs` shows it; when names repeat the tool
-lists them, so ask the user which and pass its `run_id`): `list_flow_runs`,
-`manage_flow_run` (rename, move to a work folder, `retry` a failed or cancelled run only:
+lists them, so ask the user which and pass its `run_id`): `list_flow_runs` (by status, name, workflow or project),
+`manage_flow_run` (rename, move to a project or "Unassigned", `retry` a failed or cancelled run only:
 paid again, so ask first and pass `confirm: true`), `cancel_flow_run` (confirm). A failed
 run can't be deleted from here; it stays in the history.
 **Build or change a workflow**: `design_workflow` (plain words → proposed graph; relay its
@@ -94,8 +98,7 @@ questions; for a saved workflow show the user the proposal before `update_workfl
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

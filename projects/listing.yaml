@@ -13,17 +13,21 @@ when-to-use: >-
   comes in and needs a project, or when work changes hands.
 features:
   - title: What's due, at a glance
-    description: Tasks due today or overdue, yours or the whole project's, with progress per project.
+    description: Your open tasks, approvals and checklist items across projects, or a project's overdue and upcoming tasks.
+  - title: How it's going
+    description: A project's progress, on-time rate, bottlenecks and forecast, and who has room for more.
   - title: Projects in one line
     description: Type, languages, dates, status and priority, set by name.
   - title: Your board, your words
     description: Uses each project's own statuses and priorities; no ids anywhere.
   - title: People by name
-    description: Add assignees and watchers, or reassign a task, by name or email.
+    description: Project leads and members, task assignees and watchers, by name or email.
   - title: Safe changes
     description: Deletes always ask first; ambiguous names come back as a question.
   - title: Job assignments
     description: Put people on each language of a dub, document or image job.
+  - title: Run a folder
+    description: Preview, then run the project's workflow on every file in one of its folders.
 use-cases:
   - title: Daily stand-up
     description: What's due, what's overdue, who's on it.
@@ -33,8 +37,12 @@ use-cases:
     description: Move a task to review and assign the reviewer in one step.
 mcp-toolset: work
 mcp-tools:
+  - name: my_work
+    title: What's on my plate
   - name: list_tasks
-    title: List tasks, or what's due
+    title: List tasks
+  - name: task_schedule
+    title: What is planned, and who has it
   - name: list_projects
     title: List projects
   - name: get_project
@@ -42,9 +50,15 @@ mcp-tools:
   - name: create_project
     title: Create a project
   - name: update_project
-    title: Edit or move a project
+    title: Edit a project
+  - name: move_project
+    title: Move a project on the board
   - name: delete_project
     title: Delete a project
+  - name: project_analytics
+    title: How a project is going
+  - name: list_project_people
+    title: See who's on a project
   - name: set_project_people
     title: Put people on a project
   - name: get_task
@@ -52,9 +66,17 @@ mcp-tools:
   - name: create_task
     title: Create a task
   - name: update_task
-    title: Edit or move a task
+    title: Edit a task
+  - name: move_task
+    title: Move a task on the board
+  - name: delete_task
+    title: Delete a task
   - name: set_task_people
     title: Assign people to a task
+  - name: list_checklists
+    title: See a task's checklists
+  - name: create_checklist
+    title: Add a checklist to a task
   - name: add_checklist_items
     title: Add to a task's checklist
   - name: update_checklist_items
@@ -65,6 +87,10 @@ mcp-tools:
     title: See the organization's project statuses
   - name: update_project_board
     title: Edit the organization's project statuses
+  - name: get_task_statuses
+    title: See a project's task statuses
+  - name: update_task_statuses
+    title: Edit a project's task statuses
   - name: list_task_templates
     title: List task templates
   - name: create_task_template
@@ -73,6 +99,16 @@ mcp-tools:
     title: Edit a task template
   - name: delete_task_template
     title: Delete a task template
+  - name: get_project_workflow
+    title: Read a project’s workflow and fields
+  - name: set_project_field_values
+    title: Fill a project’s fields
+  - name: preview_project_batch
+    title: Preview running a project’s workflow on a folder
+  - name: start_project_batch
+    title: Run a project’s workflow on a folder
+  - name: list_project_batches
+    title: List a project’s batches
   - name: list_job_people
     title: See who works on a job
   - name: assign_job_people
@@ -81,4 +117,8 @@ mcp-tools:
     title: List languages
   - name: quote_cost
     title: Price work in credits
-related-skills: []
+related-skills:
+  - name: drive
+    why: Browse and upload files in a project's Drive folder.
+  - name: workflows
+    why: Build the workflows a project runs, and follow single runs.

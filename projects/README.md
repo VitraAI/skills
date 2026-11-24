@@ -1,6 +1,6 @@
 # projects
 
-Projects & Tasks: an agent skill for Vitra Universe. Tracks the organization's work in Vitra Universe: projects with status, due dates, progress and people; tasks with checklists, assignees and watchers; the organization's project board and task templates; and who is assigned to each language of a dub, document, image or Playground job — all by name.
+Projects & Tasks: an agent skill for Vitra Universe. Tracks the organization's work in Vitra Universe: projects with status, due dates, progress, leads and members, each with its own Drive folder; tasks with checklists, assignees and watchers; the project board, task statuses and templates; what's on the user's plate, schedules, workloads and project analytics; running a project's workflow on a folder of files; and who is assigned to each language of a job — all by name.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

@@ -1,6 +1,6 @@
 # drive
 
-Drive: an agent skill for Vitra Universe. Works with the organization's Drive in Vitra Universe: finds files by name, browses folders, favourites and the trash, uploads local files or gives the user an upload link, gives download links, creates, renames and moves folders and files, trashes and restores them, shows the storage used, and keeps work folders that group the jobs of one engagement.
+Drive: an agent skill for Vitra Universe. Works with the organization's Drive in Vitra Universe: finds files by name, browses folders, favourites and the trash, uploads local files or gives the user an upload link, gives download links, creates, renames and moves folders and files, trashes and restores them, and shows the storage used.
 
 Drop this folder into your agent's skills directory. The agent reads `SKILL.md`
 and does the rest; you don't run anything by hand.

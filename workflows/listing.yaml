@@ -54,6 +54,10 @@ mcp-tools:
     title: Get a workflow’s graph
   - name: update_workflow
     title: Change a saved workflow
+  - name: delete_workflow
+    title: Delete a saved workflow
+  - name: list_projects
+    title: List projects
   - name: list_languages
     title: List languages
   - name: quote_cost

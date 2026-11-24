@@ -44,6 +44,18 @@ mcp-tools:
     title: Quality-score a translated image
   - name: run_design_job_quality_report
     title: Score a design job translation
+  - name: apply_document_quality_fixes
+    title: Apply a quality report’s fixes to a document
+  - name: apply_dub_quality_fixes
+    title: Apply a quality report's fixes
+  - name: apply_image_quality_fixes
+    title: Apply a quality report to an image
+  - name: apply_design_job_quality_fixes
+    title: Apply a quality report's fixes to a design job
+  - name: list_languages
+    title: List languages
+  - name: quote_cost
+    title: Price work in credits
 related-skills:
   - name: translation-memory
     why: Correct recurring errors once, in the memory everyone uses.

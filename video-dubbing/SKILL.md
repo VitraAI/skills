@@ -60,7 +60,7 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Start
@@ -71,7 +71,7 @@ background: mention it once; nothing to do.
 
 A Drive file: `find_assets` by name. A local file: `vitra.py upload <path>`; a video over
 ~100 MB: `large_video_upload` (`start` → PUT each part → `finish`) gives an `upload_id`
-for `start_dub`. Languages as keys from `list_languages` (no auto-detect: ask the source).
+for `start_dub`. Languages as codes from `list_languages`, e.g. `hi-IN` (no auto-detect: ask the source).
 Memory: `list_translation_memories`; several → ask which by name.
 
 **Length**: pass the video's `duration_seconds` to `start_dub` and `start_subtitles`
@@ -87,7 +87,7 @@ the video is and call again with `duration_seconds`.
    language with `confirm: true` → `get_dub` until `awaiting_voices`. The other
    languages come later with `add_dub_language`.
    ```bash
-   python3 scripts/vitra.py call start_dub '{"file_name": "webinar.mp4", "source_language": "english_united_states", "target_languages": ["hindi_india"], "duration_seconds": 312.5, "confirm": true}'
+   python3 scripts/vitra.py call start_dub '{"file_name": "webinar.mp4", "source_language": "en-US", "target_languages": ["hi-IN"], "duration_seconds": 312.5, "confirm": true}'
    ```
 2. **Voices** ⏸ per speaker: a voice from the Vitra voice library is the default
    (`list_voices`, `find_voices_by_accent`; offer previews; the organization's cloned
@@ -111,7 +111,8 @@ the video is and call again with `duration_seconds`.
    Errors block export: never try to bypass.
 6. **Export** one language at a time: `export_dub` (optional burned-in `subtitles`;
    `lip_sync` is paid and needs `confirm` and `consent`) → `get_dub_export` for the link →
-   optionally `save_dub_export_to_drive` once (saving the same export again returns the
+   optionally `save_dub_export_to_drive` once (into the job's project folder when it is in a
+   project; saving the same export again returns the
    copy already saved; the user can't trash saved videos from the Drive). A source that is
    not 16:9, 9:16 or 1:1 (e.g. 4:5) is exported with bars: say so before exporting.
 
@@ -121,7 +122,7 @@ Quality: `run_dub_quality_report` → `get_quality_report` → `apply_dub_qualit
 (confirm; then regenerate audio). Memory: `sync_dub_memory` (confirm). Settings:
 `get_dub_settings` (with `language`: its background audio tracks), `update_dub_settings`, `dub_background_audio` (`duration_seconds` is optional: Vitra
 reads the length from the file and checks a given one against it). Spreadsheet of every
-line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs`, `update_dub_job`, `stop_dub_work`
+line: `get_dub_spreadsheet`. Jobs: `list_dub_jobs` (by name, kind or project), `update_dub_job` (rename, or `move` into a project by name), `stop_dub_work`
 (cancels a running job; a finished one answers nothing_running), `remove_dub_language`,
 `delete_dub_job` (confirm). A failed job can't be resumed: tell the user why; starting
 again is a new paid job.
@@ -129,8 +130,7 @@ again is a new paid job.
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

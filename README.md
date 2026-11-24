@@ -12,7 +12,7 @@ plus the scripts it runs.
 | Skill | What it does |
 | --- | --- |
 | [`vitra`](vitra/) | Sign in, credits and quotes, and finding any other Vitra tool |
-| [`drive`](drive/) | Find, upload, download and organize Drive files and folders; work folders |
+| [`drive`](drive/) | Find, upload, download and organize Drive files and folders |
 | [`org-knowledge`](org-knowledge/) | Search and maintain the organization's knowledge (Memory), with version history |
 | [`image-creator`](image-creator/) | Generate images from a prompt, edit them in plain language, multi-format briefs, save them to your Drive |
 | [`image-resize`](image-resize/) | Re-compose one image for other sizes (Story, LinkedIn, 1080x1920…) |

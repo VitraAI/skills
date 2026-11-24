@@ -4,10 +4,10 @@
 # the skill uses (checked against scripts/mcp-tools.json).
 # `related-skills`: skills people move on to from this one, and why.
 about: >-
-  Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML and XLIFF files —
-  or plain text — without losing their layout: one file, a batch, or a whole
-  Drive folder into several languages, reusing your organization's translation
-  memory so approved terminology stays consistent.
+  Translate Word, PowerPoint, Excel, CSV, PDF, HTML, JSON, XML, XLIFF, DITA,
+  Markdown and YAML files — or plain text — without losing their layout: one
+  file, a batch, or a whole Drive folder into several languages, reusing your
+  organization's translation memory so approved terminology stays consistent.
 when-to-use: >-
   Reach for it whenever a file or text needs to exist in another language —
   contracts, decks, spreadsheets, product strings, web pages, manuals. For
@@ -28,7 +28,7 @@ features:
   - title: Correct line by line
     description: See every line with where it sits, correct or approve lines, and save them to your memory.
   - title: Keep it organized
-    description: Find past translations, rename them, file them into folders or save them to the Drive.
+    description: Find past translations, rename them, file them into projects or save them to the Drive.
 use-cases:
   - title: Legal and HR documents
     description: Contracts and policies in every language your teams work in.

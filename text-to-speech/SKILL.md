@@ -57,12 +57,12 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 
-1. **Language**: key from `list_languages`.
+1. **Language**: code from `list_languages` (e.g. `hi-IN`).
 2. **Voice** ⏸: `list_voices` for the language (gender, provider, keyword; includes cloned
    voices), or `find_voices_by_accent` for an accent; `list_cloned_voices` for the
    organization's own. Offer a few with their preview links; let the user pick.
@@ -72,7 +72,7 @@ background: mention it once; nothing to do.
    and get their yes. Up to 5,000 characters per clip; split longer text into
    passages. `pronunciations` says words differently (`{"word": "SQL", "say_as": "sequel"}`).
    ```bash
-   python3 scripts/vitra.py call text_to_speech '{"text": "…", "language": "english_united_kingdom", "provider": "elevenlabs", "voice_id": "…", "confirm": true}'
+   python3 scripts/vitra.py call text_to_speech '{"text": "…", "language": "en-GB", "provider": "elevenlabs", "voice_id": "…", "confirm": true}'
    ```
 4. **Wait**: `get_speech_job` until `completed`; give the audio link, or
    `vitra.py download <link> --to <path>`. `billed_seconds` is what the clip was charged
@@ -87,8 +87,7 @@ default folder can't be trashed, so pass `folder` if the user will tidy up later
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.

@@ -38,7 +38,13 @@ QUOTED = {
 # Server tools deliberately left out of every skill (e.g. organization-admin
 # tools no customer skill should drive). Every other tool in
 # scripts/mcp-tools.json must be named by at least one SKILL.md.
-NOT_IN_A_SKILL: set[str] = set()
+# Toolsets the server offers that no skill covers yet. The vitra skill points
+# agents at them through `vitra.py tools --find`; give them a skill, then drop
+# the toolset from this list.
+TOOLSETS_WITHOUT_A_SKILL = {"blog", "performance_marketing"}
+NOT_IN_A_SKILL: set[str] = {
+    n for s in TOOLSETS_WITHOUT_A_SKILL for n in CATALOG["toolsets"].get(s, [])
+}
 
 BACKTICKED = re.compile(r"`([a-z][a-z0-9_]*)`")
 COMMAND = re.compile(r"vitra\.py (?:call|describe) ([A-Za-z0-9_<>-]+)")

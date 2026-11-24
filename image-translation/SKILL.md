@@ -61,20 +61,20 @@ background: mention it once; nothing to do.
 
 ## Talking to the user
 
-- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language keys or ids unless the user asks for them.
+- Plain words only: name languages, voices, files and features the way the Vitra app shows them ("Hindi (India)", "the Summer Sale banner"). Never show tool names, argument names, language codes or ids unless the user asks for them.
 - Many users don't know how a feature works. Say what Vitra will do in a sentence, then ask for the one thing you need next (a file, a language, a yes to the price) — one question at a time. Relay a tool's `ask` as it is.
 
 ## Workflow
 
-1. **The image.** A file in the Drive: pass its name as `file` (`asset_id` if names repeat). A local file: `vitra.py upload <path>`, then pass the returned `asset_id`.
+1. **The image.** A file in the Drive: pass its name as `file` (`asset_id` if names repeat). A local file: `vitra.py upload <path>`, then pass the returned `asset_id` (or its `key` as `asset_key`).
    In the Drive only: `find_assets`, `get_download_url`, `vitra.py download`, then upload.
-2. **Languages and memory.** Target language keys from `list_languages`.
+2. **Languages and memory.** Target language codes from `list_languages` (e.g. `fr-FR`).
    `list_translation_memories` for the first target: several → ask which (by name).
 3. **Price, ask, start.** Quick mode renders every language straight away; `review: true`
    only analyses, so the user can check the text before rendering. The job is named after
-   the file (`name` sets another).
+   the file (`name` sets another); `project` files it under a project.
    ```bash
-   python3 scripts/vitra.py call translate_image '{"file": "summer-poster.png", "target_languages": ["french_france"], "estimate_only": true}'
+   python3 scripts/vitra.py call translate_image '{"file": "summer-poster.png", "target_languages": ["fr-FR"], "estimate_only": true}'
    ```
    Then the same with `"confirm": true`.
 4. **Wait** per language: `get_image_translation` until `completed` (show `image_url`) or
@@ -100,14 +100,13 @@ suggestions already made for the image (free; they are run per text layer in the
 web app); apply what the user accepts with `edit_image_text`.
 **History** (a `job_id` also takes the job's name from `list_image_translations`):
 `list_image_translations`, `get_image_versions`, `update_image_translation`
-(rename, move, restore with confirm), `retry_image_translation`,
+(rename, move to a project, restore with confirm), `retry_image_translation`,
 `delete_image_translation`, `save_image_as_template` (back to a Hyperlocal campaign).
 
 ## Rules
 
 - **Names, never ids.** Show names, languages and line numbers; keep ids for the next call.
-- **Languages are keys** from `list_languages` (e.g. `"hindi_india"`), never display names,
-  unless a tool takes a memory's own language codes (`describe` says so).
+- **Languages are codes** from `list_languages` (e.g. `"hi-IN"`), never display names.
 - **Paid work: price, ask, confirm.** Call with `estimate_only: true` (or price it with
   `quote_cost`), tell the user the credits, and call again with `confirm: true` only
   after their yes. Tools without `estimate_only` still need the yes before `confirm: true`.
