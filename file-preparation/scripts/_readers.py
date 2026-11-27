@@ -11,6 +11,7 @@ read-only.
 
 from __future__ import annotations
 
+import io
 import os
 import re
 import sqlite3
@@ -18,11 +19,61 @@ import zipfile
 from collections import Counter
 from dataclasses import dataclass, field
 from xml.etree import ElementTree as ET
+from xml.parsers import expat
 
 from _fields import field_of, is_admin
 from _model import Concept, GlossaryEntry, Log, Term, TmRow, clean_newlines, to_bool
 
 XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
+_MAX_XML_BYTES = 256 * 1024 * 1024
+_MAX_XML_DEPTH = 128
+_MAX_XML_ELEMENTS = 2_000_000
+
+
+def _check_xml(data: bytes | str) -> None:
+    # The preflight counts bytes, nesting and elements before ElementTree
+    # builds the document. A UTF-16 XLIFF file keeps its declared encoding.
+    size = len(data.encode("utf-8")) if isinstance(data, str) else len(data)
+    if size > _MAX_XML_BYTES:
+        raise Unsupported("XML input exceeds 256 MiB. Split the export into smaller files.")
+
+    depth = elements = 0
+    parser = expat.ParserCreate()
+
+    def check_doctype(_name, _system_id, _public_id, has_internal_subset):
+        # A legacy TMX export can still name the standard external DTD.
+        # Reject a declaration with its own internal subset.
+        if has_internal_subset:
+            raise Unsupported("XML entity declarations are unsupported. Export XML without an internal DTD.")
+
+    def start(_name, _attributes):
+        nonlocal depth, elements
+        depth += 1
+        elements += 1
+        if depth > _MAX_XML_DEPTH or elements > _MAX_XML_ELEMENTS:
+            raise Unsupported("XML nesting or element count exceeds the import limits.")
+
+    def end(_name):
+        nonlocal depth
+        depth -= 1
+
+    # A standard TMX external DTD declaration is permitted and never loaded.
+    parser.SetParamEntityParsing(expat.XML_PARAM_ENTITY_PARSING_NEVER)
+    parser.StartDoctypeDeclHandler = check_doctype
+    parser.StartElementHandler = start
+    parser.EndElementHandler = end
+    try:
+        parser.Parse(data, True)
+    except expat.ExpatError as error:
+        raise Unsupported(f"Invalid XML at line {error.lineno}.") from error
+
+
+def _read_xml(path: str) -> bytes:
+    with open(path, "rb") as file:
+        # One extra byte detects an oversized file without reading the rest.
+        data = file.read(_MAX_XML_BYTES + 1)
+    _check_xml(data)
+    return data
 
 
 @dataclass
@@ -243,7 +294,7 @@ def read_tmx(path: str, name: str, log: Log, keep_tags: bool = True) -> Parsed:
     out = Parsed(name, "tmx", "tm", kind_reason="TMX is a translation memory format")
     header_src = ""
     n = 0
-    for _, el in ET.iterparse(path, events=("end",)):
+    for _, el in ET.iterparse(io.BytesIO(_read_xml(path)), events=("end",)):
         tag = _local(el.tag)
         if tag == "header":
             header_src = el.get("srclang", "")
@@ -318,7 +369,7 @@ def _sdl_status(conf: str | None) -> str | None:
 
 def read_xliff(path: str, name: str, log: Log, keep_tags: bool = True) -> Parsed:
     out = Parsed(name, "xliff", "tm", kind_reason="XLIFF is a bilingual translation file")
-    root = ET.parse(path).getroot()
+    root = ET.fromstring(_read_xml(path))
     version = root.get("version", "")
     if version.startswith("2") or root.get("srcLang"):
         _xliff2(root, name, out, log, keep_tags)
@@ -429,6 +480,7 @@ def _sdl_elements(xml: str | None) -> tuple[str, list]:
     """(culture, [("text", value) | (tag type, anchor, alignment anchor)]) of a Trados Studio segment."""
     if not xml:
         return "", []
+    _check_xml(xml)
     root = ET.fromstring(xml)
     culture, items = "", []
     for el in root:
@@ -685,7 +737,7 @@ def _assign_term(t: Term, label: str, value: str, name: str, log: Log) -> None:
 
 def read_tbx(path: str, name: str, log: Log) -> Parsed:
     out = Parsed(name, "tbx", "terms", tool="TBX", kind_reason="TBX is a terminology format")
-    root = ET.parse(path).getroot()
+    root = ET.fromstring(_read_xml(path))
     n = 0
     for entry in root.iter():
         if _local(entry.tag) not in ("termEntry", "conceptEntry"):
@@ -766,7 +818,7 @@ def _tbx_term(el: ET.Element, c: Concept, lang: str, name: str, log: Log) -> Non
 
 def read_multiterm(path: str, name: str, log: Log) -> Parsed:
     out = Parsed(name, "multiterm", "terms", tool="MultiTerm", kind_reason="MultiTerm XML is a term base export")
-    root = ET.parse(path).getroot()
+    root = ET.fromstring(_read_xml(path))
     n = 0
     for cg in root:
         if _local(cg.tag) != "conceptGrp":
