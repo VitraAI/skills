@@ -7,6 +7,7 @@ token every script then sends, renewal, and signing out. Run from the repo root:
 from __future__ import annotations
 
 import base64
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
@@ -122,6 +123,7 @@ class FakeVitra:
 class LoginTest(unittest.TestCase):
     def setUp(self) -> None:
         self.fake = FakeVitra()
+        self.addCleanup(self.fake.httpd.server_close)
         self.home = tempfile.mkdtemp()
         self.env = {**os.environ, "VITRA_UNIVERSE_BASE_URL": self.fake.base,
                     "VITRA_HOME": self.home, "BROWSER": "true",
@@ -239,19 +241,16 @@ class LoginTest(unittest.TestCase):
         started = self.run_script("login.py")
         with urllib.request.urlopen(started["sign_in_url"], timeout=30) as res:
             first = res.geturl()
-        pages: list[bytes] = []
-
-        def hit() -> None:
+        def hit() -> bytes:
             with urllib.request.urlopen(first, timeout=30) as res:
-                pages.append(res.read())
+                return res.read()
 
         # The first visit already signed in; two more copies of the same
         # callback must show the same outcome, not "invalid code".
-        threads = [threading.Thread(target=hit) for _ in range(2)]
-        for t in threads:
-            t.start()
-        for t in threads:
-            t.join()
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            requests = [executor.submit(hit) for _ in range(2)]
+            pages = [request.result() for request in requests]
+        self.assertEqual(len(pages), 2)
         self.assertTrue(all(b"signed in" in p for p in pages), pages)
         self.assertEqual(self.run_script("login.py", "--status")["status"], "signed_in")
 
@@ -314,6 +313,7 @@ class LoginTest(unittest.TestCase):
             self.assertTrue(link.startswith(other.base + "/api/auth/oauth2/authorize?"))
         finally:
             other.httpd.shutdown()
+            other.httpd.server_close()
 
     def test_wait_signs_in_without_a_background_helper(self) -> None:
         proc = subprocess.Popen([sys.executable, str(SCRIPTS / "login.py"), "--wait"], env=self.env,

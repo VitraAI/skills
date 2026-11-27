@@ -61,6 +61,7 @@ class Fake:
 class VitraTest(unittest.TestCase):
     def setUp(self) -> None:
         self.fake = Fake()
+        self.addCleanup(self.fake.httpd.server_close)
         self.env = {**os.environ, "VITRA_UNIVERSE_BASE_URL": self.fake.base,
                     "VITRA_UNIVERSE_API_KEY": "uvk_test", "VITRA_HOME": tempfile.mkdtemp(), "VITRA_SKILLS_NO_UPDATE_CHECK": "1"}
 
@@ -171,6 +172,8 @@ class VitraTest(unittest.TestCase):
 
         cat = http.server.ThreadingHTTPServer(("127.0.0.1", 0), C)
         threading.Thread(target=cat.serve_forever, daemon=True).start()
+        self.addCleanup(cat.server_close)
+        self.addCleanup(cat.shutdown)
         self.env.pop("VITRA_SKILLS_NO_UPDATE_CHECK")
         self.env["VITRA_SKILLS_CATALOG_URL"] = f"http://127.0.0.1:{cat.server_address[1]}"
         self.env["PATH"] = f"{bindir}:{self.env['PATH']}"
@@ -186,7 +189,6 @@ class VitraTest(unittest.TestCase):
         self.assertEqual(marker.read_text().split(), ["-y", "skills", "update", "-g", "-y"])
         self.assertNotIn("skills_update", run())       # once a day
         self.assertEqual(len(hits), 1)
-        cat.shutdown()
 
     def test_never_updates_a_git_checkout(self) -> None:
         self.env.pop("VITRA_SKILLS_NO_UPDATE_CHECK")

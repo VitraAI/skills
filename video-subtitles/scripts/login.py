@@ -424,7 +424,13 @@ def _serve(plan: dict, on_url=None) -> int:
     httpd.timeout = 1
     while not result and time.time() < deadline:
         httpd.handle_request()
-    time.sleep(0.2)  # let the reply page finish sending
+    if result:
+        # Keep accepting briefly while the success page sends. Sleeping
+        # with the listener open leaves duplicate browser requests unanswered.
+        closing_at = time.monotonic() + 0.2
+        while (remaining := closing_at - time.monotonic()) > 0:
+            httpd.timeout = remaining
+            httpd.handle_request()
     httpd.server_close()
     if result.get("status") == "superseded" or _read_pending().get("pid") != os.getpid():
         return 0  # a newer sign-in started meanwhile; its helper owns the file
